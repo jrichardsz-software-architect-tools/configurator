@@ -1,0 +1,18 @@
+extends layout/base
+block content
+	section.content-header
+		h1
+			| Docker applications
+	section.content
+		each container in containers
+			.col
+				a(href='customers/add')
+					.col-md-3.col-sm-6.col-xs-12
+						.info-box
+							span.info-box-icon.bg-aqua
+								| #{container.name}
+							.info-box-content
+								span.info-box-text
+									| #{container.image}
+								span.info-box-number
+									| #{container.port}
