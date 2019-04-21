@@ -1,0 +1,65 @@
+  <!DOCTYPE html>
+<html lang="en">
+
+{{> head}}
+
+<body>
+
+  <div id="wrapper">
+
+    {{> navbar}}
+
+    {{> sidenav}}
+
+    <div id="page-wrapper">
+      <div class="row">
+        <div class="col-lg-12">
+          <h1 class="page-header">Delete</h1>
+        </div>
+        <!-- /.col-lg-12 -->
+      </div>
+      <!-- /.row -->
+      <div class="row">
+        <div class="col-lg-12">
+          {{#if success_message}}
+						<div class="alert alert-success">
+							{{success_message}}
+						</div>
+					{{/if}}
+					{{#if warning_message}}
+						<div class="alert alert-warning">
+							{{warning_message}}
+						</div>
+					{{/if}}
+					{{#if error_message}}
+						<div class="alert alert-danger">
+							{{error_message}}
+						</div>
+					{{/if}}
+          <div class="panel panel-default">
+            <div class="panel-body">
+              <div class="row">
+                <div class="col-lg-6">
+                  <form action="/{{entityType}}/action/delete" role="form" method="post"  >
+                    <input name="id" type="hidden" value="{{entityId}}" />
+                    {{#each additionalFormValues}}
+                      <input name="{{this.name}}" type="hidden" value="{{this.value}}" />
+                    {{/each}}
+                    <div class="form-group">
+                      <label>{{warningMessage}}</label>
+                    </div>
+                    <button type="submit" class="btn btn-outline btn-primary">Submit</button>
+                    <a href="/{{entityType}}" type="button" class="btn btn-outline btn-primary">Cancel</a>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {{> scripts}}
+
+</body>
+
+</html>

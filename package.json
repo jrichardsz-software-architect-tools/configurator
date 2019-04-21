@@ -1,0 +1,31 @@
+{
+  "name": "confignet",
+  "version": "1.0.0",
+  "description": "Centralize and Management configurations of all your applications.",
+  "main": "app.js",
+  "scripts": {
+    "dev": "supervisor -e 'js|hbs'  app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "bcrypt": "4.0.1",
+    "body-parser": "^1.19.0",
+    "cookie-parser": "^1.4.4",
+    "express": "^4.15.4",
+    "express-session": "^1.16.2",
+    "hbs": "4.1.0",
+    "jsonpath": "^1.0.2",
+    "log4js": "^4.5.1",
+    "mysql": "^2.12.0",
+    "request": "^2.88.0",
+    "supervisor": "^0.12.0",
+    "uuid": "^3.3.3",
+    "dependency-injection-4nodejs": "jrichardsz/dependency-injection-4nodejs#master"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:software-architect-tools/confignet.git"
+  },
+  "author": "JRichardsz"
+}

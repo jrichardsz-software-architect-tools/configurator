@@ -1,0 +1,136 @@
+const express = require('express');
+const router = express.Router();
+
+router.get('/', (req, res) => {
+
+  if(!properties.allowDocker){
+    properties.allowDocker = "false";
+  }
+
+  if (properties.allowDocker === "false") {
+    logger.info("Docker is disabled. Applications will be obtained from database");
+    applicationRepository.findAll(function(err, containers){
+      res.render('index.hbs', {
+        properties: properties,
+        array: containers
+      });
+    });
+  }else{
+    dockerRestClient.getContainers(function(errContainers, containers) {
+      res.render('index.hbs', {
+        properties: properties,
+        array: containers
+      });
+    });
+  }
+});
+
+router.get('/variables/:app_name/new', (req, res) => {
+  databaseConnection.getConnection(function(err, connection) {
+    connection.query('select * from application where docker_name=' + req.params.app_name, function(err, rows) {
+      if (!rows || rows.length == 0) {
+        dockerRestClient.getContainers(function(containers) {
+          res.render('index.hbs', {
+            redirect: '/',
+            array: containers,
+            warning_message: req.params.app_name + " is not registered <h1>adsadd</h1>."
+          });
+        });
+      } else {
+        connection.query('select * from variables', function(err, rows) {
+          res.render('variables/variables_home.hbs', {
+            app_name: req.params.app_name,
+            variables: rows
+          });
+        });
+      }
+    });
+  });
+});
+
+router.get('/register/:app_name/new', (req, res) => {
+
+  databaseConnection.getConnection(function(err, connection) {
+    connection.query('select * from application where docker_name=\'' + req.params.app_name+'\'', function(err, rows) {
+      if (rows && rows.length > 0) {
+        dockerRestClient.getContainers(function(containers) {
+          res.render('index.hbs', {
+            redirect: '/',
+            array: containers,
+            success_message: req.params.app_name + " is already registered."
+          });
+        });
+      } else {
+        res.render('applications/new_application.hbs', {
+          app_name: req.params.app_name,
+        });
+      }
+    });
+  });
+
+
+});
+
+router.post('/register/:app_name/create', (req, res) => {
+
+  databaseConnection.getConnection(function(err, connection) {
+    connection.query('select * from application where docker_name=' + req.params.app_name, function(err, rows) {
+      if (rows && rows.length > 0) {
+        dockerRestClient.getContainers(function(containers) {
+          res.render('index.hbs', {
+            redirect: '/',
+            array: containers,
+            sucess_message: req.params.app_name + " is already registered."
+          });
+        });
+      } else {
+        var sql='INSERT INTO application (description, docker_name) VALUES(\''+req.body.description+'\', \''+req.params.app_name+'\')';
+        connection.query(sql, function(sqlErr, rows) {
+          if(sqlErr){
+            logger.info(sql+"\n"+sqlErr);
+            dockerRestClient.getContainers(function(containers) {
+              res.render('index.hbs', {
+                redirect: '/',
+                array: containers,
+                danger_message: "There is an internal error when "+req.params.app_name + " was registered. Check logs."
+              });
+            });
+          }else{
+            dockerRestClient.getContainers(function(containers) {
+              res.render('index.hbs', {
+                redirect: '/',
+                array: containers,
+                success_message: req.params.app_name + " was registered."
+              });
+            });
+          }
+        });
+      }
+    });
+  });
+});
+
+router.get('/variables', (req, res) => {
+  databaseConnection.getConnection(function(err, connection) {
+    connection.query('select * from variables', function(err, rows) {
+      res.render('variables/variables_home.hbs', {
+        variables: rows
+      });
+    });
+  });
+});
+
+// router.get('/application/new', (req, res) => {
+//   res.render('applications/new_application.hbs', {
+//
+//   });
+// });
+
+
+router.get('/login', (req, res) => {
+  res.render('login.hbs', {
+    morris: true
+  });
+});
+
+module.exports = router;

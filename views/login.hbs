@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{{> head}}
+
+<body>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 col-md-offset-4">
+                <div class="login-panel panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">TachikomaOps LogIn</h3>
+                    </div>
+                    <div class="panel-body">
+                        <form action="/login/action" role="form" method="post">
+                            <fieldset>
+                                <div class="form-group">
+                                    <input class="form-control" placeholder="user" name="user" autofocus>
+                                </div>
+                                <div class="form-group">
+                                    <input class="form-control" placeholder="password" name="password" type="password" value="">
+                                </div>
+                            </fieldset>
+                            {{#if success_message}}
+                              <div class="alert alert-success" style="padding: 5px;" >
+                                {{success_message}}
+                              </div>
+                            {{/if}}
+                            {{#if warning_message}}
+                              <div class="alert alert-warning" style="padding: 5px;" >
+                                {{warning_message}}
+                              </div>
+                            {{/if}}
+                            {{#if error_message}}
+                              <div class="alert alert-danger" style="padding: 5px;" >
+                                {{error_message}}
+                              </div>
+                            {{/if}}
+                            <button type="submit" class="btn btn-success btn-block">Submit</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{> scripts}}
+
+</body>
+
+</html>
