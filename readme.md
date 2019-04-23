@@ -12,6 +12,7 @@ If you have these questions, Tachikoma ops is for you!!
 
 - Mysql database
 
+With docker you just need to execute this line:
 ```
 docker run -d -p 3306:3306 --name database -e MYSQL_ROOT_PASSWORD=secret mysql:5.7 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
 ```
