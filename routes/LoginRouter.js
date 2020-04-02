@@ -28,27 +28,18 @@ function LoginRouter(expressInstance) {
   });
 
   expressInstance.post('/login/action', (req, res) => {
-    logger.info("Login validation:");
-    logger.info(req.body);
+    logger.info("Login validation for user:"+req.body.user);
 
     authenticationRepository.findOneByUser(req.body.user.toLowerCase(), function(err, userInformation) {
 
       if (err) {
         logger.info(err);
         res.render('login.hbs', {
-          error_message: "Internal error."
-        });
-      }
-
-      if (userInformation.length == 0) {
-        logger.info("User was not found in database:" + req.body.user);
-        res.render('login.hbs', {
           error_message: "Incorrect user or password."
         });
-        return;
       }
 
-      bcrypt.compare(req.body.password, userInformation[0].password, function(compareErr, compareResult) {
+      bcrypt.compare(req.body.password, userInformation.password, function(compareErr, compareResult) {
 
         if (compareErr) {
           logger.info(compareErr);
@@ -59,8 +50,8 @@ function LoginRouter(expressInstance) {
 
         if (compareResult) {
           req.session.loginInformation = {
-            "user": userInformation[0].user,
-            "role": userInformation[0].role
+            "user": userInformation.user,
+            "role": userInformation.role
           };
           req.session.save();
           res.redirect('/');

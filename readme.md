@@ -21,6 +21,7 @@ export CONFIGNET_DATABASE_USER=root
 export CONFIGNET_DATABASE_PASSWORD=secret
 export CONFIGNET_DATABASE_PORT=3306
 export CONFIGNET_DATABASE_NAME=confignet
+export API_KEY=changeme
 ```
 
 ## As developer
@@ -49,14 +50,31 @@ If no errors, you will see:
 
 ![home](./logo/home.png)
 
+# Get variables
+
+```
+curl localhost:8080/api/v1/variables?application=helicarrier-api -H "apiKey:changeme"
+```
+
+response will be
+
+```
+export ERP_HOST="12.124.1.6"
+export firebase_key="65468748"
+```
+
+If **helicarrier-api** exists as application and has at least one variable
+
 # Roadmap
 
-- add rest endpoint to expose variables in formats json and bash: /api/variables
-- add feature to create : read only users
-- add feature to create users to consume specific apps: /api/variables
-- add easy import/export feature
-- add dependency injection
-- unit tests/selenium tests
+- [ ] add http endpoint to get variables in environment or json format
+- [ ] improve user experience in **Add Global Variable** ui
+- [ ] add changelog column for each app or variable
+- [ ] add feature to create : read only users
+- [ ] add feature to create users to consume specific apps: /api/variables
+- [ ] add easy import/export feature
+- [ ] add dependency injection
+- [ ] unit tests/selenium tests
 
 
 # Made with
@@ -65,12 +83,9 @@ If no errors, you will see:
 - Mysql
 - Web template engine for fast development: https://www.npmjs.com/package/pug
 - Bootstrap template: https://adminlte.io/
-
-# Acknowledgments
-
-- Logo from : https://tachikoma.cerevo.com
-- Initial template : https://github.com/jayetan/Nodejs-Admin-Dashboard.git
 - Handlebars Engine : https://handlebarsjs.com/builtin_helpers.html
+- Initial template : https://github.com/jayetan/Nodejs-Admin-Dashboard.git
+
 
 # Contributors
 
