@@ -37,6 +37,38 @@ function ApplicationVariableRepository() {
     });
   }
 
+  this.findVariablesByApplicationName = function(applicationName, callback) {
+    databaseConnection.getConnection(function(err, connection) {
+
+      var sql = `select
+                	av.id,
+                	av.variable_id,
+                	v.name,
+                	v.value,
+                	v.description,
+                	v.type,
+                	v.scope
+                from
+                	application_variable av,
+                	variable v,
+                	application ap
+                where
+                	ap.name = ?
+                	and av.application_id = ap.id
+                	and av.variable_id = v.id`;
+      try {
+        connection.query(sql, [applicationName], function(err, selectResult) {
+          if (err) {
+            callback(err, null);
+          }
+          callback(null, selectResult);
+        });
+      } catch (connectionErr) {
+        callback(connectionErr, null);
+      }
+    });
+  }
+
   this.findApplicationAndVariableById = function(id, callback) {
     databaseConnection.getConnection(function(err, connection) {
       var sql = `select av.id, a.name as application_name,v.name as variable_name
