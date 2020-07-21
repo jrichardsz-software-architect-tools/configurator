@@ -1,17 +1,46 @@
 const uuid = require('uuid');
 const bcrypt = require('bcrypt');
+const Utils = require('../common/Utils.js');
 
 function Security() {
 
   var _this = this;
   var exceptions = null;
+  var staticAssets = null;
+  var apiEndpoints = null;
+  var loginEndpoints = null;
   var saltRoundsGenerationNumber = 10;
 
-  this.setExceptions = function(exceptions) {
-    _this.exceptions = exceptions;
+  this.setLoginEndpoints = function(loginEndpoints) {
+    _this.loginEndpoints = loginEndpoints;
   }
 
-  function isStaticAsset(item, collection) {
+  this.setStaticAssets = function(staticAssets) {
+    _this.staticAssets = staticAssets;
+  }
+
+  this.setApiEndpoints = function(apiEndpoints) {
+    _this.apiEndpoints = apiEndpoints;
+  }
+
+  function isAllowed(item, collection) {
+    for (let key in collection) {
+      if (item.startsWith(collection[key])) {
+        return true;
+      }
+    }
+    return false;
+  }
+  function isContained(item, collection) {
+    for (let key in collection) {
+      if (item.startsWith(collection[key])) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function isExactMatch(item, collection) {
     for (let key in collection) {
       if (item.startsWith(collection[key])) {
         return true;
@@ -22,31 +51,38 @@ function Security() {
 
   this.authorize = function(req, res, next) {
 
-    if (isStaticAsset(req.originalUrl, _this.exceptions)) {
-      return next();
-    } else if (!req.session.loginInformation || req.session.loginInformation.user == "") {
-      res.redirect('/login');
-      return;
-    } else {
+    logger.debug("authorize url: "+req.originalUrl);
+
+    if(!Utils.hasProperty(req, "session.loginInformation.user")){
+      if(isExactMatch(req.originalUrl, _this.loginEndpoints)){ //login endpoints
+        return next();
+      }else if(isContained(req.originalUrl, _this.apiEndpoints)){ //api endpoint
+        logger.debug("api endpoint. Another security will be applied");
+        return next();
+      }else if(isContained(req.originalUrl, _this.staticAssets)){ //assets
+        return next();
+      }else { //is unknown
+        res.redirect('/login');
+        return;
+      }
+    }else{
+      //already has user session. security is not required
       return next();
     }
+
   }
 
   this.configureAdminCredentials = function() {
     authenticationRepository.findOneByUser("admin", function(err, userInformation) {
-      if (err) {
+      if (err || userInformation.length == 0) {
         logger.error(err);
         logger.error("The existence of the admin user cannot be determined.");
-        return;
-      }
-
-      if (userInformation.length == 0) {
         logger.info("Admin was not found in database");
         var plainPassword = uuid.v4();
 
         bcrypt.hash(plainPassword, saltRoundsGenerationNumber, function(err, hash) {
 
-          if(err){
+          if (err) {
             logger.error(err);
             return;
           }

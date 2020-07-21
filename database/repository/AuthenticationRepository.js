@@ -7,10 +7,12 @@ function AuthenticationRepository() {
           callback(err, null);
         }
 
-        if (rows.length > 1) {
+        if (rows.length == 0) {
+          callback("Zero rows were founded for this user:" + user, null);
+        } else if (rows.length > 1) {
           callback("More than one row was found for user:" + user, null);
-        } else {
-          callback(null, rows);
+        }else {
+          callback(null, rows[0]);
         }
       });
     });

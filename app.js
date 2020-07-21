@@ -24,7 +24,7 @@ const RoutesScanner = require('./scanner/RoutesScanner.js');
 const DatabaseRepositoryScanner = require('./scanner/DatabaseRepositoryScanner.js');
 const Security = require('./security/Security.js');
 
-const port = process.env.PORT | 8080;
+const port = process.env.PORT || 2708;
 const app = express();
 
 app.use(cookieParser())
@@ -41,7 +41,9 @@ app.use(session({
 
 var security = new Security();
 
-security.setExceptions(["/login","/vendor","/dist"]);
+security.setStaticAssets(["/vendor","/dist","/favicon.ico"]);
+security.setLoginEndpoints(["/login","/login/action"]);
+security.setApiEndpoints(["/api"]);
 
 app.use(bodyParser.urlencoded({
   extended: true
