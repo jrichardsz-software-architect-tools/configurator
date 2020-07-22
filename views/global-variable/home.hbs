@@ -52,8 +52,12 @@
 										{{#each globalVariables}}
 											<tr class="table-row">
 												<td>{{incremented @index}}</td>
-												<td>{{this.name}}</td>
-												<td>{{this.value}}</td>
+												<td>{{this.name}}</td>												
+                        {{#eq this.type 'P'}}
+  												<td>{{this.value}}</td>
+  											{{else}}
+  												<td>******</td>
+  											{{/eq}}                        
 												<td>{{this.description}}</td>
 												<td style="text-align: center;">
 													<a href="/global-variable/view/edit/{{this.id}}" type="button" class="btn btn-outline btn-primary fa fa-pencil-square-o"

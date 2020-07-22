@@ -41,9 +41,11 @@
 								<select id="selectApplicationComponent" name="applicationId" class="form-control">
 									<option value="-1">---</option>
 									{{#each applications}}
-										{{#select @root.selectedApplicationId}}
-											<option value="{{this.id}}">{{this.name}}</option>
-										{{/select}}
+                    {{#stringEquals this.id @root.selectedApplicationId}}
+                      <option value="{{this.id}}" selected >{{this.name}}</option>
+                    {{else}}
+                      <option value="{{this.id}}">{{this.name}}</option>
+                    {{/stringEquals}}   
 									{{/each}}
 								</select>
 							</div>
@@ -65,7 +67,11 @@
 											<tr class="table-row">
 												<td>{{incremented @index}}</td>
 												<td>{{this.name}}</td>
-												<td>{{this.value}}</td>
+                        {{#eq this.type 'P'}}
+  												<td>{{this.value}}</td>
+  											{{else}}
+  												<td>******</td>
+  											{{/eq}}
 												<td>{{this.description}}</td>
 												{{#eq this.scope 'G'}}
 													<td>Global</td>

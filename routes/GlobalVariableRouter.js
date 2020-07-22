@@ -25,10 +25,11 @@ function GlobalVariableRouter(expressInstance) {
 
   expressInstance.post('/global-variable/action/save', (req, res) => {
 
-    logger.info("Save global variable:");
-    logger.info(req.body);
+    logger.info("Save global variable:");    
     req.body.scope = 'G';
-    logger.info(req.body);
+    
+    let objectToLog = {...req.body}; objectToLog.value = "****";
+    logger.info(objectToLog);
     variableRepository.save(req.body, function(err, result) {
       if (err) {
         logger.info(err);

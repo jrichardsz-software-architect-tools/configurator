@@ -73,7 +73,7 @@
 														<a th:href="@{|/project/edit/${p.clientId}|}" type="button" class="btn btn-outline btn-primary">Stop</a>
 														<a th:href="@{|/project/edit/${p.clientId}|}" type="button" class="btn btn-outline btn-primary">Log</a>
 													{{/eq}}
-													<a href="/variables/{{this.name}}/new" type="button" class="btn btn-outline btn-primary fa fa-list"
+													<a href="/application-variable?applicationId={{this.id}}&applicationName={{this.name}}" type="button" class="btn btn-outline btn-primary fa fa-list"
 													data-toggle="tooltip" data-placement="top" title="Variables"></a>
 													<a href="/application/view/edit/{{this.id}}" type="button" class="btn btn-outline btn-primary fa fa-pencil-square-o"
 													data-toggle="tooltip" data-placement="top" title="Edit"></a>
