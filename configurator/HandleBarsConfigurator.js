@@ -44,6 +44,12 @@ HandleBarsConfigurator.configure = function(hbs) {
           new RegExp(' value=\"' + selected + '\"'),
           '$& selected="selected"');
   });
+  
+  hbs.registerHelper('stringEquals', function(arg1, arg2, options) {
+      arg1 = ''+arg1;
+      arg2 = ''+arg2;
+      return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
+  });
 
 };
 

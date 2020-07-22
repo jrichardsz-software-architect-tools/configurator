@@ -118,8 +118,9 @@ function ApplicationVariableRouter(expressInstance) {
     if (req.body.variable_id) {
       variable.id = req.body.variable_id;
     }
-
-    logger.info(variable);
+    
+    let objectToLog = {...variable}; objectToLog.value = "****";
+    logger.info(objectToLog);
     //save variable
     variableRepository.save(variable, function(err, variableSaveResult) {
       if (err) {
@@ -128,7 +129,7 @@ function ApplicationVariableRouter(expressInstance) {
           error_message: "An error occurred when trying to save the variable."
         });
       } else {
-        //if variable is already createdor updated, we just need to match variable
+        //if variable is already created or updated, we just need to match variable
         // with selected application
         if (!req.body.variable_id) {
           var application_variable = {

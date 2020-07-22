@@ -23,7 +23,8 @@ function ApplicationVariableRepository() {
 
       var sql = `select av.id, av.variable_id, v.name, v.value, v.description, v.type, v.scope
                  from application_variable av, variable v
-                 where av.application_id = ? and av.variable_id = v.id`;
+                 where av.application_id = ? and av.variable_id = v.id
+                 order by scope`;
       try {
         connection.query(sql, [applicationId], function(err, selectResult) {
           if (err) {
