@@ -9,7 +9,7 @@ const hbs = require('hbs');
 const bodyParser = require('body-parser');
 const uuid = require('uuid');
 
-const Prototypes = require('./prototypes/Prototypes.js');
+const Prototypes = require('./startup/Prototypes.js');
 Prototypes.register();
 
 const Configuration = require('./config/Configuration.js');
@@ -19,10 +19,11 @@ const logger = require('./log/Logger.js');
 global.logger = logger;
 
 const DatabaseConnection = require('./database/DatabaseConnection.js');
-const HandleBarsConfigurator = require('./configurator/HandleBarsConfigurator.js');
+const DefaultUserConfigurator = require('./startup/DefaultUserConfigurator.js');
+const HandleBarsConfigurator = require('./startup/HandleBarsConfigurator.js');
 const RoutesScanner = require('./scanner/RoutesScanner.js');
 const DatabaseRepositoryScanner = require('./scanner/DatabaseRepositoryScanner.js');
-const Security = require('./security/Security.js');
+const SecureExpress = require('./security/SecureExpress.js');
 
 const port = process.env.PORT || 2708;
 const app = express();
@@ -39,17 +40,16 @@ app.use(session({
   }
 }));
 
-var security = new Security();
-
-security.setStaticAssets(["/vendor","/dist","/favicon.ico"]);
-security.setLoginEndpoints(["/login","/login/action"]);
-security.setApiEndpoints(["/api"]);
-
 app.use(bodyParser.urlencoded({
   extended: true
 }));
 
-app.use(security.authorize);
+var secureExpress = new SecureExpress();
+secureExpress.setStaticAssets(["/vendor","/dist","/favicon.ico"]);
+secureExpress.setLoginEndpoints(["/login","/login/action"]);
+secureExpress.setApiEndpoints(["/api"]);
+secureExpress.setExpressInstance(app);
+secureExpress.configure();
 
 hbs.registerPartials("./views/partials");
 
@@ -66,10 +66,13 @@ databaseConnection.initializeConnection({
 
 global.databaseConnection = databaseConnection;
 
-RoutesScanner.scan(app);
+RoutesScanner.scan(secureExpress);
 DatabaseRepositoryScanner.scan();
 
-security.configureAdminCredentials();
+var defaultUserConfigurator = new DefaultUserConfigurator();
+defaultUserConfigurator.createUserIfNoExist("admin", "admin");
+defaultUserConfigurator.createUserIfNoExist("guest", "reader");
+
 
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'views'));

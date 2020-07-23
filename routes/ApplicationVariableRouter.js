@@ -2,7 +2,7 @@ function ApplicationVariableRouter(expressInstance) {
 
   var _this = this;
 
-  expressInstance.get('/application-variable', (req, res) => {
+  expressInstance.get('/application-variable', ["admin", "reader"], (req, res) => {
     _this.goToHomePage(req, res);
   });
 
@@ -12,9 +12,12 @@ function ApplicationVariableRouter(expressInstance) {
 
       if (err) {
         logger.info(err);
-        res.render('application-variable/home.hbs', {
-          error_message: "An error occurred when trying to list applications."
-        });
+        let renderAttributes = {
+          error_message: "An error occurred when trying to list applications.",
+          error_security_message: req.session.error_security_message || undefined
+        };        
+        req.session.error_security_message = undefined;                        
+        res.render('application-variable/home.hbs', renderAttributes);
         return;
       }
 
@@ -32,13 +35,20 @@ function ApplicationVariableRouter(expressInstance) {
           if (errVarApplications) {
             logger.info(errVarApplications);
             req.query.applicationId = null;
-            _this.goToHomePage(req, res, {
-              error_message: "An error occurred when trying to list variables for this application:" + req.query.applicationName
-            })
+            
+            let renderAttributes = {
+              error_message: "An error occurred when trying to list variables for this application:" + req.query.applicationName,
+              error_security_message: req.session.error_security_message || undefined
+            };        
+            req.session.error_security_message = undefined;                  
+            
+            _this.goToHomePage(req, res, renderAttributes)
             return;
           }
 
           renderAttributes.variables = entities;
+          renderAttributes.error_security_message = req.session.error_security_message || undefined
+          renderAttributes.userRole = req.session.loginInformation.role || undefined
           res.render('application-variable/home.hbs', renderAttributes);
         });
       } else {
@@ -49,7 +59,7 @@ function ApplicationVariableRouter(expressInstance) {
     });
   }
 
-  expressInstance.get('/application-variable/view/:selectedApplicationId/:scope/new', (req, res) => {
+  expressInstance.get('/application-variable/view/:selectedApplicationId/:scope/new', ["admin"], (req, res) => {
 
     var scope = req.params.scope;
     var applicationId = req.params.selectedApplicationId;
@@ -106,7 +116,7 @@ function ApplicationVariableRouter(expressInstance) {
     return false;
   }
 
-  expressInstance.post('/application-variable/action/local/variable/save', (req, res) => {
+  expressInstance.post('/application-variable/action/local/variable/save', ["admin"], (req, res) => {
 
     logger.info("Save variable:");
     var variable = Object.assign({}, req.body);
@@ -160,7 +170,7 @@ function ApplicationVariableRouter(expressInstance) {
     });
   });
 
-  expressInstance.post('/application-variable/action/global/variable/add', (req, res) => {
+  expressInstance.post('/application-variable/action/global/variable/add', ["admin"], (req, res) => {
 
     logger.info("Add global variable:");
     var selectedApplicationId = req.body.application_id;
@@ -189,7 +199,7 @@ function ApplicationVariableRouter(expressInstance) {
 
   });
 
-  expressInstance.get('/application-variable/view/edit/:id/:application_id/:variable_id', (req, res) => {
+  expressInstance.get('/application-variable/view/edit/:id/:application_id/:variable_id', ["admin"], (req, res) => {
 
     variableRepository.findOneById(req.params.variable_id, function(err, entity) {
       if (err) {
@@ -207,7 +217,42 @@ function ApplicationVariableRouter(expressInstance) {
     });
   });
 
-  expressInstance.get('/application-variable/view/delete/:id/:scope', (req, res) => {
+  expressInstance.get('/application-variable/view/read/:application_id/:variable_id', ["reader"], (req, res) => {
+    
+    applicationRepository.findOneById(req.params.application_id, function(err, application) {
+      if (err) {
+        logger.info(err);
+        _this.goToHomePage(req, res, {
+          error_message: "An error occurred when trying to read the application."
+        })
+      } else {
+        variableRepository.findOneById(req.params.variable_id, function(err, entity) {
+          if (err) {
+            logger.info(err);
+            _this.goToHomePage(req, res, {
+              error_message: "An error occurred when trying to read the variable."
+            })
+          } else {
+            
+            entity.applicationFrom = application.name
+            entity.originUrl = req.get('referer')
+            
+            if(entity.type === 'S'){
+              entity.value = "{secret}"
+            }
+            
+            res.render('application-variable/read_var.hbs', {
+              id: req.params.id,
+              application_id: req.params.application_id,
+              variable: entity
+            });
+          }
+        });
+      }
+    });    
+  });
+
+  expressInstance.get('/application-variable/view/delete/:id/:scope', ["admin"], (req, res) => {
 
     var id = req.params.id;
 
@@ -250,7 +295,7 @@ function ApplicationVariableRouter(expressInstance) {
     });
   });
 
-  expressInstance.post('/application-variable/action/delete', (req, res) => {
+  expressInstance.post('/application-variable/action/delete', ["admin"], (req, res) => {
 
     var id = req.body.id;
     var variableScope = req.body.scope;

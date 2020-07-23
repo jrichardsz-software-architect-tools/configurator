@@ -50,6 +50,18 @@ If no errors, you will see:
 
 ![home](./logo/home.png)
 
+# Users
+
+By default two user are created:
+
+- admin with admin role
+- guest with reader role
+
+Password are printed in the first log. Take care to delete them of the log!
+
+Admin can make anything. Guest user only can enter to few options and can't view secrets values.
+
+
 # Get variables
 
 ```

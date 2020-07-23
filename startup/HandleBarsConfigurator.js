@@ -39,6 +39,20 @@ HandleBarsConfigurator.configure = function(hbs) {
       return string.charAt(0).toUpperCase() + string.slice(1);;
   });
 
+  hbs.registerHelper('showValueWithSafeWidth', function (string) {
+      string = ""+string;
+      
+      if(typeof string === 'undefined'){
+        return string;
+      }      
+      
+      if(string.length < 20){
+        return string;
+      }else{
+        return string.substring(0,19);  
+      }          
+  });
+
   hbs.registerHelper('select', function(selected, options) {
       return options.fn(this).replace(
           new RegExp(' value=\"' + selected + '\"'),

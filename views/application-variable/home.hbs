@@ -34,6 +34,11 @@
 							{{error_message}}
 						</div>
 					{{/if}}
+					{{#if error_security_message}}
+						<div class="alert alert-danger">
+							{{error_security_message}}
+						</div>
+					{{/if}}
 					<div class="panel panel-default">
 						<div class="panel-body">
 							<div class="form-group">
@@ -68,11 +73,11 @@
 												<td>{{incremented @index}}</td>
 												<td>{{this.name}}</td>
                         {{#eq this.type 'P'}}
-  												<td>{{this.value}}</td>
+                          <td>{{showValueWithSafeWidth this.value}}</td>
   											{{else}}
-  												<td>******</td>
+  												<td>{secret}</td>
   											{{/eq}}
-												<td>{{this.description}}</td>
+                        <td>{{showValueWithSafeWidth this.description}}</td>
 												{{#eq this.scope 'G'}}
 													<td>Global</td>
 												{{/eq}}
@@ -80,16 +85,20 @@
 													<td>Local</td>
 												{{/eq}}
 												<td style="text-align: center;">
-													{{#eq this.scope 'L'}}
-														<a href="/application-variable/view/edit/{{this.id}}/{{@root.selectedApplicationId}}/{{this.variable_id}}" type="button" class="btn btn-outline btn-primary fa fa-pencil-square-o" data-toggle="tooltip" data-placement="top" title="Edit"></a>
-														</a>
-													{{/eq}}
-													{{#eq this.scope 'G'}}
-														<a href="/application-variable/view/delete/{{this.id}}/global" type="button" class="btn btn-outline btn-primary fa fa-times" data-toggle="tooltip" data-placement="top" title="Delete"></a>
-													{{/eq}}
-													{{#eq this.scope 'L'}}
-														<a href="/application-variable/view/delete/{{this.id}}/local" type="button" class="btn btn-outline btn-primary fa fa-times" data-toggle="tooltip" data-placement="top" title="Delete"></a>
-													{{/eq}}
+                          {{#stringEquals @root.userRole 'reader'}}
+                            <a href="/application-variable/view/read/{{@root.selectedApplicationId}}/{{this.variable_id}}" type="button" class="btn btn-outline btn-primary fa fa-eye"
+                            data-toggle="tooltip" data-placement="top" title="View"></a>	                            
+                          {{/stringEquals}}     
+
+                          {{#stringEquals @root.userRole 'admin'}}
+                            {{#eq this.scope 'L'}}
+  														<a href="/application-variable/view/edit/{{this.id}}/{{@root.selectedApplicationId}}/{{this.variable_id}}" type="button" class="btn btn-outline btn-primary fa fa-pencil-square-o" data-toggle="tooltip" data-placement="top" title="Edit"></a>  														
+                              <a href="/application-variable/view/delete/{{this.id}}/local" type="button" class="btn btn-outline btn-primary fa fa-times" data-toggle="tooltip" data-placement="top" title="Delete"></a>
+  													{{/eq}}
+  													{{#eq this.scope 'G'}}
+  														<a href="/application-variable/view/delete/{{this.id}}/global" type="button" class="btn btn-outline btn-primary fa fa-times" data-toggle="tooltip" data-placement="top" title="Delete"></a>
+  													{{/eq}}
+                          {{/stringEquals}}                             
 												</td>
 											</tr>
 										{{/each}}
@@ -98,9 +107,13 @@
 							</div>
 						</div>
 					</div>
-
-					<a href="/application-variable/view/{{selectedApplicationId}}/local/new" type="button" class="btn btn-outline btn-primary">New Local Var</a>
-					<a href="/application-variable/view/{{selectedApplicationId}}/global/new" type="button" class="btn btn-outline btn-primary">Add Global Var</a>
+          
+          {{#if selectedApplicationId }}                        
+            {{#stringEquals userRole 'admin'}}
+              <a href="/application-variable/view/{{selectedApplicationId}}/local/new" type="button" class="btn btn-outline btn-primary">New Local Var</a>
+              <a href="/application-variable/view/{{selectedApplicationId}}/global/new" type="button" class="btn btn-outline btn-primary">Add Global Var</a>   
+  					{{/stringEquals}}            
+          {{/if}}
 					<br>
 					<br>
 				</div>
