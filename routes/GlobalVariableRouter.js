@@ -2,28 +2,44 @@ function GlobalVariableRouter(expressInstance) {
 
   var _this = this;
 
-  expressInstance.get('/global-variable', (req, res) => {
+  expressInstance.get('/global-variable', ["admin", "reader"], (req, res) => {
     _this.goToHomePage(req, res);
   });
 
   this.goToHomePage = function(req, res, redirectAttributes) {
 
     variableRepository.findByScopeAndDeleted("G","N", function(err, entities) {
+      
+      if (err) {
+        logger.info(err);
+        var renderAttributes = {
+          error_message: "An error occurred when trying to list global variables.",
+          error_security_message: req.session.error_security_message || undefined
+        };        
+        req.session.error_security_message = undefined;        
+        
+        res.render('global-variable/home.hbs', renderAttributes);
+        return;
+      }      
 
       var renderAttributes = {
-        globalVariables: entities
+        globalVariables: entities,
+        error_security_message: req.session.error_security_message || undefined,
+        userRole: req.session.loginInformation.role || undefined
       };
+      
+      req.session.error_security_message = undefined;
 
       Object.assign(renderAttributes, redirectAttributes);
       res.render('global-variable/home.hbs', renderAttributes);
     });
   }
 
-  expressInstance.get('/global-variable/view/new', (req, res) => {
+  expressInstance.get('/global-variable/view/new', ["admin"], (req, res) => {
     res.render('global-variable/new.hbs', {});
   });
 
-  expressInstance.post('/global-variable/action/save', (req, res) => {
+  expressInstance.post('/global-variable/action/save', ["admin"], (req, res) => {
 
     logger.info("Save global variable:");    
     req.body.scope = 'G';
@@ -45,7 +61,7 @@ function GlobalVariableRouter(expressInstance) {
     });
   });
 
-  expressInstance.get('/global-variable/view/edit/:id', (req, res) => {
+  expressInstance.get('/global-variable/view/edit/:id', ["admin"], (req, res) => {
 
    variableRepository.findOneById(req.params.id,function(err,entity){
      if (err) {
@@ -56,6 +72,27 @@ function GlobalVariableRouter(expressInstance) {
      } else {
        res.render('global-variable/new.hbs', {
          global:entity
+       });
+     }
+   });
+  });
+
+  expressInstance.get('/global-variable/view/read/:id', ["reader"], (req, res) => {
+
+   variableRepository.findOneById(req.params.id,function(err,entity){
+     if (err) {
+       logger.info(err);
+       _this.goToHomePage(req, res, {
+         error_message: "An error occurred when trying to read the global variable."
+       })
+     } else {
+       
+       if(entity.type === 'S'){
+         entity.value = "{secret}"
+       }
+       
+       res.render('global-variable/read.hbs', {
+         variable:entity
        });
      }
    });

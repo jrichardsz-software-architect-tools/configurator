@@ -14,7 +14,7 @@
 		<div id="page-wrapper">
 			<div class="row">
 				<div class="col-lg-12">
-					<h1 class="page-header">Applications</h1>
+					<h1 class="page-header">Applications</h1>          
 				</div>
 			</div>
 			<div class="row">
@@ -34,6 +34,11 @@
 							{{error_message}}
 						</div>
 					{{/if}}
+					{{#if error_security_message}}
+						<div class="alert alert-danger">
+							{{error_security_message}}
+						</div>
+					{{/if}}
 					<div class="panel panel-default">
 						<div class="panel-body">
 							<div class="table-responsive">
@@ -41,44 +46,27 @@
 									<thead>
 										<tr>
 											<th>#</th>
-											{{#eq @root.properties.allowDocker true}}
-												<th>Docker Name</th>
-												{{else}}
-													<th>Name</th>
-											{{/eq}}
-											{{#eq @root.properties.allowDocker true}}
-												<th>Docker Image</th>
-												<th>Port</th>
-												<th>Status</th>
-											{{/eq}}
+											<th>Name</th>
 											<th>Description</th>
 											<th style="text-align: center;">Manage</th>
 										</tr>
 									</thead>
 									<tbody>
 
-										{{#each array}}
+										{{#each applications}}
 											<tr class="table-row">
 												<td>{{incremented @index}}</td>
 												<td>{{this.name}}</td>
 												<td>{{this.description}}</td>
-												{{#eq @root.properties.allowDocker true}}
-													<td>{{this.image}}</td>
-													<td>{{this.port}}</td>
-													<td>Online</td>
-												{{/eq}}
 												<td style="text-align: center;">
-													{{#eq @root.properties.allowDocker true}}
-														<a th:href="@{|/project/edit/${p.clientId}|}" type="button" class="btn btn-outline btn-primary">Start</a>
-														<a th:href="@{|/project/edit/${p.clientId}|}" type="button" class="btn btn-outline btn-primary">Stop</a>
-														<a th:href="@{|/project/edit/${p.clientId}|}" type="button" class="btn btn-outline btn-primary">Log</a>
-													{{/eq}}
 													<a href="/application-variable?applicationId={{this.id}}&applicationName={{this.name}}" type="button" class="btn btn-outline btn-primary fa fa-list"
 													data-toggle="tooltip" data-placement="top" title="Variables"></a>
-													<a href="/application/view/edit/{{this.id}}" type="button" class="btn btn-outline btn-primary fa fa-pencil-square-o"
-													data-toggle="tooltip" data-placement="top" title="Edit"></a>
-													<a href="/application/view/delete/{{this.id}}" type="button" class="btn btn-outline btn-primary fa fa-times"
-													data-toggle="tooltip" data-placement="top" title="Delete"></a>
+                          {{#stringEquals  @root.userRole 'admin'}}                              
+                              <a href="/application/view/edit/{{this.id}}" type="button" class="btn btn-outline btn-primary fa fa-pencil-square-o"
+                              data-toggle="tooltip" data-placement="top" title="Edit"></a>
+                              <a href="/application/view/delete/{{this.id}}" type="button" class="btn btn-outline btn-primary fa fa-times"
+                              data-toggle="tooltip" data-placement="top" title="Delete"></a>
+                					{{/stringEquals}}                          
 													</a>
 												</td>
 											</tr>
@@ -89,7 +77,11 @@
 						</div>
 					</div>
 
-					<a href="/application/view/new" type="button" class="btn btn-outline btn-primary">New application</a>
+          
+          {{#stringEquals userRole 'admin'}}
+              <a href="/application/view/new" type="button" class="btn btn-outline btn-primary">New application</a>           
+					{{/stringEquals}}
+          
 					<br>
 					<br>
 				</div>

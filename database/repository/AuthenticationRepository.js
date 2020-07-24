@@ -1,16 +1,16 @@
 function AuthenticationRepository() {
 
-  this.findOneByUser = function(user, callback) {
+  this.findOneByUserName = function(username, callback) {
     databaseConnection.getConnection(function(err, connection) {
-      connection.query('select * from authentication where user = ?', [user], function(err, rows) {
+      connection.query('select * from authentication where username = ?', [username], function(err, rows) {
         if (err) {
           callback(err, null);
         }
 
         if (rows.length == 0) {
-          callback("Zero rows were founded for this user:" + user, null);
+          callback("Zero rows were founded for this user:" + username, null);
         } else if (rows.length > 1) {
-          callback("More than one row was found for user:" + user, null);
+          callback("More than one row was found for user:" + username, null);
         }else {
           callback(null, rows[0]);
         }

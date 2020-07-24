@@ -53,7 +53,7 @@ function ApiRouter(expressInstance) {
 
   }
 
-  expressInstance.get('/api/v1/variables', hasProtectedAccess, (req, res) => {
+  expressInstance.get('/api/v1/variables', ["api"], hasProtectedAccess, (req, res) => {
     logger.info("get variables for app: "+req.query.application)
 
     var type = (req.query.type === 'json' || req.query.type === 'text' ? req.query.type : 'text')

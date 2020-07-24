@@ -33,5 +33,10 @@ Logger.error = function(message) {
   logger.error("[" + calleeInfo.location + "]", "[" + calleeInfo.line + "]", message);
 };
 
+Logger.warn = function(message) {
+  var calleeInfo = getCalleeInfo();
+  logger.warn("[" + calleeInfo.location + "]", "[" + calleeInfo.line + "]", message);
+};
+
 
 module.exports = Logger;

@@ -1,22 +1,30 @@
+/*
+SQLyog Community
+MySQL - 5.7.26 : Database - confignet
+*********************************************************************
+*/
+
+/*!40101 SET NAMES utf8 */;
+
+/*!40101 SET SQL_MODE=''*/;
+
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+/*Table structure for table `application` */
+
 CREATE TABLE `application` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   `description` varchar(100) DEFAULT NULL,
-  `type` char(1) NOT NULL,
+  `type` char(3) NOT NULL,
   `deleted` char(1) NOT NULL DEFAULT 'N',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=utf8;
 
-CREATE TABLE `variable` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) NOT NULL,
-  `value` varchar(100) NOT NULL,
-  `description` varchar(100) DEFAULT NULL,
-  `type` char(1) NOT NULL,
-  `scope` char(1) NOT NULL,
-  `deleted` char(1) NOT NULL DEFAULT 'N',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
+/*Table structure for table `application_variable` */
 
 CREATE TABLE `application_variable` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -27,13 +35,33 @@ CREATE TABLE `application_variable` (
   KEY `fk_variable` (`variable_id`),
   CONSTRAINT `fk_application` FOREIGN KEY (`application_id`) REFERENCES `application` (`id`),
   CONSTRAINT `fk_variable` FOREIGN KEY (`variable_id`) REFERENCES `variable` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
+
+/*Table structure for table `authentication` */
 
 CREATE TABLE `authentication` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `user` varchar(100) NOT NULL,
+  `username` varchar(100) NOT NULL,
   `password` varchar(100) NOT NULL,
   `role` varchar(10) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `authentication_UN` (`user`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
+  UNIQUE KEY `authentication_UN` (`username`)
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8;
+
+/*Table structure for table `variable` */
+
+CREATE TABLE `variable` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `value` varchar(100) NOT NULL,
+  `description` varchar(100) DEFAULT NULL,
+  `type` char(1) NOT NULL,
+  `scope` char(1) NOT NULL,
+  `deleted` char(1) NOT NULL DEFAULT 'N',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;

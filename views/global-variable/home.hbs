@@ -34,6 +34,11 @@
 							{{error_message}}
 						</div>
 					{{/if}}
+					{{#if error_security_message}}
+						<div class="alert alert-danger">
+							{{error_security_message}}
+						</div>
+					{{/if}}
 					<div class="panel panel-default">
 						<div class="panel-body">
 							<div class="table-responsive">
@@ -54,14 +59,21 @@
 												<td>{{incremented @index}}</td>
 												<td>{{this.name}}</td>												
                         {{#eq this.type 'P'}}
-  												<td>{{this.value}}</td>
+  												<td>{{showValueWithSafeWidth this.value}}</td>
   											{{else}}
-  												<td>******</td>
+  												<td>{secret}</td>
   											{{/eq}}                        
-												<td>{{this.description}}</td>
+												<td>{{showValueWithSafeWidth this.description}}</td>
 												<td style="text-align: center;">
-													<a href="/global-variable/view/edit/{{this.id}}" type="button" class="btn btn-outline btn-primary fa fa-pencil-square-o"
-													data-toggle="tooltip" data-placement="top" title="Edit"></a>
+                          {{#stringEquals @root.userRole 'reader'}}
+                            <a href="/global-variable/view/read/{{this.id}}" type="button" class="btn btn-outline btn-primary fa fa-eye"
+                            data-toggle="tooltip" data-placement="top" title="View"></a>	
+                          {{/stringEquals}}     
+
+                          {{#stringEquals @root.userRole 'admin'}}
+                            <a href="/global-variable/view/edit/{{this.id}}" type="button" class="btn btn-outline btn-primary fa fa-pencil-square-o"
+                            data-toggle="tooltip" data-placement="top" title="Edit"></a>
+                          {{/stringEquals}}     
 													<!-- @TODO:validate relationships before delete -->
 													<!-- <a href="/global-variable/view/delete/{{this.id}}" type="button" class="btn btn-outline btn-primary fa fa-times"
 													data-toggle="tooltip" data-placement="top" title="Delete"></a> -->
@@ -73,9 +85,10 @@
 								</table>
 							</div>
 						</div>
-					</div>
-
-					<a href="/global-variable/view/new" type="button" class="btn btn-outline btn-primary">New Global Var</a>
+					</div>          
+          {{#stringEquals userRole 'admin'}}
+              <a href="/global-variable/view/new" type="button" class="btn btn-outline btn-primary">New Global Var</a>
+					{{/stringEquals}}          
 					<br>
 					<br>
 				</div>

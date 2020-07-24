@@ -5,7 +5,7 @@ function LoginRouter(expressInstance) {
   var _this = this;
   var exceptions = null;
 
-  expressInstance.get('/login', (req, res) => {
+  expressInstance.get('/login', ["anonymous", "admin", "reader"], (req, res) => {
 
     // no login in session
     if (!req.session.loginInformation || req.session.loginInformation.user == "") {
@@ -18,7 +18,7 @@ function LoginRouter(expressInstance) {
 
   });
 
-  expressInstance.get('/logout/action', (req, res) => {
+  expressInstance.get('/logout/action', ["admin", "reader"], (req, res) => {
     req.session.destroy(function(err) {
       if (err) {
         return logger.info(err);
@@ -27,10 +27,10 @@ function LoginRouter(expressInstance) {
     });
   });
 
-  expressInstance.post('/login/action', (req, res) => {
+  expressInstance.post('/login/action', ["anonymous"], (req, res) => {
     logger.info("Login validation for user:"+req.body.user);
 
-    authenticationRepository.findOneByUser(req.body.user.toLowerCase(), function(err, userInformation) {
+    authenticationRepository.findOneByUserName(req.body.user.toLowerCase(), function(err, userInformation) {
 
       if (err) {
         logger.info(err);
@@ -50,7 +50,7 @@ function LoginRouter(expressInstance) {
 
         if (compareResult) {
           req.session.loginInformation = {
-            "user": userInformation.user,
+            "user": userInformation.username,
             "role": userInformation.role
           };
           req.session.save();

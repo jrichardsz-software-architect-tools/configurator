@@ -54,8 +54,18 @@
                      <label for="sel1">Select type:</label>
                      <select name="type"  class="form-control">
                        {{#select application.type}}
-                         <option value="S" >Simple</option>
-                         <option value="D" >Docker</option>
+                         <option value="API" >Api Rest</option>
+                         <option value="WEB" >Web</option>
+                         <option value="MOB" >Mobile</option>
+                         <option value="MON" >Monolith</option>
+                         <option value="ETL" >ETL</option>
+                         <option value="SCH" >Scheduler</option>
+                         <option value="CMS" >CMS</option>
+                         <option value="ERP" >ERP</option>
+                         <option value="CRM" >CRM</option>
+                         <option value="REP" >Report Platform</option>
+                         <option value="HYB" >Hybrid</option>
+                         <option value="UNK" >Unknown</option>
                        {{/select}}
                      </select>
                    </div>

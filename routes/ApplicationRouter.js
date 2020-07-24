@@ -1,10 +1,10 @@
 function ApplicationRouter(expressInstance) {
-
-  expressInstance.get('/application/view/new', (req, res) => {
+  
+  expressInstance.get('/application/view/new', ["admin"], (req, res) => {
     res.render('application/new.hbs', {});
   });
 
-  expressInstance.post('/application/action/save', (req, res) => {
+  expressInstance.post('/application/action/save', ["admin"], (req, res) => {
 
     logger.info("Save application:");
     logger.info(req.body);
@@ -22,7 +22,7 @@ function ApplicationRouter(expressInstance) {
     });
   });
 
-  expressInstance.get('/application/view/edit/:id', (req, res) => {
+  expressInstance.get('/application/view/edit/:id', ["admin"], (req, res) => {
 
    applicationRepository.findOneById(req.params.id,function(err,application){
      if (err) {
@@ -38,7 +38,7 @@ function ApplicationRouter(expressInstance) {
    });
   });
 
-  expressInstance.get('/application/view/delete/:id', (req, res) => {
+  expressInstance.get('/application/view/delete/:id', ["admin"], (req, res) => {
 
     applicationRepository.findOneById(req.params.id,function(err,application){
       if (err) {
@@ -57,7 +57,7 @@ function ApplicationRouter(expressInstance) {
   });
 
   //@TODO: use delete instead post method
-  expressInstance.post('/application/action/delete', (req, res) => {
+  expressInstance.post('/application/action/delete', ["admin"], (req, res) => {
 
     logger.info("Delete application:");
     applicationRepository.logicDelete(req.body.id, function(err, result) {
