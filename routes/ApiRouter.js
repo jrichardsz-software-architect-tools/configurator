@@ -56,7 +56,7 @@ function ApiRouter(expressInstance) {
   expressInstance.get('/api/v1/variables', ["api"], hasProtectedAccess, (req, res) => {
     logger.info("get variables for app: "+req.query.application)
 
-    var type = (req.query.type === 'json' || req.query.type === 'text' ? req.query.type : 'text')
+    var type = (req.query.type === 'json' || req.query.type === 'env' ? req.query.type : 'json')
 
     if(typeof req.query.application === 'undefined'){
       res.status(response400.status);
@@ -121,7 +121,7 @@ function ApiRouter(expressInstance) {
 
       return response;
 
-    }else{
+    }else{ //default is env
       var exportText = '';
       variables.forEach(function(variableMetadata) {
         var key = variableMetadata.name;

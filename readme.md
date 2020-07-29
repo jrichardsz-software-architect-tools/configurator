@@ -1,8 +1,8 @@
-# CONFIG-NET
+# CONFIGURATOR
 
 Centralize and Management configurations of all your applications.
 
-![logo](./logo/logo-1.0.0.png)
+![logo](./logo/logo.png)
 
 # Requirements
 
@@ -16,22 +16,22 @@ Centralize and Management configurations of all your applications.
 
 ```
 export PORT=8080
-export CONFIGNET_DATABASE_HOST=localhost
-export CONFIGNET_DATABASE_USER=root
-export CONFIGNET_DATABASE_PASSWORD=secret
-export CONFIGNET_DATABASE_PORT=3306
-export CONFIGNET_DATABASE_NAME=confignet
+export CONFIGURATOR_DATABASE_HOST=localhost
+export CONFIGURATOR_DATABASE_USER=root
+export CONFIGURATOR_DATABASE_PASSWORD=secret
+export CONFIGURATOR_DATABASE_PORT=3306
+export CONFIGURATOR_DATABASE_NAME=configurator
 export API_KEY=changeme
 ```
 
-## As developer
+## Developer Mode
 
 ```
 npm install
 npm run dev
 ```
 
-## As production
+## Production Mode
 
 ```
 npm install

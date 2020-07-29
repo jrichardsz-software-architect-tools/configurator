@@ -1,6 +1,6 @@
 /*
 SQLyog Community
-MySQL - 5.7.26 : Database - confignet
+MySQL - 5.7.26 : Database - configurator
 *********************************************************************
 */
 

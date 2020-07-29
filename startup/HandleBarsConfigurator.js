@@ -9,23 +9,18 @@ HandleBarsConfigurator.configure = function(hbs) {
       return (v1 === v2) ? opts.fn(this) : opts.inverse(this);
     },
     ne: function(v1, v2, opts) {
-      return v1 !== v2;
       return (v1 !== v2) ? opts.fn(this) : opts.inverse(this);
     },
     lt: function(v1, v2, opts) {
-      return v1 < v2;
       return (v1 < v2) ? opts.fn(this) : opts.inverse(this);
     },
     gt: function(v1, v2, opts) {
-      return v1 > v2;
       return (v1 > v2) ? opts.fn(this) : opts.inverse(this);
     },
     lte: function(v1, v2, opts) {
-      return v1 <= v2;
       return (v1 <= v2) ? opts.fn(this) : opts.inverse(this);
     },
     gte: function(v1, v2, opts) {
-      return v1 >= v2;
       return (v1 >= v2) ? opts.fn(this) : opts.inverse(this);
     }
   });
