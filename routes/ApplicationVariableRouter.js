@@ -63,48 +63,67 @@ function ApplicationVariableRouter(expressInstance) {
 
     var scope = req.params.scope;
     var applicationId = req.params.selectedApplicationId;
+    
+    //validate id application exist
+    applicationRepository.findOneById(applicationId, function(err, application){
+      if (err) {
+        logger.info(err);
+        let renderAttributes = {
+          error_message: "An error occurred when trying to get the application.",
+          error_security_message: req.session.error_security_message || undefined
+        };        
+        req.session.error_security_message = undefined;                        
+        res.render('application-variable/home.hbs', renderAttributes);
+        return;
+      }
+      
+      //if application exist, show variables options
+      if (scope == "local") {
+        res.render('application-variable/new_local_var.hbs', {
+          application_id: applicationId,
+          application_name: application.name
+        });
+      } else if (scope == "global") {
 
-    if (scope == "local") {
-      res.render('application-variable/new_local_var.hbs', {
-        application_id: applicationId
-      });
-    } else if (scope == "global") {
+        applicationVariableRepository.findVariablesByApplicationId(applicationId, function(selectApplicationVariablesErr, applicationVariables) {
+          if (selectApplicationVariablesErr) {
+            logger.error(selectApplicationVariablesErr);
+            _this.goToHomePage(req, res, {
+              redirect: '/application-variable',
+              error_message: "Variables cannot be obtained for selected application."
+            })
+          } else {
+            variableRepository.findByScopeAndDeleted("G","N",function(selectGlobalVariablesErr, globalVariables){
+              if (selectGlobalVariablesErr) {
+                logger.error(selectGlobalVariablesErr);
+                _this.goToHomePage(req, res, {
+                  redirect: '/application-variable',
+                  error_message: "Global variables cannot be obtained."
+                })
+              } else {
 
-      applicationVariableRepository.findVariablesByApplicationId(applicationId, function(selectApplicationVariablesErr, applicationVariables) {
-        if (selectApplicationVariablesErr) {
-          logger.error(selectApplicationVariablesErr);
-          _this.goToHomePage(req, res, {
-            redirect: '/application-variable',
-            error_message: "Variables cannot be obtained for selected application."
-          })
-        } else {
-          variableRepository.findByScopeAndDeleted("G","N",function(selectGlobalVariablesErr, globalVariables){
-            if (selectGlobalVariablesErr) {
-              logger.error(selectGlobalVariablesErr);
-              _this.goToHomePage(req, res, {
-                redirect: '/application-variable',
-                error_message: "Global variables cannot be obtained."
-              })
-            } else {
+                var availableGlobalVariables = [];
 
-              var availableGlobalVariables = [];
-
-              for(var globalVariablesIndex in globalVariables){
-                console.log("search "+globalVariables[globalVariablesIndex].id+" in");
-                if(!contains(globalVariables[globalVariablesIndex].id,"variable_id",applicationVariables)){
-                  availableGlobalVariables.push(globalVariables[globalVariablesIndex]);
+                for(var globalVariablesIndex in globalVariables){
+                  logger.debug("search "+globalVariables[globalVariablesIndex].id+" in");
+                  if(!contains(globalVariables[globalVariablesIndex].id,"variable_id",applicationVariables)){
+                    availableGlobalVariables.push(globalVariables[globalVariablesIndex]);
+                  }
                 }
-              }
 
-              res.render('application-variable/add_global_var.hbs', {
-                application_id: req.params.selectedApplicationId,
-                variables: availableGlobalVariables
-              });
-            }
-          });
-        }
-      });
-    }
+                res.render('application-variable/add_global_var.hbs', {
+                  application_id: req.params.selectedApplicationId,
+                  variables: availableGlobalVariables,
+                  application_name: application.name
+                });
+              }
+            });
+          }
+        });
+      }      
+      
+    })
+
   });
 
   function contains(searchedValue, attributeName, array ){
@@ -172,27 +191,33 @@ function ApplicationVariableRouter(expressInstance) {
 
   expressInstance.post('/application-variable/action/global/variable/add', ["admin"], (req, res) => {
 
-    logger.info("Add global variable:");
+    logger.info("Add global variables:");
+    logger.debug(req.body);
+    logger.debug(typeof req.body);
+    
     var selectedApplicationId = req.body.application_id;
-    var selectedGlobalVariableId = req.body.selectedGlobalVariableId;
+    
+    var columns = ["application_id", "variable_id"];    
+    var variables_id = [];
+    
+    for(var key in req.body){
+      if(key.startsWith("global_var_id_selected_")){
+        variables_id.push(key.replace("global_var_id_selected_",""))
+      }
+    }
 
-    var application_variable = {
-      application_id: selectedApplicationId,
-      variable_id: selectedGlobalVariableId
-    };
-
-    applicationVariableRepository.save(application_variable,function(applicationVariableErr, applicationVariableResult){
+    applicationVariableRepository.massiveSave(columns, selectedApplicationId, variables_id,function(applicationVariableErr, applicationVariableResult){
       if (applicationVariableErr) {
         logger.info(applicationVariableErr);
         //TODO: Show error message in add global variable page instead home page
         _this.goToHomePage(req, res, {
           redirect: '/application-variable',
-          error_message: "An error occurred when trying to add the variable."
+          error_message: "An error occurred when trying to add the variable. Application was not found"
         })
       } else {
         _this.goToHomePage(req, res, {
           redirect: '/application-variable',
-          success_message: "The variable was added successfully."
+          success_message: "The variables were added successfully."
         })
       }
     });

@@ -1,10 +1,10 @@
 {
   "database": {
-    "host":"${CONFIGNET_DATABASE_HOST}",
-    "port":"${CONFIGNET_DATABASE_PORT}",
-    "user":"${CONFIGNET_DATABASE_USER}",
-    "password":"${CONFIGNET_DATABASE_PASSWORD}",
-    "name":"${CONFIGNET_DATABASE_NAME}"
+    "host":"${CONFIGURATOR_DATABASE_HOST}",
+    "port":"${CONFIGURATOR_DATABASE_PORT}",
+    "user":"${CONFIGURATOR_DATABASE_USER}",
+    "password":"${CONFIGURATOR_DATABASE_PASSWORD}",
+    "name":"${CONFIGURATOR_DATABASE_NAME}"
   },
   "api":{
     "key":"${API_KEY}"

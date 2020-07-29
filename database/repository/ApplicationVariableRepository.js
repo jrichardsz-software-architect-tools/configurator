@@ -144,6 +144,32 @@ function ApplicationVariableRepository() {
       }
     });
   }
+  
+  this.massiveSave = function(columns, application_id, variables_id, callback) {
+    databaseConnection.getConnection(function(err, connection) {
+      logger.info("Massive Insert action")
+      
+      var values = "";
+      
+      for(var i=0; i<variables_id.length; i++){
+        values += `(${application_id}, ${variables_id[i]})`;          
+        if(i<variables_id.length-1){//is the last
+          values += ",";    
+        }
+      }
+
+      var sql = `INSERT INTO application_variable
+                 (@columns)
+                 VALUES
+                 @values`;
+      sql = sql.replace("@columns", columns.toString());
+      sql = sql.replace("@values", values.toString());
+      logger.info(sql);
+      connection.query(sql, values, function(errInsert, result) {
+        callback(errInsert, result);
+      });    
+    });
+  }  
 
   this.delete = function(id, callback) {
     var params = [id];

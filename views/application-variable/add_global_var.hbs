@@ -14,7 +14,7 @@
     <div id="page-wrapper">
       <div class="row">
         <div class="col-lg-12">
-          <h1 class="page-header">Add Global Variable</h1>
+          <h1 class="page-header">Add Global Variable to: {{application_name}}</h1>
         </div>
         <!-- /.col-lg-12 -->
       </div>
@@ -43,18 +43,40 @@
                   <form action="/application-variable/action/global/variable/add" role="form" method="post"  >
                     <input name="id" type="hidden" value="{{id}}" />
                     <input name="application_id" type="hidden" value="{{application_id}}" />
-                    <input name="variable_id" type="hidden" value="{{variable.id}}" />
-                    <div class="form-group">
-                      <label for="sel1">Select a global variable:</label>
-                        <!-- TODO: Use a table instead select -->
-                      <select name="selectedGlobalVariableId" class="form-control">
-                        <option value="-1">---</option>
-                        {{#each variables}}
-                          <option value="{{this.id}}">Global variable name: [{{this.name}}] > Variable Description: {{this.description}}</option>
-                        {{/each}}
-                      </select>
-                    </div>
-                    <button type="submit" class="btn btn-outline btn-primary">Submit</button>
+                    
+                    {{#eq variables.length 0}}
+                      <div class="alert alert-warning">
+                        This app already has all the global properties!
+                      </div>
+          					{{/eq}}                    
+                    
+                    {{#ne variables.length 0}}
+                      <div class="form-group">
+                        <label for="sel1">Select a global variable:</label>
+                        <br><br>
+                        <table class="table table-bordered">
+                          <thead class="thead-dark" >
+                            <tr>
+                              <th scope="col">Var Name</th>
+                              <th scope="col">Var Description</th>
+                              <th scope="col">Select?</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {{#each variables}}
+                              <tr>
+                                <th scope="row">{{this.name}}</th>
+                                <td>{{showValueWithSafeWidth this.description}}</td>
+                                <td>
+                                  <input type="checkbox" class="form-check-input" id="{{this.id}}" name="global_var_id_selected_{{this.id}}">
+                                </td>
+                              </tr>                            
+                            {{/each}} 
+                          </tbody>
+                        </table>                    
+                      </div>
+                      <button type="submit" class="btn btn-outline btn-primary">Submit</button>                      
+          					{{/ne}}                     
                     <a href="/application-variable" type="button" class="btn btn-outline btn-primary">Cancel</a>
                   </form>
                 </div>
