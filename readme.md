@@ -6,9 +6,9 @@ Centralize and Management configurations of all your applications.
 
 # Requirements
 
-- Mysql database. You could use docker : https://gist.github.com/jrichardsz/73142c5c7eb7136d80b165e75d3a1e22
-- Execute ddl in your mysql database: ./database/ddl.sql
 - Node.js > 8.*
+- Mysql database. You could use [docker](https://gist.github.com/jrichardsz/73142c5c7eb7136d80b165e75d3a1e22)
+- Create a database and execute this ddl to create the required tables: [./database/ddl.sql](./database/ddl.sql)
 
 # Getting Started
 
@@ -42,7 +42,7 @@ npm run start
 
 Open your browser pointing at:
 
-- http://localhost:8080
+- http://localhost:2708
 
 > Note: Admin password will be showed in the server log.
 
@@ -57,15 +57,17 @@ By default two user are created:
 - admin with admin role
 - guest with reader role
 
-Password are printed in the first log. Take care to delete them of the log!
+Password are printed in the first log. Take care to delete them of the log!!. If you are using docker, [this](https://stackoverflow.com/a/42510314/3957754) works.
 
 Admin can make anything. Guest user only can enter to few options and can't view secrets values.
 
 
 # Get variables
 
+If you have created an app called **helicarrier-api** with at least one variable, this is how can we get its variables:
+
 ```
-curl localhost:8080/api/v1/variables?application=helicarrier-api -H "apiKey:changeme"
+curl localhost:2708/api/v1/variables?application=helicarrier-api -H "apiKey:changeme"
 ```
 
 response will be
@@ -75,18 +77,23 @@ export ERP_HOST="12.124.1.6"
 export firebase_key="65468748"
 ```
 
-If **helicarrier-api** exists as application and has at least one variable
+These variables must be launched in the remote server in which **helicarrier-api** will run. 
+
+This is how [heroku](https://devcenter.heroku.com/articles/config-vars) works.
+
+# Docker
+
+Follow this [guide](https://github.com/software-architect-tools/configurator/wiki/Launch-with-Docker)
 
 # Roadmap
 
-- [ ] add http endpoint to get variables in environment or json format
-- [ ] improve user experience in **Add Global Variable** ui
+- [ ] add http endpoint to get variables in json format
 - [ ] add changelog column for each app or variable
-- [ ] add feature to create : read only users
-- [ ] add feature to create users to consume specific apps: /api/variables
 - [ ] add easy import/export feature
 - [ ] add dependency injection
 - [ ] unit tests/selenium tests
+- [ ] java and nodejs libraries to be used in application as **configurator client**
+- [ ] solve/implement [issues](https://github.com/software-architect-tools/configurator/issues)
 
 
 # Made with
