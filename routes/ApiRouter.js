@@ -1,5 +1,4 @@
 function ApiRouter(expressInstance) {
-
   var _this = this;
 
   var response400 = {
@@ -7,56 +6,15 @@ function ApiRouter(expressInstance) {
     "message": "Bad request"
   };
 
-  var response401 = {
-    "status": 401,
-    "message": "Unauthorized access"
-  };
-
-  var response422 = {
-    "status": 422,
-    "message": "Unprocessable response"
-  };
-
-  var hasProtectedAccess = function(req, res, next) {
-
-    var apiKey = req.headers['apikey'];
-    var incomingApiKey;
-    try{
-      incomingApiKey = properties.api.key;
-    }catch(e){
-      logger.error("value api.key does not exist in configuration. Is api.key env var configured?");
-      res.status(response422.status);
-      res.json(response422);
-      return;
-    }
-
-    if (typeof apiKey === 'undefined' || apiKey.length == 0) {
-      res.status(response422.status);
-      res.json(response422);
-      return;
-    }
-
-    if (typeof incomingApiKey === 'undefined' || incomingApiKey.length == 0) {
-      res.status(response422.status);
-      res.json(response422);
-      return;
-    }
-
-    if (incomingApiKey===apiKey) {
-      next();
-    }else{
-      logger.error("Incoming api key in header are not equal to configured value");
-      res.status(response401.status);
-      res.json(response401);
-      return;
-    }
-
-  }
-
-  expressInstance.get('/api/v1/variables', ["api"], hasProtectedAccess, (req, res) => {
+  expressInstance.get('/api/v1/variables', ["api"], (req, res) => {
     logger.info("get variables for app: "+req.query.application)
 
-    var type = (req.query.type === 'json' || req.query.type === 'env' ? req.query.type : 'json')
+    var type;
+    if(req.query.type === 'json' || req.query.type === 'env'){
+      type = req.query.type;
+    }else{
+      type = 'env';
+    }
 
     if(typeof req.query.application === 'undefined'){
       res.status(response400.status);

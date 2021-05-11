@@ -16,9 +16,11 @@ function Configuration() {
               var endIndex = configInitialValue.indexOf("}");
               var environmentKey = configInitialValue.substring(startIndex , endIndex - startIndex + 2 );
               var environmentValue = process.env[environmentKey];
-              configInitialValue = configInitialValue.replace("${" + environmentKey + "}" , environmentValue);
+              if(typeof environmentValue!=='undefined'){
+                configInitialValue = configInitialValue.replace("${" + environmentKey + "}" , environmentValue);
+              }
             };
-            if (configInitialValue) {
+            if (configInitialValue != ("" + obj[k]) && configInitialValue!="") {
               if(configInitialValue == "true" || configInitialValue == "false"){
                 var isTrueSet = (configInitialValue === "true");
                 obj[k] = isTrueSet;
@@ -26,6 +28,8 @@ function Configuration() {
               else{
                 obj[k] = configInitialValue;
               }
+            }else{
+              obj[k] = null;
             }
           }
         }

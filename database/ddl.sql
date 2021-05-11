@@ -22,7 +22,7 @@ CREATE TABLE `application` (
   `type` char(3) NOT NULL,
   `deleted` char(1) NOT NULL DEFAULT 'N',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 /*Table structure for table `application_variable` */
 
@@ -35,7 +35,7 @@ CREATE TABLE `application_variable` (
   KEY `fk_variable` (`variable_id`),
   CONSTRAINT `fk_application` FOREIGN KEY (`application_id`) REFERENCES `application` (`id`),
   CONSTRAINT `fk_variable` FOREIGN KEY (`variable_id`) REFERENCES `variable` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 /*Table structure for table `authentication` */
 
@@ -46,7 +46,7 @@ CREATE TABLE `authentication` (
   `role` varchar(10) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `authentication_UN` (`username`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 /*Table structure for table `variable` */
 
@@ -59,7 +59,7 @@ CREATE TABLE `variable` (
   `scope` char(1) NOT NULL,
   `deleted` char(1) NOT NULL DEFAULT 'N',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
