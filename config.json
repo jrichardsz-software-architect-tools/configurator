@@ -8,6 +8,8 @@
   },
   "api":{
     "key":"${API_KEY}"
+  },
+  "security":{
+    "bfaThreshold":"${BFA_THRESHOLD}"
   }
-
 }
