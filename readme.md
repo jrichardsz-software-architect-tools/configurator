@@ -10,9 +10,8 @@ Centralize and Management configurations of all your applications.
 - Mysql database. You could use [docker](https://gist.github.com/jrichardsz/73142c5c7eb7136d80b165e75d3a1e22)
 - Create a database and execute this ddl to create the required tables: [./database/ddl.sql](./database/ddl.sql)
 
-# Getting Started
 
-## Environment variables:
+# Variables
 
 ```
 export PORT=8080
@@ -24,25 +23,46 @@ export CONFIGURATOR_DATABASE_NAME=configurator
 export API_KEY=changeme
 ```
 
-## Developer Mode
+## For developers
 
-```
 npm install
 npm run dev
-```
 
-## Production Mode
+## For servers
 
-```
 npm install
 npm run start
+
+# Run with docker
+
+## Docker build
+
 ```
+export image_name=configurator
+docker build -t ${image_name}:1.0.0 .
+```
+
+## Docker run
+
+```
+export image_name=configurator
+docker run --name $image_name -it --rm -p 8080:2708 \
+-e CONFIGURATOR_DATABASE_HOST=localhost \
+-e CONFIGURATOR_DATABASE_USER=root \
+-e CONFIGURATOR_DATABASE_PASSWORD=secret \
+-e CONFIGURATOR_DATABASE_PORT=3306 \
+-e CONFIGURATOR_DATABASE_NAME=configurator \
+-e API_KEY=changeme \
+-e TZ=America/Lima  $image_name:1.0.0
+```
+
 
 # Usage
 
 Open your browser pointing at:
 
 - http://localhost:2708
+- or http://localhost:8080 if you are using the PORT variables
 
 > Note: Admin password will be showed in the server log.
 
@@ -77,7 +97,7 @@ export ERP_HOST="12.124.1.6"
 export firebase_key="65468748"
 ```
 
-These variables must be launched in the remote server in which **helicarrier-api** will run. 
+These variables must be launched in the remote server in which **helicarrier-api** will run.
 
 This is how [heroku](https://devcenter.heroku.com/articles/config-vars) works.
 
@@ -87,7 +107,7 @@ Follow this [guide](https://github.com/software-architect-tools/configurator/wik
 
 # Roadmap
 
-- [ ] add http endpoint to get variables in json format
+- [x] add http endpoint to get variables in json format
 - [ ] add changelog column for each app or variable
 - [ ] add easy import/export feature
 - [ ] add dependency injection

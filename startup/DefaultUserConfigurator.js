@@ -1,8 +1,10 @@
 const uuid = require('uuid');
+const fs = require('fs');
 const bcrypt = require('bcrypt');
+const osUtil = require('os');
 
 function DefaultUserConfigurator() {
-  
+
   var saltRoundsGenerationNumber = 10;
 
   this.createUserIfNoExist = function(userName, role) {
@@ -30,7 +32,15 @@ function DefaultUserConfigurator() {
               logger.error(userName+" user cannot be created.");
               return;
             }
-            logger.info(userName+" user was created with password : [{0}]".format(plainPassword));
+            var homePath = osUtil.homedir();
+            var filePassword = `${homePath}/configurator-user-${userName}.txt`;
+            fs.writeFile(`${filePassword}`, plainPassword, function(err) {
+                if(err) {
+                  logger.info(`${userName} user was not created. You will not be able to access the system`);
+                  logger.error(err);
+                }
+                logger.info(`${userName} user was created. Password is in ${filePassword}. READ AND DELETE IT!!!`);
+            });
           });
         });
       } else {

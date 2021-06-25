@@ -18,6 +18,8 @@ global.properties = new Configuration().loadJsonFile(appHomePath+'/config.json',
 const logger = require('./log/Logger.js');
 global.logger = logger;
 
+logger.info("starting configurator...");
+
 const DatabaseConnection = require('./database/DatabaseConnection.js');
 const DefaultUserConfigurator = require('./startup/DefaultUserConfigurator.js');
 const HandleBarsConfigurator = require('./startup/HandleBarsConfigurator.js');
