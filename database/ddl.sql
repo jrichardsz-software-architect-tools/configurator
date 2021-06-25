@@ -17,7 +17,7 @@ MySQL - 5.7.26 : Database - configurator
 
 CREATE TABLE `application` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) NOT NULL,
+  `name` varchar(250) NOT NULL,
   `description` varchar(100) DEFAULT NULL,
   `type` char(3) NOT NULL,
   `deleted` char(1) NOT NULL DEFAULT 'N',
@@ -53,7 +53,7 @@ CREATE TABLE `authentication` (
 CREATE TABLE `variable` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
-  `value` varchar(100) NOT NULL,
+  `value` LONGTEXT NOT NULL,
   `description` varchar(100) DEFAULT NULL,
   `type` char(1) NOT NULL,
   `scope` char(1) NOT NULL,

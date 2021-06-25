@@ -1,6 +1,6 @@
 var log4js = require('log4js');
 var logger = log4js.getLogger();
-logger.level = 'debug';
+logger.level = process.env.LOG_LEVEL || 'info';
 
 function getCalleeInfo() {
   var stack = new Error().stack.split("at ");

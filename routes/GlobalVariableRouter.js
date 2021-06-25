@@ -1,3 +1,6 @@
+var aes256 = require('aes256');
+var key = 'my passphrase';
+
 function GlobalVariableRouter(expressInstance) {
 
   var _this = this;
@@ -9,25 +12,25 @@ function GlobalVariableRouter(expressInstance) {
   this.goToHomePage = function(req, res, redirectAttributes) {
 
     variableRepository.findByScopeAndDeleted("G","N", function(err, entities) {
-      
+
       if (err) {
         logger.info(err);
         var renderAttributes = {
           error_message: "An error occurred when trying to list global variables.",
           error_security_message: req.session.error_security_message || undefined
-        };        
-        req.session.error_security_message = undefined;        
-        
+        };
+        req.session.error_security_message = undefined;
+
         res.render('global-variable/home.hbs', renderAttributes);
         return;
-      }      
+      }
 
       var renderAttributes = {
         globalVariables: entities,
         error_security_message: req.session.error_security_message || undefined,
         userRole: req.session.loginInformation.role || undefined
       };
-      
+
       req.session.error_security_message = undefined;
 
       Object.assign(renderAttributes, redirectAttributes);
@@ -41,17 +44,31 @@ function GlobalVariableRouter(expressInstance) {
 
   expressInstance.post('/global-variable/action/save', ["admin"], (req, res) => {
 
-    logger.info("Save global variable:");    
+    logger.info("Save global variable:");
     req.body.scope = 'G';
-    
+
+    var variable = Object.assign({}, req.body);
+
     let objectToLog = {...req.body}; objectToLog.value = "****";
     logger.info(objectToLog);
-    variableRepository.save(req.body, function(err, result) {
+
+    //safe value store
+    if(variable.type === "S"){
+      variable.value = aes256.encrypt(key, variable.value);
+    }
+
+    variableRepository.save(variable, function(err, result) {
       if (err) {
         logger.info(err);
-        res.render('global-variable/new.hbs', {
-          error_message: "An error occurred when trying to save the global variable."
-        });
+        if(err.code === 'ER_DUP_ENTRY'){
+          res.render('global-variable/new.hbs', {
+            error_message: "A variable already exist with provided name: "+req.body.name
+          });
+        }else{
+          res.render('global-variable/new.hbs', {
+            error_message: "An error occurred when trying to save the global variable."
+          });
+        }
       } else {
         _this.goToHomePage(req, res, {
           redirect: '/global-variable',
@@ -63,15 +80,19 @@ function GlobalVariableRouter(expressInstance) {
 
   expressInstance.get('/global-variable/view/edit/:id', ["admin"], (req, res) => {
 
-   variableRepository.findOneById(req.params.id,function(err,entity){
+   variableRepository.findOneById(req.params.id,function(err,variable){
      if (err) {
        logger.info(err);
        _this.goToHomePage(req, res, {
          error_message: "An error occurred when trying to get the global variable."
        })
      } else {
+       //decr variable value to allow edit
+       if(variable.type === "S"){
+         variable.value = aes256.decrypt(key, variable.value);
+       }
        res.render('global-variable/new.hbs', {
-         global:entity
+         global:variable
        });
      }
    });
@@ -86,11 +107,11 @@ function GlobalVariableRouter(expressInstance) {
          error_message: "An error occurred when trying to read the global variable."
        })
      } else {
-       
+
        if(entity.type === 'S'){
          entity.value = "{secret}"
        }
-       
+
        res.render('global-variable/read.hbs', {
          variable:entity
        });
