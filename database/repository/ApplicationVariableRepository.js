@@ -90,6 +90,23 @@ function ApplicationVariableRepository() {
     });
   }
 
+  this.findApplicationsByVariableById = function(variableId, callback) {
+    databaseConnection.getConnection(function(err, connection) {
+      var sql = `select ap.name from application ap , application_variable av
+                 where av.variable_id = ? && av.application_id = ap.id`;
+      try {
+        connection.query(sql, [variableId], function(err, rows) {
+          if (err) {
+            callback(err, rows);
+          }
+          callback(null, rows);
+        });
+      } catch (connectionErr) {
+        callback(connectionErr, null);
+      }
+    });
+  }
+
   this.save = function(entity, callback) {
     databaseConnection.getConnection(function(err, connection) {
       if (entity.id) {
@@ -144,17 +161,17 @@ function ApplicationVariableRepository() {
       }
     });
   }
-  
+
   this.massiveSave = function(columns, application_id, variables_id, callback) {
     databaseConnection.getConnection(function(err, connection) {
       logger.info("Massive Insert action")
-      
+
       var values = "";
-      
+
       for(var i=0; i<variables_id.length; i++){
-        values += `(${application_id}, ${variables_id[i]})`;          
+        values += `(${application_id}, ${variables_id[i]})`;
         if(i<variables_id.length-1){//is the last
-          values += ",";    
+          values += ",";
         }
       }
 
@@ -167,9 +184,9 @@ function ApplicationVariableRepository() {
       logger.info(sql);
       connection.query(sql, values, function(errInsert, result) {
         callback(errInsert, result);
-      });    
+      });
     });
-  }  
+  }
 
   this.delete = function(id, callback) {
     var params = [id];

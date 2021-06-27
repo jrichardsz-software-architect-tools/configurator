@@ -46,10 +46,15 @@
                       <input name="{{this.name}}" type="hidden" value="{{this.value}}" />
                     {{/each}}
                     <div class="form-group">
-                      <label>{{warningMessage}}</label>
+                      <p>{{warningMessage}}</p>
                     </div>
-                    <button type="submit" class="btn btn-outline btn-primary">Submit</button>
-                    <a href="/{{entityType}}" type="button" onclick="window.history.go(-1); return false;" class="btn btn-outline btn-primary">Cancel</a>
+                    {{#stringEquals @root.mode 'cannot-delete'}}
+                      <a href="/{{entityType}}" type="button" onclick="window.history.go(-1); return false;" class="btn btn-outline btn-primary">Accept</a>
+                    {{/stringEquals}}
+                    {{#stringEquals @root.mode 'confirm'}}
+                      <button type="submit" class="btn btn-outline btn-primary">Submit</button>
+                      <a href="/{{entityType}}" type="button" onclick="window.history.go(-1); return false;" class="btn btn-outline btn-primary">Cancel</a>
+                    {{/stringEquals}}
                   </form>
                 </div>
               </div>

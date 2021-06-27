@@ -44,11 +44,11 @@
                     <input name="id" type="hidden" value="{{application.id}}" />
                     <div class="form-group">
                       <label>Name</label>
-                      <input name="name" class="form-control" placeholder="Enter text" value="{{application.name}}"  />
+                      <input name="name" required=true class="form-control" placeholder="Enter text" value="{{application.name}}"  />
                     </div>
                     <div class="form-group">
                       <label>Description</label>
-                      <input name="description" class="form-control" placeholder="Enter text" value="{{application.description}}" />
+                      <input name="description"  required=true  class="form-control" placeholder="Enter text" value="{{application.description}}" />
                     </div>
                     <div class="form-group">
                      <label for="sel1">Select type:</label>
@@ -79,7 +79,7 @@
         </div>
       </div>
     </div>
-    
+
     {{> scripts}}
 
 </body>

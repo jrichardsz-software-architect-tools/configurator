@@ -1,5 +1,7 @@
+const Utils = require('../common/Utils.js');
+
 function ApplicationRouter(expressInstance) {
-  
+
   expressInstance.get('/application/view/new', ["admin"], (req, res) => {
     res.render('application/new.hbs', {});
   });
@@ -47,11 +49,28 @@ function ApplicationRouter(expressInstance) {
           error_message: "An error occurred when trying to get the application."
         })
       } else {
-        res.render('common/delete.hbs', {
-          entityId:application.id,
-          warningMessage:"Are you sure you want to delete this application: {0}".format(application.name),
-          entityType:"application"
+
+        applicationVariableRepository.findVariablesByApplicationId(application.id, function(findApplicationsByVariableByIdErr, applications){
+
+          if(applications.length > 0){
+            var appsString = Utils.arrayToSimpleRepresentation(applications,"name", ",");
+            res.render('common/delete.hbs', {
+              entityId:application.id,
+              warningMessage:`You can not delete this application ${application.name} because has registered these variables: ${appsString}. Delete them and try again.`,
+              entityType:"application",
+              "mode":"cannot-delete"
+            });
+          }else{
+            res.render('common/delete.hbs', {
+              entityId:application.id,
+              warningMessage:"Are you sure you want to delete this application: {0}".format(application.name),
+              entityType:"application",
+              "mode":"confirm"
+            });
+          }
+
         });
+
       }
     });
   });
@@ -60,7 +79,7 @@ function ApplicationRouter(expressInstance) {
   expressInstance.post('/application/action/delete', ["admin"], (req, res) => {
 
     logger.info("Delete application:");
-    applicationRepository.logicDelete(req.body.id, function(err, result) {
+    applicationRepository.delete(req.body.id, function(err, result) {
       if (err) {
         logger.info(err);
         res.render('common/delete.hbs', {

@@ -30,5 +30,16 @@ Utils.getIp = function(req) {
   return ip;
 };
 
+Utils.arrayToSimpleRepresentation = function(array, fieldName, charSeparator) {
+  var simpleRepresentation = "";
+  for(i=0; i<array.length; i++){
+    simpleRepresentation += " "+array[i][fieldName]
+    if(i < array.length-1){
+      simpleRepresentation += charSeparator;
+    }
+  }
+  return simpleRepresentation;
+};
+
 
 module.exports = Utils;

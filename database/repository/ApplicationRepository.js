@@ -109,6 +109,19 @@ function ApplicationRepository() {
     });
   }
 
+  this.delete = function(id, callback) {
+    var params = [id];
+
+    var sql = `DELETE FROM application
+               WHERE id=?`;
+
+    databaseConnection.getConnection(function(conecctionErr, connection) {
+      connection.query(sql, params, function(deletionErr, deletionResult) {
+        callback(deletionErr, deletionResult);
+      });
+    });
+  }
+
 }
 
 

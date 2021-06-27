@@ -329,7 +329,7 @@ function ApplicationVariableRouter(expressInstance) {
                     "name": "scope",
                     "value": req.params.scope
                   }],
-                  warningMessage: "Are you sure you want to delete this {0} variable: \"{1}\" from this application \"{2}\"".format(req.params.scope, variable.name, application.name),
+                  warningMessage: "Are you sure you want to delete this {0} variable: \"{1}\" from this application \"{2}\"?".format(req.params.scope, variable.name, application.name),
                   entityType: "application-variable",
                 });
               }

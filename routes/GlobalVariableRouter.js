@@ -39,7 +39,7 @@ function GlobalVariableRouter(expressInstance) {
   }
 
   expressInstance.get('/global-variable/view/new', ["admin"], (req, res) => {
-    res.render('global-variable/new.hbs', {});
+    res.render('global-variable/new.hbs', {"mode":"add"});
   });
 
   expressInstance.post('/global-variable/action/save', ["admin"], (req, res) => {
@@ -62,11 +62,13 @@ function GlobalVariableRouter(expressInstance) {
         logger.info(err);
         if(err.code === 'ER_DUP_ENTRY'){
           res.render('global-variable/new.hbs', {
-            error_message: "A variable already exist with provided name: "+req.body.name
+            error_message: "A variable already exist with provided name: "+req.body.name,
+            "mode":"add"
           });
         }else{
           res.render('global-variable/new.hbs', {
-            error_message: "An error occurred when trying to save the global variable."
+            error_message: "An error occurred when trying to save the global variable.",
+            "mode":"add"
           });
         }
       } else {
@@ -92,7 +94,8 @@ function GlobalVariableRouter(expressInstance) {
          variable.value = aes256.decrypt(key, variable.value);
        }
        res.render('global-variable/new.hbs', {
-         global:variable
+         global:variable,
+         "mode":"edit"
        });
      }
    });
