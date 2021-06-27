@@ -1,5 +1,9 @@
+var aes256 = require('aes256');
+
 function ApiRouter(expressInstance) {
   var _this = this;
+
+  var cryptKey = properties.security.cryptKey;
 
   var response400 = {
     "status": 400,
@@ -36,6 +40,14 @@ function ApiRouter(expressInstance) {
         res.status(response422.status);
         createResponse(type, response422, res)
         return;
+      }
+
+      //decrypt secret values
+      for(variable of variables){
+        console.log(variable);
+        if(variable.type === 'S'){
+          variable.value = aes256.decrypt(cryptKey, variable.value);
+        }
       }
 
       try{

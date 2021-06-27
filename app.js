@@ -20,6 +20,10 @@ global.logger = logger;
 
 logger.info("starting configurator...");
 
+const RequiredVariables = require('./startup/RequiredVariables.js');
+var requiredVariables = new RequiredVariables();
+requiredVariables.startValidation();
+
 const DatabaseConnection = require('./database/DatabaseConnection.js');
 const DefaultUserConfigurator = require('./startup/DefaultUserConfigurator.js');
 const HandleBarsConfigurator = require('./startup/HandleBarsConfigurator.js');

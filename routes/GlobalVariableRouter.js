@@ -1,9 +1,11 @@
+const Utils = require('../common/Utils.js');
+
 var aes256 = require('aes256');
-var key = 'my passphrase';
 
 function GlobalVariableRouter(expressInstance) {
 
   var _this = this;
+  var cryptKey = properties.security.cryptKey;
 
   expressInstance.get('/global-variable', ["admin", "reader"], (req, res) => {
     _this.goToHomePage(req, res);
@@ -54,7 +56,7 @@ function GlobalVariableRouter(expressInstance) {
 
     //safe value store
     if(variable.type === "S"){
-      variable.value = aes256.encrypt(key, variable.value);
+      variable.value = aes256.encrypt(cryptKey, variable.value);
     }
 
     variableRepository.save(variable, function(err, result) {
@@ -91,7 +93,7 @@ function GlobalVariableRouter(expressInstance) {
      } else {
        //decr variable value to allow edit
        if(variable.type === "S"){
-         variable.value = aes256.decrypt(key, variable.value);
+         variable.value = aes256.decrypt(cryptKey, variable.value);
        }
        res.render('global-variable/new.hbs', {
          global:variable,
@@ -120,6 +122,57 @@ function GlobalVariableRouter(expressInstance) {
        });
      }
    });
+  });
+
+  expressInstance.get('/global-variable/view/delete/:id', ["admin"], (req, res) => {
+
+    variableRepository.findOneById(req.params.id,function(err,variable){
+      if (err) {
+        logger.info(err);
+        homeRouter.goToHomePage(req, res, {
+          error_message: "An error occurred when trying to get the variable."
+        })
+      } else {
+
+        applicationVariableRepository.findApplicationsByVariableById(variable.id, function(findApplicationsByVariableByIdErr, applications){
+
+          if(applications.length > 0){
+            var appsString = Utils.arrayToSimpleRepresentation(applications,"name", ",");
+            res.render('common/delete.hbs', {
+              entityId:variable.id,
+              warningMessage:`You can not delete this variable ${variable.name} because it is required in these applications : ${appsString}.`,
+              entityType:"global-variable",
+              "mode":"cannot-delete"
+            });
+          }else{
+            res.render('common/delete.hbs', {
+              entityId:variable.id,
+              warningMessage:"Are you sure you want to delete this variable: {0}".format(variable.name),
+              entityType:"global-variable",
+              "mode":"confirm"
+            });
+          }
+        });
+      }
+    });
+  });
+
+  expressInstance.post('/global-variable/action/delete', ["admin"], (req, res) => {
+
+    logger.info("Delete variable:");
+    variableRepository.delete(req.body.id, function(err, result) {
+      if (err) {
+        logger.info(err);
+        res.render('common/delete.hbs', {
+          error_message: "An error occurred when trying to delete this variable."
+        });
+      } else {
+        _this.goToHomePage(req, res, {
+          redirect: '/global-variable',
+          success_message: "The variable was deleted successfully."
+        })
+      }
+    });
   });
 
 

@@ -80,10 +80,10 @@
                           {{#stringEquals @root.userRole 'admin'}}
                             <a href="/global-variable/view/edit/{{this.id}}" type="button" class="btn btn-outline btn-primary fa fa-pencil-square-o"
                             data-toggle="tooltip" data-placement="top" title="Edit"></a>
+														<!-- @TODO:validate relationships before delete -->
+														<a href="/global-variable/view/delete/{{this.id}}" type="button" class="btn btn-outline btn-primary fa fa-times"
+														data-toggle="tooltip" data-placement="top" title="Delete"></a>
                           {{/stringEquals}}
-													<!-- @TODO:validate relationships before delete -->
-													<!-- <a href="/global-variable/view/delete/{{this.id}}" type="button" class="btn btn-outline btn-primary fa fa-times"
-													data-toggle="tooltip" data-placement="top" title="Delete"></a> -->
 													</a>
 												</td>
 											</tr>

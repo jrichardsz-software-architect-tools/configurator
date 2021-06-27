@@ -10,6 +10,7 @@
     "key":"${API_KEY}"
   },
   "security":{
-    "bfaThreshold":"${BFA_THRESHOLD}"
+    "bfaThreshold":"${BFA_THRESHOLD}",
+    "cryptKey":"${CRYPT_KEY}"
   }
 }

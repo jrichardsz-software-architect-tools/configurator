@@ -50,13 +50,13 @@ function ApplicationRouter(expressInstance) {
         })
       } else {
 
-        applicationVariableRepository.findVariablesByApplicationId(application.id, function(findApplicationsByVariableByIdErr, applications){
+        applicationVariableRepository.findVariablesByApplicationId(application.id, function(findApplicationsByVariableByIdErr, variables){
 
-          if(applications.length > 0){
-            var appsString = Utils.arrayToSimpleRepresentation(applications,"name", ",");
+          if(variables.length > 0){
+            var variablesAsString = Utils.arrayToSimpleRepresentation(variables,"name", ",");
             res.render('common/delete.hbs', {
               entityId:application.id,
-              warningMessage:`You can not delete this application ${application.name} because has registered these variables: ${appsString}. Delete them and try again.`,
+              warningMessage:`You can not delete this application ${application.name} because has registered these variables: ${variablesAsString}. Delete them and try again.`,
               entityType:"application",
               "mode":"cannot-delete"
             });

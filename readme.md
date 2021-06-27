@@ -21,6 +21,7 @@ export CONFIGURATOR_DATABASE_PASSWORD=secret
 export CONFIGURATOR_DATABASE_PORT=3306
 export CONFIGURATOR_DATABASE_NAME=configurator
 export API_KEY=changeme
+export CRYPT_KEY=changeme
 ```
 
 ## For developers
@@ -53,6 +54,7 @@ docker run --name $image_name -it --rm -p 8080:2708 \
 -e CONFIGURATOR_DATABASE_PORT=3306 \
 -e CONFIGURATOR_DATABASE_NAME=configurator \
 -e API_KEY=changeme \
+-e CRYPT_KEY=changeme \
 -e TZ=America/Lima  $image_name:1.0.0
 ```
 

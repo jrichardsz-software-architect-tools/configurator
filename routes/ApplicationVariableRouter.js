@@ -1,8 +1,8 @@
 var aes256 = require('aes256');
-var key = 'my passphrase';
 
 function ApplicationVariableRouter(expressInstance) {
 
+  var cryptKey = properties.security.cryptKey;
   var _this = this;
 
   expressInstance.get('/application-variable', ["admin", "reader"], (req, res) => {
@@ -157,7 +157,7 @@ function ApplicationVariableRouter(expressInstance) {
 
     //safe value store
     if(variable.type === "S"){
-      variable.value = aes256.encrypt(key, variable.value);
+      variable.value = aes256.encrypt(cryptKey, variable.value);
     }
 
     //save variable
@@ -250,7 +250,7 @@ function ApplicationVariableRouter(expressInstance) {
         })
       } else {
         if(variable.type === "S"){
-          variable.value = aes256.decrypt(key, variable.value);
+          variable.value = aes256.decrypt(cryptKey, variable.value);
         }
         res.render('application-variable/new_local_var.hbs', {
           id: req.params.id,
@@ -331,6 +331,7 @@ function ApplicationVariableRouter(expressInstance) {
                   }],
                   warningMessage: "Are you sure you want to delete this {0} variable: \"{1}\" from this application \"{2}\"?".format(req.params.scope, variable.name, application.name),
                   entityType: "application-variable",
+                  "mode":"confirm"
                 });
               }
             });
