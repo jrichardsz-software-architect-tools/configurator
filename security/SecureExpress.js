@@ -13,6 +13,7 @@ function SecureExpress() {
   var rolesByRoute = {};
   var blackListBruteIps = {};
   var defaultBfaThreshold = 50;
+  //each 24h suspicious attacks are restarted
   var cleanUpBlackListIntervalMillis = 24*3600*1000;
 
   var response401 = {
@@ -173,6 +174,8 @@ function SecureExpress() {
       logger.error("apikey http header is wrong or empty.");
       res.status(response422.status);
       res.json(response422);
+      //update count for this ip
+      blackListBruteIps[clientRemoteIp] = (blackListBruteIps[clientRemoteIp]==null ? 0:blackListBruteIps[clientRemoteIp]) +1;
       return;
     }
 
@@ -227,7 +230,7 @@ function SecureExpress() {
   }
 
   setInterval(function() {
-    logger.info("clean up black list ip bfa.");
+    logger.info("clean up black list ip used to protect against bfa.");
     logger.info(blackListBruteIps);
     blackListBruteIps = [];
   }, cleanUpBlackListIntervalMillis);

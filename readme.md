@@ -20,8 +20,9 @@ export CONFIGURATOR_DATABASE_USER=root
 export CONFIGURATOR_DATABASE_PASSWORD=secret
 export CONFIGURATOR_DATABASE_PORT=3306
 export CONFIGURATOR_DATABASE_NAME=configurator
-export API_KEY=changeme
-export CRYPT_KEY=changeme
+export CONFIGURATOR_API_KEY=changeme
+export CONFIGURATOR_CRYPT_KEY=changeme
+export CONFIGURATOR_BFA_THRESHOLD=100
 ```
 
 ## For developers
@@ -39,23 +40,22 @@ npm run start
 ## Docker build
 
 ```
-export image_name=configurator
-docker build -t ${image_name}:1.0.0 .
+docker build -t configurator:1.0.0 .
 ```
 
 ## Docker run
 
 ```
-export image_name=configurator
-docker run --name $image_name -it --rm -p 8080:2708 \
+docker run --name configurator -it --rm -p 8080:2708 \
 -e CONFIGURATOR_DATABASE_HOST=localhost \
 -e CONFIGURATOR_DATABASE_USER=root \
 -e CONFIGURATOR_DATABASE_PASSWORD=secret \
 -e CONFIGURATOR_DATABASE_PORT=3306 \
 -e CONFIGURATOR_DATABASE_NAME=configurator \
--e API_KEY=changeme \
--e CRYPT_KEY=changeme \
--e TZ=America/Lima  $image_name:1.0.0
+-e CONFIGURATOR_API_KEY=changeme \
+-e CONFIGURATOR_CRYPT_KEY=changeme \
+-e CONFIGURATOR_BFA_THRESHOLD=100 \
+-e TZ=America/Lima configurator:1.0.0
 ```
 
 
