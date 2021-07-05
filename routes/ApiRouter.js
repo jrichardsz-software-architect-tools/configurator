@@ -6,8 +6,13 @@ function ApiRouter(expressInstance) {
   var cryptKey = properties.security.cryptKey;
 
   var response400 = {
-    "status": 400,
+    "code": 400,
     "message": "Bad request"
+  };
+
+  var response500 = {
+    "code": 500,
+    "message": "Internal Error"
   };
 
   expressInstance.get('/api/v1/variables', ["api"], (req, res) => {
@@ -21,7 +26,7 @@ function ApiRouter(expressInstance) {
     }
 
     if(typeof req.query.application === 'undefined'){
-      res.status(response400.status);
+      res.status(response400.code);
       createResponse(type, response400, res)
       return;
     }
@@ -30,21 +35,20 @@ function ApiRouter(expressInstance) {
 
       if (findVariablesByApplicationIdErr) {
         logger.error(errVarApplications);
-        res.status(response422.status);
-        createResponse(type, response422, res)
+        res.status(response500.code);
+        createResponse(type, response500, res)
         return;
       }
 
       if (variables && variables.length===0) {
         logger.error("zero variables were founded");
-        res.status(response422.status);
-        createResponse(type, response422, res)
+        res.status(response500.code);
+        createResponse(type, response500, res)
         return;
       }
 
       //decrypt secret values
       for(variable of variables){
-        console.log(variable);
         if(variable.type === 'S'){
           variable.value = aes256.decrypt(cryptKey, variable.value);
         }
@@ -55,8 +59,8 @@ function ApiRouter(expressInstance) {
         createResponse(type,parsedVariables, res);
       }catch(errParseVariables){
         logger.error("Failed to convert variables to type: "+type)
-        res.status(response422.status);
-        createResponse(type, response422, res)
+        res.status(response500.code);
+        createResponse(type, response500, res)
         return;
       }
     });
@@ -84,7 +88,7 @@ function ApiRouter(expressInstance) {
       });
 
       var response = {
-        "status": "200",
+        "code": "200",
         "message": "success",
         "content": parsedVariables
       };

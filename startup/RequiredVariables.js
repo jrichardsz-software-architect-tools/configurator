@@ -5,7 +5,7 @@ function RequiredVariables() {
   this.startValidation = function() {
     logger.info("validating required variables...")
     if(!Utils.hasProperty(properties, "security.cryptKey")){
-      throw new Error("CRYPT_KEY env variable is required to save secrets in database");
+      throw new Error("CONFIGURATOR_CRYPT_KEY env variable is required to save secrets in database");
     }
   }
 
