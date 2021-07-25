@@ -51,11 +51,11 @@
                     <input name="variable_id" type="hidden" value="{{variable.id}}" />
                     <div class="form-group">
                       <label>Name</label>
-                      <input name="name" class="form-control" placeholder="Enter text" value="{{variable.name}}"  />
+                      <input name="name" class="form-control" placeholder="Enter text" value="{{variable.name}}" onchange="this.value = $(this).val().trim()" />
                     </div>
                     <div class="form-group">
                       <label>Value</label>
-                      <textarea name="value" class="form-control" placeholder="Enter text" rows="10" >{{variable.value}}</textarea>
+                      <textarea name="value" class="form-control" placeholder="Enter text" rows="10" onchange="this.value = $(this).val().trim()"  >{{variable.value}}</textarea>
                     </div>
                     <div class="form-group">
                       <label>Description</label>

@@ -48,11 +48,11 @@
                     <input name="id" type="hidden" value="{{global.id}}" />
                     <div class="form-group">
                       <label>Name</label>
-                      <input name="name" required=true class="form-control" placeholder="Enter text" value="{{global.name}}"  />
+                      <input name="name" required=true class="form-control" placeholder="Enter text" value="{{global.name}}" onchange="this.value = $(this).val().trim()" />
                     </div>
                     <div class="form-group">
                       <label>Value</label>
-                      <textarea name="value" required=true class="form-control" placeholder="Enter text" rows="10" >{{global.value}}</textarea>
+                      <textarea name="value" required=true class="form-control" placeholder="Enter text" rows="10" onchange="this.value = $(this).val().trim()"  >{{global.value}}</textarea>
                     </div>
                     <div class="form-group">
                       <label>Description</label>
