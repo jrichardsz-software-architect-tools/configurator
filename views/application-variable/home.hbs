@@ -54,6 +54,15 @@
 									{{/each}}
 								</select>
 							</div>
+							<div>
+								{{#if selectedApplicationId }}
+									{{#stringEquals userRole 'admin'}}
+										<a href="/application-variable/view/{{selectedApplicationId}}/local/new" type="button" class="btn btn-outline btn-primary">New Local Var</a>
+										<a href="/application-variable/view/{{selectedApplicationId}}/global/new" type="button" class="btn btn-outline btn-primary">Add Global Var</a>
+									{{/stringEquals}}
+									<br><br>
+								{{/if}}
+							</div>
 							<div class="table-responsive">
 								<table class="table table-bordered table-hover table-striped">
 									<thead>
@@ -114,13 +123,6 @@
 							</div>
 						</div>
 					</div>
-
-          {{#if selectedApplicationId }}
-            {{#stringEquals userRole 'admin'}}
-              <a href="/application-variable/view/{{selectedApplicationId}}/local/new" type="button" class="btn btn-outline btn-primary">New Local Var</a>
-              <a href="/application-variable/view/{{selectedApplicationId}}/global/new" type="button" class="btn btn-outline btn-primary">Add Global Var</a>
-  					{{/stringEquals}}
-          {{/if}}
 					<br>
 					<br>
 				</div>

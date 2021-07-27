@@ -49,7 +49,7 @@ function VariableRepository() {
                    WHERE id = ?`;
 
         sql = sql.replace("@columns", columns.toString());
-        logger.info(sql);
+        logger.debug(sql);
 
         connection.query(sql, params, function(errUpdate, result) {
           callback(errUpdate, result);

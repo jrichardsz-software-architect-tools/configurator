@@ -39,6 +39,14 @@
 							{{error_security_message}}
 						</div>
 					{{/if}}
+
+					<div>
+						{{#stringEquals userRole 'admin'}}
+	              <a href="/global-variable/view/new" type="button" class="btn btn-outline btn-primary">New Global Var</a>
+						{{/stringEquals}}
+						<br><br>
+					</div>
+
 					<div class="panel panel-default">
 						<div class="panel-body">
 							<div class="table-responsive">
@@ -93,9 +101,6 @@
 							</div>
 						</div>
 					</div>
-          {{#stringEquals userRole 'admin'}}
-              <a href="/global-variable/view/new" type="button" class="btn btn-outline btn-primary">New Global Var</a>
-					{{/stringEquals}}
 					<br>
 					<br>
 				</div>

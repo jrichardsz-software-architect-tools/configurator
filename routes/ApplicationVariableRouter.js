@@ -29,18 +29,25 @@ function ApplicationVariableRouter(expressInstance) {
         javascriptModule: 'application-variable'
       };
 
-      if (req.query.applicationId && req.query.applicationId != "-1") {
-        logger.info("Selected application:" + req.query.applicationId)
-        renderAttributes.selectedApplicationId = req.query.applicationId;
+      var applicationId;
+      if(req.query.application_id && req.query.application_id != "-1"){
+        applicationId = req.query.application_id;
+      }else if(typeof redirectAttributes !== 'undefined' && typeof redirectAttributes.application_id !== 'undefined' && redirectAttributes.application_id != "-1"){
+        applicationId = redirectAttributes.application_id;
+      }
+
+      logger.info("Selected application:" + applicationId)
+      if (applicationId && applicationId != "-1") {
+        renderAttributes.selectedApplicationId = applicationId;
         Object.assign(renderAttributes, redirectAttributes);
-        applicationVariableRepository.findVariablesByApplicationId(req.query.applicationId, function(errVarApplications, entities) {
+        applicationVariableRepository.findVariablesByApplicationId(applicationId, function(errVarApplications, entities) {
 
           if (errVarApplications) {
             logger.info(errVarApplications);
             req.query.applicationId = null;
 
             let renderAttributes = {
-              error_message: "An error occurred when trying to list variables for this application:" + req.query.applicationName,
+              error_message: "An error occurred when trying to list variables of selected application.",
               error_security_message: req.session.error_security_message || undefined
             };
             req.session.error_security_message = undefined;
@@ -82,7 +89,7 @@ function ApplicationVariableRouter(expressInstance) {
 
       //if application exist, show variables options
       if (scope == "local") {
-        res.render('application-variable/new_local_var.hbs', {
+        return res.render('application-variable/new_local_var.hbs', {
           application_id: applicationId,
           application_name: application.name,
           mode: "add"
@@ -141,7 +148,6 @@ function ApplicationVariableRouter(expressInstance) {
 
   expressInstance.post('/application-variable/action/local/variable/save', ["admin"], (req, res) => {
 
-    logger.info("Save variable:");
     var variable = Object.assign({}, req.body);
     delete variable.application_id;
     delete variable.variable_id;
@@ -165,10 +171,11 @@ function ApplicationVariableRouter(expressInstance) {
       if (err) {
         logger.error(`Error while trying to persist variable: ${err.code} ${err.sqlMessage}`);
         res.render('application-variable/new_local_var.hbs', {
-          error_message: "An error occurred when trying to save the variable."
+          error_message: "An error occurred when trying to save the variable.",
+          application_id: req.body.application_id
         });
       } else {
-        console.log(variableSaveResult);
+        console.log("variable was created");
         //if variable is already created or updated, we just need to match variable
         // with selected application
         if (!req.body.variable_id) {
@@ -184,21 +191,24 @@ function ApplicationVariableRouter(expressInstance) {
               variableRepository.delete(variableSaveResult.insertId, function(errDelete, deleteResult) {
 
                 res.render('application-variable/new_local_var.hbs', {
-                  error_message: "An error occurred when trying to save the variable."
+                  error_message: "An error occurred when trying to save the variable.",
+                  application_id: req.body.application_id
                 });
               });
 
             } else {
               _this.goToHomePage(req, res, {
                 redirect: '/application-variable',
-                success_message: "The variable was saved successfully."
+                success_message: "The variable was saved successfully.",
+                application_id: req.body.application_id
               })
             }
           });
         } else {
           _this.goToHomePage(req, res, {
             redirect: '/application-variable',
-            success_message: "The variable was edited successfully."
+            success_message: "The variable was edited successfully.",
+            application_id: req.body.application_id
           })
         }
       }
@@ -209,7 +219,6 @@ function ApplicationVariableRouter(expressInstance) {
 
     logger.info("Add global variables:");
     logger.debug(req.body);
-    logger.debug(typeof req.body);
 
     var selectedApplicationId = req.body.application_id;
 
@@ -233,7 +242,8 @@ function ApplicationVariableRouter(expressInstance) {
       } else {
         _this.goToHomePage(req, res, {
           redirect: '/application-variable',
-          success_message: "The variables were added successfully."
+          success_message: "The variables were added successfully.",
+          application_id: req.body.application_id
         })
       }
     });
@@ -283,7 +293,7 @@ function ApplicationVariableRouter(expressInstance) {
             entity.originUrl = req.get('referer')
 
             if(entity.type === 'S'){
-              entity.value = "{secret}"
+              entity.value = "*****"
             }
 
             res.render('application-variable/read_var.hbs', {

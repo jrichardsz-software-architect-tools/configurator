@@ -39,6 +39,14 @@
 							{{error_security_message}}
 						</div>
 					{{/if}}
+
+					<div>
+						{{#stringEquals userRole 'admin'}}
+	              <a href="/application/view/new" type="button" class="btn btn-outline btn-primary">New application</a>
+								<br><br>
+						{{/stringEquals}}
+					</div>
+
 					<div class="panel panel-default">
 						<div class="panel-body">
 							<div class="table-responsive">
@@ -78,12 +86,6 @@
 							</div>
 						</div>
 					</div>
-
-
-          {{#stringEquals userRole 'admin'}}
-              <a href="/application/view/new" type="button" class="btn btn-outline btn-primary">New application</a>
-					{{/stringEquals}}
-
 					<br>
 					<br>
 				</div>

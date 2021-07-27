@@ -114,7 +114,7 @@ function GlobalVariableRouter(expressInstance) {
      } else {
 
        if(entity.type === 'S'){
-         entity.value = "{secret}"
+         entity.value = "*****"
        }
 
        res.render('global-variable/read.hbs', {
