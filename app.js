@@ -8,6 +8,8 @@ const router = express.Router();
 const hbs = require('hbs');
 const bodyParser = require('body-parser');
 const uuid = require('uuid');
+const fileUpload = require('express-fileupload');
+const os = require("os");
 
 const Prototypes = require('./startup/Prototypes.js');
 Prototypes.register();
@@ -48,6 +50,17 @@ app.use(session({
 
 app.use(bodyParser.urlencoded({
   extended: true
+}));
+
+app.use(fileUpload({
+    useTempFiles : true,
+    tempFileDir : os.tmpdir(),
+    abortOnLimit : true,
+    safeFileNames : true,
+    preserveExtension : true,
+    limits: {
+        fileSize: 500000 //0.5 mb
+    },
 }));
 
 var secureExpress = new SecureExpress();

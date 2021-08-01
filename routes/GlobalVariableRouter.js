@@ -61,7 +61,7 @@ function GlobalVariableRouter(expressInstance) {
 
     variableRepository.save(variable, function(err, result) {
       if (err) {
-        logger.info(err);
+        logger.error(`Error while trying to persist variable: ${err.code} ${err.sqlMessage}`);
         if(err.code === 'ER_DUP_ENTRY'){
           res.render('global-variable/new.hbs', {
             error_message: "A variable already exist with provided name: "+req.body.name,

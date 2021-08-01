@@ -69,7 +69,7 @@
 												<td>{{this.type}}</td>
 												<td>{{this.description}}</td>
 												<td style="text-align: center;">
-													<a href="/application-variable?applicationId={{this.id}}&applicationName={{this.name}}" type="button" class="btn btn-outline btn-primary fa fa-list"
+													<a href="/application-variable?application_id={{this.id}}" type="button" class="btn btn-outline btn-primary fa fa-list"
 													data-toggle="tooltip" data-placement="top" title="Variables"></a>
                           {{#stringEquals  @root.userRole 'admin'}}
                               <a href="/application/view/edit/{{this.id}}" type="button" class="btn btn-outline btn-primary fa fa-pencil-square-o"

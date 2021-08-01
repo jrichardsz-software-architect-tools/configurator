@@ -39,6 +39,13 @@
 							{{error_security_message}}
 						</div>
 					{{/if}}
+					{{#if multiple_messages}}
+						{{#each multiple_messages}}
+							<div class="alert alert-{{this.level}}">
+								{{this.message}}
+							</div>
+						{{/each}}
+					{{/if}}
 					<div class="panel panel-default">
 						<div class="panel-body">
 							<div class="form-group">
@@ -59,6 +66,11 @@
 									{{#stringEquals userRole 'admin'}}
 										<a href="/application-variable/view/{{selectedApplicationId}}/local/new" type="button" class="btn btn-outline btn-primary">New Local Var</a>
 										<a href="/application-variable/view/{{selectedApplicationId}}/global/new" type="button" class="btn btn-outline btn-primary">Add Global Var</a>
+										<a href="/application-variable/action/{{selectedApplicationId}}/variables/export" type="button" class="btn btn-outline btn-primary" target="_blank" >Export</a>
+										<button class="btn btn-outline btn-primary" onclick="document.getElementById('import_file').click()">Import</button>
+										<form style="display:none" action="/application-variable/action/{{selectedApplicationId}}/variables/import" method="POST" enctype="multipart/form-data" >
+												<input type="file" id="import_file" name="import_file" onchange="this.form.submit()" />
+										</form>
 									{{/stringEquals}}
 									<br><br>
 								{{/if}}

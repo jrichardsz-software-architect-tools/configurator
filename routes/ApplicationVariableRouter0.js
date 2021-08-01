@@ -1,10 +1,6 @@
 var aes256 = require('aes256');
 const fs = require('fs');
 const Utils = require('../common/Utils.js');
-const ApplicationVariableService = require(appHomePath+'/service/ApplicationVariableService.js');
-var applicationVariableService = new ApplicationVariableService();
-const util = require('util');
-const readFile = util.promisify(fs.readFile);
 
 function ApplicationVariableRouter(expressInstance) {
 
@@ -177,10 +173,9 @@ function ApplicationVariableRouter(expressInstance) {
 
   });
 
-  expressInstance.post('/application-variable/action/:selectedApplicationId/variables/import', ["admin", "reader"], async (req, res) => {
+  expressInstance.post('/application-variable/action/:selectedApplicationId/variables/import', ["admin", "reader"], (req, res) => {
 
     var applicationId = req.params.selectedApplicationId;
-    var resultMessages = [];
 
     if (!req.files || Object.keys(req.files).length === 0) {
       return _this.goToHomePage(req, res, {
@@ -200,162 +195,111 @@ function ApplicationVariableRouter(expressInstance) {
       })
     }
 
-    var rawVariablesToImportStrin;
-    try {
-      rawVariablesToImportString = await readFile(targetFile.tempFilePath, "utf8");
-    } catch (err) {
-      return _this.goToHomePage(req, res, {
-        redirect: '/application-variable',
-        error_message: err,
-        application_id: applicationId
-      })
-    }
-
-
-    var incomingVariablesToImport;
-    try {
-      incomingVariablesToImport = JSON.parse(rawVariablesToImportString);
-    } catch (err) {
-      return _this.goToHomePage(req, res, {
-        redirect: '/application-variable',
-        error_message:"Not valid json. "+ err,
-        application_id: applicationId
-      })
-    }
-
-    if(!Array.isArray(incomingVariablesToImport) || incomingVariablesToImport.length == 0 ){
-      return _this.goToHomePage(req, res, {
-        redirect: '/application-variable',
-        warning_message:"json is empty or is not a collection of variables",
-        application_id: applicationId
-      })
-    }
-
-    var safeReceivedVariables = Utils.obfuscateFieldAndTrimInArray(incomingVariablesToImport, "value", "****", 10);
-    logger.info("received variables to import")
-    logger.info(safeReceivedVariables);
-    //get sub sets of the received variables
-    //these subsets are variables that not exist
-    var readyToInsertGlobals = await applicationVariableService.getNewVariablesReadyToInsertByScope(incomingVariablesToImport, "G");
-    var readyToInsertLocals = await applicationVariableService.getNewVariablesReadyToInsertByScope(incomingVariablesToImport, "L");
-    logger.info("globals ready to insert");
-    logger.info(Utils.arrayObjecsToArrayValues(readyToInsertGlobals, "name"));
-    logger.info("locals ready to insert");
-    logger.info(Utils.arrayObjecsToArrayValues(readyToInsertLocals, "name"));
-
-    //globals
-    //if readyToInsertGlobals length == 0, it means that exist as variables
-    //just we need to determine if were added to this application
-
-    //if readyToInsertGlobals length > 0, user wants to import some globals
-    //these global variables does not exist in table: variable
-    //if it does not exist in its table, it does not exist in application_variable
-
-    if(readyToInsertGlobals.length == 0){
-      logger.info("All the received globals already exist.");
-      //get the global names of received
-      var receivedGlobalNames = Utils.arrayObjecsToArrayValuesFilterByField(incomingVariablesToImport,"name", "scope","G");
-      logger.info(receivedGlobalNames);
-      resultMessages.push({level:"warning", message:"Globals already exist: "+receivedGlobalNames})
-      //search if globals were added to this application
-      var alreadyGlobalsInApplication = await applicationVariableRepository.findAlreadyExistentVariablesInApplicationByNamesAndScope(applicationId, receivedGlobalNames, "G");
-      //if 3 were received and 3 already exist in this application
-      if(alreadyGlobalsInApplication.length == receivedGlobalNames.length){
-        resultMessages.push({level:"warning", message:"Globals have already been added to this application: "+detectedGlobals})
-        logger.info("All the received globals have already been added to this application");
-      }else{
-        //there are some globals which exist but are not yet in this application
-        logger.info("there are some globals which exist but are not yet in this application");
-        var receivedGlobalVariablesFullData = await variableRepository.findVariablesByNamesAndScope(receivedGlobalNames, "G");
-        var applicationVariables = [];
-        receivedGlobalVariablesFullData.forEach((variable, i) => {
-          applicationVariables.push([applicationId, variable.id]);
-        });
-        logger.info("adding these globals to this application");
-        logger.info(applicationVariables);
-        await applicationVariableRepository.bulkInsert("application_id, variable_id", applicationVariables);
-        resultMessages.push({level:"success", message:"Globals were added to this application successfully"})
-      }
-    }else{
-      try {
-        //step 1 : insert the variables
-        await variableRepository.bulkInsert("name, value, description, type, scope", readyToInsertGlobals);
-        resultMessages.push({level:"success", message:"Globals were created successfully"})
-        logger.info("Globals were created successfully");
-        //due to mysql behavior, after bulk insert, we don't have its primary keys.
-        //we need to query them
-        var variableNames = Utils.arrayObjecsToArrayValuesWithFilter(readyToInsertGlobals, "name", "scope", "G");
-        var recentlyCreatedVariablesFullData = await variableRepository.findVariablesByNamesAndScope(variableNames, "G");
-        //step 2: retrieve the ids of created variables
-        // create an array with the new variable ids
-        var applicationVariables = [];
-        recentlyCreatedVariablesFullData.forEach((variableId, i) => {
-          applicationVariables.push([applicationId, variableId.id]);
-        });
-        //step 3: add the global variables to the application
-        await applicationVariableRepository.bulkInsert("application_id, variable_id", applicationVariables);
-        resultMessages.push({level:"success", message:"Globals were added to this application successfully"})
-        logger.info("Globals were added to this application successfully");
-      } catch (err) {
-        logger.error(err)
+    fs.readFile(targetFile.tempFilePath, "utf8", function(err, rawVariablesToImportString) {
+      if (err) {
+        logger.error(err);
         return _this.goToHomePage(req, res, {
           redirect: '/application-variable',
-          error_message: err,
+          error_message: 'No files were uploaded.',
           application_id: applicationId
         })
       }
-    }
+      var incomingVariablesToImport = JSON.parse(rawVariablesToImportString);
+      //we need to filter just new variables, global and locals
+      //update existing values is not allowed
 
+      var variableNames = [];
+      incomingVariablesToImport.forEach(function(incomingVariable) {
+        variableNames.push(incomingVariable.name);
+      });
 
-    //locals
-    //if readyToInsertLocals length == 0, it means that exist as variables
-    //if exist as variables, it means that another application created them
-    //so, there is nothing to do here!
+      //variables cannot be duplicated thanks to its constraint
+      applicationVariableRepository.findAlreadyExistentVariablesInApplication(applicationId, variableNames, function(findAlreadyExistentVariablesInApplicationErr, alreadyExistentVariables) {
+        if (findAlreadyExistentVariablesInApplicationErr) {
+          return _this.goToHomePage(req, res, {
+            redirect: '/application-variable',
+            error_message: "Internal error while trying to determine variables to add",
+            application_id: applicationId
+          })
+        }
 
-    //if readyToInsertLocals length > 0, user want to import globals
-    //these local variables does not exist in table: variable
-    //if it does not exist in its table, it does not exist in application_variable
+        if (alreadyExistentVariables.length == incomingVariablesToImport.length) {
+          return _this.goToHomePage(req, res, {
+            redirect: '/application-variable',
+            warning_message: "All variables to import already exist for this application",
+            application_id: applicationId
+          })
+        }
 
-    if(readyToInsertLocals.length == 0){
-      resultMessages.push({level:"warning", message:"Locals already exist in this application or others: "+Utils.arrayObjecsToArrayValuesFilterByField(incomingVariablesToImport,"name", "scope","L")})
-      //TODO: show in which application this variables already exist
-      logger.info("Locals already exist in this application or others");
-    }else{
-      try {
-        //step 1 : insert the variables
-        await variableRepository.bulkInsert("name, value, description, type, scope", readyToInsertLocals);
-        resultMessages.push({level:"success", message:"Locals were created successfully"})
-        logger.info("Locals were created successfully");
-        //due to mysql behavior, after bulk insert, we don't have its primary keys.
-        //we need to query them
-        var variableNames = Utils.arrayObjecsToArrayValuesWithFilter(readyToInsertLocals, "name", "scope", "L");
-        var recentlyCreatedVariablesFullData = await variableRepository.findVariablesByNamesAndScope(variableNames, "L");
-        //step 2: retrieve the ids of created variables
-        // create an array with the new variable ids
-        var applicationVariables = [];
-        recentlyCreatedVariablesFullData.forEach((variableId, i) => {
-          applicationVariables.push([applicationId, variableId.id]);
+        //at this point we have to sets : incoming variables and already existing variables
+        //we need the new variables. In other words, the difference
+        var variablesToInsert = Utils.getDifferenceBetweenObjectArraysByField(alreadyExistentVariables, incomingVariablesToImport, "name");
+        //also these variables are ready to insert because they should not exist thanks to constraint in variable table
+
+        var fixedValueVariablesToInsert = [];
+        for (variableToInsert of variablesToInsert) {
+          var row = [];
+          row.push(variableToInsert.name);
+          if (variableToInsert.type == "S") {
+            row.push(dummySecret);
+          } else {
+            row.push(variableToInsert.value);
+          }
+          row.push(variableToInsert.description);
+          row.push(variableToInsert.type);
+          row.push(variableToInsert.scope);
+          fixedValueVariablesToInsert.push(row);
+        }
+
+        variableRepository.bulkInsert("name, value, description, type, scope", fixedValueVariablesToInsert, function(bulkInsertErr, bulkInsertResult) {
+          if (bulkInsertErr) {
+            logger.error(bulkInsertErr);
+            return _this.goToHomePage(req, res, {
+              redirect: '/application-variable',
+              error_message: 'Error while adding variables',
+              application_id: applicationId
+            })
+          }
+
+          var variableNames = [];
+          variablesToInsert.forEach((item, i) => {
+            variableNames.push(item.name)
+          });
+
+          //get new ids with a new query
+          variableRepository.findIdsFromNames(variableNames, function(variableIdsErr, variableIds) {
+            if (variableIdsErr) {
+              logger.error(variableIdsErr);
+              return _this.goToHomePage(req, res, {
+                redirect: '/application-variable',
+                error_message: 'Error while querying new variables ids',
+                application_id: applicationId
+              })
+            }
+            var applicationVariables = [];
+            variableIds.forEach((variableId, i) => {
+              applicationVariables.push([applicationId, variableId.id]);
+            });
+
+            applicationVariableRepository.bulkInsert("application_id, variable_id", applicationVariables, function(applicationVariableBulkInserErrr, variableIds) {
+              if (applicationVariableBulkInserErrr) {
+                logger.error(applicationVariableBulkInserErrr);
+                return _this.goToHomePage(req, res, {
+                  redirect: '/application-variable',
+                  error_message: 'Error while adding variables to this application',
+                  application_id: applicationId
+                })
+              }
+              return _this.goToHomePage(req, res, {
+                redirect: '/application-variable',
+                success_message: "Variables were imported successfully.",
+                application_id: applicationId
+              })
+            });
+          });
         });
-        //step 3: add the global variables to the application
-        await applicationVariableRepository.bulkInsert("application_id, variable_id", applicationVariables);
-        resultMessages.push({level:"success", message:"Locals were added to this application successfully"})
-      } catch (err) {
-        logger.error(err)
-        return _this.goToHomePage(req, res, {
-          redirect: '/application-variable',
-          error_message: err,
-          application_id: applicationId
-        })
-      }
-    }
-
-
-    return _this.goToHomePage(req, res, {
-      redirect: '/application-variable',
-      multiple_messages: resultMessages,
-      application_id: applicationId
-    })
-
+      });
+    });
   });
 
   expressInstance.post('/application-variable/action/local/variable/save', ["admin"], (req, res) => {

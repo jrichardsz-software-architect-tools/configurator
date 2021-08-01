@@ -201,41 +201,35 @@ function ApplicationVariableRepository() {
     });
   }
 
-  this.findAlreadyExistentVariablesInApplicationByNamesAndScope = function(applicationId, variableNames, scope) {
-    return new Promise(function (resolve, reject) {
-      databaseConnection.getConnection(function(getConnectionErr, connection) {
-        if (getConnectionErr) {
-          reject(getConnectionErr);
-        }
-        var sql = `
-        select
-        	v.id,
-        	v.name,
-        	v.value,
-        	v.description,
-        	v.type,
-        	v.scope
-        from
-        	application_variable av,
-        	variable v
-        where
-        	av.application_id = ?
-        	and av.variable_id = v.id
-        	and v.name in (?)
-          and v.scope = ?
-        `;
-        connection.query(sql, [applicationId, variableNames, scope], function(err, rows) {
+
+  this.findAlreadyExistentVariablesInApplication = function(applicationId, variableNames, callback) {
+    databaseConnection.getConnection(function(err, connection) {
+      var sql = `
+      select
+      	v.name,
+      	v.scope
+      from
+      	application_variable av,
+      	variable v
+      where
+      	av.application_id = ?
+      	and av.variable_id = v.id
+      	and v.name in (?)
+      `;
+      try {
+        connection.query(sql, [applicationId, variableNames], function(err, rows) {
           if (err) {
-            reject(err);
+            callback(err, rows);
           }
-          resolve(rows);
+          callback(null, rows);
         });
-      });
-    })
+      } catch (connectionErr) {
+        callback(connectionErr, null);
+      }
+    });
   }
 
-  //deprecated
-  this.findAlreadyExistentLocalVariablesInApplication = function(variableNames, callback) {
+  this.findAlreadyExistentVariablesInOtherApplications = function(variableNames, callback) {
     databaseConnection.getConnection(function(err, connection) {
       var sql = `
       select
@@ -265,22 +259,16 @@ function ApplicationVariableRepository() {
     });
   }
 
-  this.bulkInsert = function(columns, variables) {
-    return new Promise(function (resolve, reject) {
-      databaseConnection.getConnection(function(getConnectionErr, connection) {
-        if (getConnectionErr) {
-          reject(getConnectionErr);
-        }
-        var sql = `INSERT into application_variable (@columns) VALUES ?`;
-        sql = sql.replace("@columns", columns.toString());
-        connection.query(sql,  [variables], function(err, result) {
-          if (err) {
-            reject(err);
-          }
-          resolve(result);
-        });
+  this.bulkInsert = function(columns, variables, callback) {
+
+    var sql = `INSERT into application_variable (@columns) VALUES ?`;
+    sql = sql.replace("@columns", columns.toString());
+
+    databaseConnection.getConnection(function(conecctionErr, connection) {
+      connection.query(sql, [variables], function(bulkInsertErr, bulkResult, fields) {
+        callback(bulkInsertErr, bulkResult);
       });
-    })
+    });
   }
 
 }
