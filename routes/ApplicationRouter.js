@@ -12,10 +12,17 @@ function ApplicationRouter(expressInstance) {
     logger.info(req.body);
     applicationRepository.save(req.body, function(err, result) {
       if (err) {
-        logger.info(err);
-        res.render('application/new.hbs', {
-          error_message: "An error occurred when trying to save the application."
-        });
+        logger.error(`Error while trying to persist an application: ${err.code} ${err.sqlMessage}`);
+        if (err.code === 'ER_DUP_ENTRY') {
+          return res.render('application/new.hbs', {
+            error_message: "An application already exist with provided name: " + req.body.name
+          });
+        } else {
+          logger.error(err);
+          return res.render('application-variable/new_local_var.hbs', {
+            error_message: "An error occurred when trying to save the application."
+          });
+        }
       } else {
         homeRouter.goToHomePage(req, res, {
           success_message: "The application was saved successfully."

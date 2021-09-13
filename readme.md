@@ -40,7 +40,7 @@ npm run start
 ## Docker build
 
 ```
-docker build -t configurator:1.0.0 .
+docker build -t configurator .
 ```
 
 ## Docker run
@@ -55,7 +55,7 @@ docker run --name configurator -it --rm -p 8080:2708 \
 -e CONFIGURATOR_API_KEY=changeme \
 -e CONFIGURATOR_CRYPT_KEY=changeme \
 -e CONFIGURATOR_BFA_THRESHOLD=100 \
--e TZ=America/Lima configurator:1.0.0
+-e TZ=America/Lima configurator
 ```
 
 
@@ -99,23 +99,17 @@ export ERP_HOST="12.124.1.6"
 export firebase_key="65468748"
 ```
 
-These variables must be launched in the remote server in which **helicarrier-api** will run.
-
-This is how [heroku](https://devcenter.heroku.com/articles/config-vars) works.
-
 # Docker
 
 Follow this [guide](https://github.com/software-architect-tools/configurator/wiki/Launch-with-Docker)
 
 # Roadmap
 
-- [x] add http endpoint to get variables in json format
+- [ ] solve/implement [issues](https://github.com/software-architect-tools/configurator/issues)
 - [ ] add changelog column for each app or variable
-- [ ] add easy import/export feature
 - [ ] add dependency injection
 - [ ] unit tests/selenium tests
 - [ ] java and nodejs libraries to be used in application as **configurator client**
-- [ ] solve/implement [issues](https://github.com/software-architect-tools/configurator/issues)
 
 
 # Made with
