@@ -1,25 +1,8 @@
-function ApplicationRepository() {
-
-  this.findAll = function(callback) {
-    databaseConnection.getConnection(function(err, connection) {
-      connection.query('select * from application', function(err, rows) {
-        callback(err, rows);
-      });
-    });
-  }
-
-  this.findByDeleted = function(deleted, callback) {
-    var params = [deleted];
-    databaseConnection.getConnection(function(err, connection) {
-      connection.query('select * from application where deleted = ?', params, function(err, rows) {
-        callback(err, rows);
-      });
-    });
-  }
+function VariableRepository() {
 
   this.findOneById = function(id, callback) {
     databaseConnection.getConnection(function(err, connection) {
-      connection.query('select * from application where id = ?', [id], function(err, rows) {
+      connection.query('select * from variable where id = ?', [id], function(err, rows) {
         if (err) {
           callback(err, rows);
         }
@@ -34,9 +17,10 @@ function ApplicationRepository() {
     });
   }
 
-  this.findByName = function(name, callback) {
+  this.findByScopeAndDeleted = function(scope,deleted, callback) {
+    var params = [scope,deleted];
     databaseConnection.getConnection(function(err, connection) {
-      connection.query('select * from application where name = ?', [name], function(err, rows) {
+      connection.query('select * from variable where scope = ? and deleted = ?', params, function(err, rows) {
         callback(err, rows);
       });
     });
@@ -60,12 +44,12 @@ function ApplicationRepository() {
         params.push(entity.id);
 
         // update statment
-        var sql = `UPDATE application
+        var sql = `UPDATE variable
                    SET @columns
                    WHERE id = ?`;
 
         sql = sql.replace("@columns", columns.toString());
-        logger.info(sql);
+        logger.debug(sql);
 
         connection.query(sql, params, function(errUpdate, result) {
           callback(errUpdate, result);
@@ -73,6 +57,7 @@ function ApplicationRepository() {
 
       } else {
         logger.info("Insert action")
+
         var values = [];
         var columns = [];
         var jokers = [];
@@ -84,7 +69,7 @@ function ApplicationRepository() {
           }
         }
 
-        var sql = `INSERT INTO application
+        var sql = `INSERT INTO variable
                    (@columns)
                    VALUES(@jokers)`;
         sql = sql.replace("@columns", columns.toString());
@@ -97,22 +82,10 @@ function ApplicationRepository() {
     });
   }
 
-  this.logicDelete = function(id, callback) {
-    databaseConnection.getConnection(function(err, connection) {
-      // just turn delete column to 'Y'
-      var sql = `UPDATE application
-                 SET deleted = 'Y'
-                 WHERE id = ?`;
-      connection.query(sql, [id], function(errDelete, result) {
-        callback(errDelete, result);
-      });
-    });
-  }
-
   this.delete = function(id, callback) {
     var params = [id];
 
-    var sql = `DELETE FROM application
+    var sql = `DELETE FROM variable
                WHERE id=?`;
 
     databaseConnection.getConnection(function(conecctionErr, connection) {
@@ -122,7 +95,33 @@ function ApplicationRepository() {
     });
   }
 
+  /*
+  input collection must have the same columns, in the same order
+  https://stackoverflow.com/questions/39270007/get-inserted-ids-of-multiple-insert-statements
+  https://stackoverflow.com/questions/8899802/how-do-i-do-a-bulk-insert-in-mysql-using-node-js/34503558#34503558
+  https://stackoverflow.com/questions/45076191/mysql-bulk-insert-in-node-js-how-to-get-all-insertids
+  https://github.com/mysqljs/mysql/issues/1284
+  */
+  this.bulkInsert = function(columns, variables, callback) {
+
+    var sql = `INSERT into variable (@columns) VALUES ?`;
+    sql = sql.replace("@columns", columns.toString());
+
+    databaseConnection.getConnection(function(conecctionErr, connection) {
+      connection.query(sql, [variables], function(bulkInsertErr, bulkResult, fields) {
+        callback(bulkInsertErr, bulkResult);
+      });
+    });
+  }
+
+  this.findIdsFromNames = function(names, callback) {
+    databaseConnection.getConnection(function(err, connection) {
+      connection.query('select id from variable where name in (?)', [names], function(err, rows) {
+        callback(err, rows);
+      });
+    });
+  }
+
 }
 
-
-module.exports = ApplicationRepository;
+module.exports = VariableRepository;

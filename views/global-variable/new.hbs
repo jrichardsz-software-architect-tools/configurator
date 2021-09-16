@@ -14,9 +14,13 @@
     <div id="page-wrapper">
       <div class="row">
         <div class="col-lg-12">
-          <h1 class="page-header">New Global Variable</h1>
+          {{#stringEquals @root.mode 'add'}}
+            <h1 class="page-header">New Global Variable</h1>
+          {{/stringEquals}}
+          {{#stringEquals @root.mode 'edit'}}
+          <h1 class="page-header">Editing Global Variable</h1>
+          {{/stringEquals}}
         </div>
-        <!-- /.col-lg-12 -->
       </div>
       <!-- /.row -->
       <div class="row">
@@ -44,19 +48,19 @@
                     <input name="id" type="hidden" value="{{global.id}}" />
                     <div class="form-group">
                       <label>Name</label>
-                      <input name="name" class="form-control" placeholder="Enter text" value="{{global.name}}"  />
+                      <input name="name" required=true class="form-control" placeholder="Enter text" value="{{global.name}}" onchange="this.value = $(this).val().trim()" />
                     </div>
                     <div class="form-group">
                       <label>Value</label>
-                      <textarea name="value" class="form-control" placeholder="Enter text" rows="10" >{{global.value}}</textarea>                      
+                      <textarea name="value" required=true class="form-control" placeholder="Enter text" rows="10" onchange="this.value = $(this).val().trim()"  >{{global.value}}</textarea>
                     </div>
                     <div class="form-group">
                       <label>Description</label>
-                      <input name="description" class="form-control" placeholder="Enter text" value="{{global.description}}" />
+                      <input name="description" required=true  class="form-control" placeholder="Enter text" value="{{global.description}}" />
                     </div>
                     <div class="form-group">
                      <label for="sel1">Select type:</label>
-                     <select name="type"  class="form-control">
+                     <select name="type"  required=true  class="form-control">
                        {{#select global.type}}
                          <option value="P" >Plain</option>
                          <option value="S" >Secret</option>
