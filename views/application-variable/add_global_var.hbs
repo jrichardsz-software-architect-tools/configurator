@@ -43,13 +43,13 @@
                   <form action="/application-variable/action/global/variable/add" role="form" method="post"  >
                     <input name="id" type="hidden" value="{{id}}" />
                     <input name="application_id" type="hidden" value="{{application_id}}" />
-                    
+
                     {{#eq variables.length 0}}
                       <div class="alert alert-warning">
                         This app already has all the global properties!
                       </div>
-          					{{/eq}}                    
-                    
+          					{{/eq}}
+
                     {{#ne variables.length 0}}
                       <div class="form-group">
                         <label for="sel1">Select a global variable:</label>
@@ -70,14 +70,14 @@
                                 <td>
                                   <input type="checkbox" class="form-check-input" id="{{this.id}}" name="global_var_id_selected_{{this.id}}">
                                 </td>
-                              </tr>                            
-                            {{/each}} 
+                              </tr>
+                            {{/each}}
                           </tbody>
-                        </table>                    
+                        </table>
                       </div>
-                      <button type="submit" class="btn btn-outline btn-primary">Submit</button>                      
-          					{{/ne}}                     
-                    <a href="/application-variable" type="button" class="btn btn-outline btn-primary">Cancel</a>
+                      <button type="submit" class="btn btn-outline btn-primary">Submit</button>
+          					{{/ne}}
+                    <a href="/application-variable?application_id={{application_id}}" type="button" class="btn btn-outline btn-primary">Cancel</a>
                   </form>
                 </div>
               </div>

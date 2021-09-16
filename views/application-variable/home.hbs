@@ -39,6 +39,13 @@
 							{{error_security_message}}
 						</div>
 					{{/if}}
+					{{#if multiple_messages}}
+						{{#each multiple_messages}}
+							<div class="alert alert-{{this.level}}">
+								{{this.message}}
+							</div>
+						{{/each}}
+					{{/if}}
 					<div class="panel panel-default">
 						<div class="panel-body">
 							<div class="form-group">
@@ -50,9 +57,23 @@
                       <option value="{{this.id}}" selected >{{this.name}}</option>
                     {{else}}
                       <option value="{{this.id}}">{{this.name}}</option>
-                    {{/stringEquals}}   
+                    {{/stringEquals}}
 									{{/each}}
 								</select>
+							</div>
+							<div>
+								{{#if selectedApplicationId }}
+									{{#stringEquals userRole 'admin'}}
+										<a href="/application-variable/view/{{selectedApplicationId}}/local/new" type="button" class="btn btn-outline btn-primary">New Local Var</a>
+										<a href="/application-variable/view/{{selectedApplicationId}}/global/new" type="button" class="btn btn-outline btn-primary">Add Global Var</a>
+										<a href="/application-variable/action/{{selectedApplicationId}}/variables/export" type="button" class="btn btn-outline btn-primary" target="_blank" >Export</a>
+										<button class="btn btn-outline btn-primary" onclick="document.getElementById('import_file').click()">Import</button>
+										<form style="display:none" action="/application-variable/action/{{selectedApplicationId}}/variables/import" method="POST" enctype="multipart/form-data" >
+												<input type="file" id="import_file" name="import_file" onchange="this.form.submit()" />
+										</form>
+									{{/stringEquals}}
+									<br><br>
+								{{/if}}
 							</div>
 							<div class="table-responsive">
 								<table class="table table-bordered table-hover table-striped">
@@ -60,6 +81,7 @@
 										<tr>
 											<th>#</th>
 											<th>Name</th>
+											<th>Type</th>
 											<th>Value</th>
 											<th>Description</th>
 											<th>Scope</th>
@@ -72,33 +94,39 @@
 											<tr class="table-row">
 												<td>{{incremented @index}}</td>
 												<td>{{this.name}}</td>
+												{{#eq this.type 'P'}}
+												<td>Plain</td>
+												{{/eq}}
+												{{#eq this.type 'S'}}
+												<td>Secret</td>
+												{{/eq}}
                         {{#eq this.type 'P'}}
-                          <td>{{showValueWithSafeWidth this.value}}</td>
+                        <td>{{showValueWithSafeWidth this.value}}</td>
   											{{else}}
-  												<td>{secret}</td>
+												<td>*****</td>
   											{{/eq}}
                         <td>{{showValueWithSafeWidth this.description}}</td>
-												{{#eq this.scope 'G'}}
-													<td>Global</td>
-												{{/eq}}
 												{{#eq this.scope 'L'}}
-													<td>Local</td>
+												<td>Local</td>
+												{{/eq}}
+												{{#eq this.scope 'G'}}
+												<td>Global</td>
 												{{/eq}}
 												<td style="text-align: center;">
                           {{#stringEquals @root.userRole 'reader'}}
                             <a href="/application-variable/view/read/{{@root.selectedApplicationId}}/{{this.variable_id}}" type="button" class="btn btn-outline btn-primary fa fa-eye"
-                            data-toggle="tooltip" data-placement="top" title="View"></a>	                            
-                          {{/stringEquals}}     
+                            data-toggle="tooltip" data-placement="top" title="View"></a>
+                          {{/stringEquals}}
 
                           {{#stringEquals @root.userRole 'admin'}}
                             {{#eq this.scope 'L'}}
-  														<a href="/application-variable/view/edit/{{this.id}}/{{@root.selectedApplicationId}}/{{this.variable_id}}" type="button" class="btn btn-outline btn-primary fa fa-pencil-square-o" data-toggle="tooltip" data-placement="top" title="Edit"></a>  														
+  														<a href="/application-variable/view/edit/{{this.id}}/{{@root.selectedApplicationId}}/{{this.variable_id}}" type="button" class="btn btn-outline btn-primary fa fa-pencil-square-o" data-toggle="tooltip" data-placement="top" title="Edit"></a>
                               <a href="/application-variable/view/delete/{{this.id}}/local" type="button" class="btn btn-outline btn-primary fa fa-times" data-toggle="tooltip" data-placement="top" title="Delete"></a>
   													{{/eq}}
   													{{#eq this.scope 'G'}}
   														<a href="/application-variable/view/delete/{{this.id}}/global" type="button" class="btn btn-outline btn-primary fa fa-times" data-toggle="tooltip" data-placement="top" title="Delete"></a>
   													{{/eq}}
-                          {{/stringEquals}}                             
+                          {{/stringEquals}}
 												</td>
 											</tr>
 										{{/each}}
@@ -107,13 +135,6 @@
 							</div>
 						</div>
 					</div>
-          
-          {{#if selectedApplicationId }}                        
-            {{#stringEquals userRole 'admin'}}
-              <a href="/application-variable/view/{{selectedApplicationId}}/local/new" type="button" class="btn btn-outline btn-primary">New Local Var</a>
-              <a href="/application-variable/view/{{selectedApplicationId}}/global/new" type="button" class="btn btn-outline btn-primary">Add Global Var</a>   
-  					{{/stringEquals}}            
-          {{/if}}
 					<br>
 					<br>
 				</div>

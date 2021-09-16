@@ -14,7 +14,7 @@
 		<div id="page-wrapper">
 			<div class="row">
 				<div class="col-lg-12">
-					<h1 class="page-header">Applications</h1>          
+					<h1 class="page-header">Applications</h1>
 				</div>
 			</div>
 			<div class="row">
@@ -39,6 +39,14 @@
 							{{error_security_message}}
 						</div>
 					{{/if}}
+
+					<div>
+						{{#stringEquals userRole 'admin'}}
+	              <a href="/application/view/new" type="button" class="btn btn-outline btn-primary">New application</a>
+								<br><br>
+						{{/stringEquals}}
+					</div>
+
 					<div class="panel panel-default">
 						<div class="panel-body">
 							<div class="table-responsive">
@@ -47,6 +55,7 @@
 										<tr>
 											<th>#</th>
 											<th>Name</th>
+											<th>Type</th>
 											<th>Description</th>
 											<th style="text-align: center;">Manage</th>
 										</tr>
@@ -57,16 +66,17 @@
 											<tr class="table-row">
 												<td>{{incremented @index}}</td>
 												<td>{{this.name}}</td>
+												<td>{{this.type}}</td>
 												<td>{{this.description}}</td>
 												<td style="text-align: center;">
-													<a href="/application-variable?applicationId={{this.id}}&applicationName={{this.name}}" type="button" class="btn btn-outline btn-primary fa fa-list"
+													<a href="/application-variable?application_id={{this.id}}" type="button" class="btn btn-outline btn-primary fa fa-list"
 													data-toggle="tooltip" data-placement="top" title="Variables"></a>
-                          {{#stringEquals  @root.userRole 'admin'}}                              
+                          {{#stringEquals  @root.userRole 'admin'}}
                               <a href="/application/view/edit/{{this.id}}" type="button" class="btn btn-outline btn-primary fa fa-pencil-square-o"
                               data-toggle="tooltip" data-placement="top" title="Edit"></a>
                               <a href="/application/view/delete/{{this.id}}" type="button" class="btn btn-outline btn-primary fa fa-times"
                               data-toggle="tooltip" data-placement="top" title="Delete"></a>
-                					{{/stringEquals}}                          
+                					{{/stringEquals}}
 													</a>
 												</td>
 											</tr>
@@ -76,12 +86,6 @@
 							</div>
 						</div>
 					</div>
-
-          
-          {{#stringEquals userRole 'admin'}}
-              <a href="/application/view/new" type="button" class="btn btn-outline btn-primary">New application</a>           
-					{{/stringEquals}}
-          
 					<br>
 					<br>
 				</div>

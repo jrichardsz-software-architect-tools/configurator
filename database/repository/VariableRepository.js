@@ -49,7 +49,7 @@ function VariableRepository() {
                    WHERE id = ?`;
 
         sql = sql.replace("@columns", columns.toString());
-        logger.info(sql);
+        logger.debug(sql);
 
         connection.query(sql, params, function(errUpdate, result) {
           callback(errUpdate, result);
@@ -94,6 +94,54 @@ function VariableRepository() {
       });
     });
   }
+
+  /*
+  input collection must have the same columns, in the same order
+  https://stackoverflow.com/questions/39270007/get-inserted-ids-of-multiple-insert-statements
+  https://stackoverflow.com/questions/8899802/how-do-i-do-a-bulk-insert-in-mysql-using-node-js/34503558#34503558
+  https://stackoverflow.com/questions/45076191/mysql-bulk-insert-in-node-js-how-to-get-all-insertids
+  https://github.com/mysqljs/mysql/issues/1284
+  */
+  this.bulkInsert = function(columns, variables) {
+    return new Promise(function (resolve, reject) {
+      databaseConnection.getConnection(function(getConnectionErr, connection) {
+        if (getConnectionErr) {
+          reject(getConnectionErr);
+        }
+        var sql = `INSERT into variable (@columns) VALUES ?`;
+        sql = sql.replace("@columns", columns.toString());
+
+        //create a new array instead to objects arrays
+        //https://stackoverflow.com/a/68596834/3957754
+        var rows = variables.map(row => [row.name, row.value, row.description, row.type, row.scope]);
+        connection.query(sql, [rows], function(err, result) {
+          if (err) {
+            reject(err);
+          }
+          resolve(result);
+        });
+      });
+    })
+  }
+
+
+  this.findVariablesByNamesAndScope = function(names,scope) {
+    return new Promise(function (resolve, reject) {
+      databaseConnection.getConnection(function(getConnectionErr, connection) {
+        if (getConnectionErr) {
+          reject(getConnectionErr);
+        }
+        var sql = 'select * from variable where name in (?) and scope = ? ';
+        connection.query(sql, [names, scope], function(err, rows) {
+          if (err) {
+            reject(err);
+          }
+          resolve(rows);
+        });
+      });
+    })
+  }
+
 }
 
 module.exports = VariableRepository;

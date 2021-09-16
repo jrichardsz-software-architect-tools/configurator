@@ -8,6 +8,8 @@ const router = express.Router();
 const hbs = require('hbs');
 const bodyParser = require('body-parser');
 const uuid = require('uuid');
+const fileUpload = require('express-fileupload');
+const os = require("os");
 
 const Prototypes = require('./startup/Prototypes.js');
 Prototypes.register();
@@ -17,6 +19,12 @@ global.properties = new Configuration().loadJsonFile(appHomePath+'/config.json',
 
 const logger = require('./log/Logger.js');
 global.logger = logger;
+
+logger.info("starting configurator...");
+
+const RequiredVariables = require('./startup/RequiredVariables.js');
+var requiredVariables = new RequiredVariables();
+requiredVariables.startValidation();
 
 const DatabaseConnection = require('./database/DatabaseConnection.js');
 const DefaultUserConfigurator = require('./startup/DefaultUserConfigurator.js');
@@ -42,6 +50,17 @@ app.use(session({
 
 app.use(bodyParser.urlencoded({
   extended: true
+}));
+
+app.use(fileUpload({
+    useTempFiles : true,
+    tempFileDir : os.tmpdir(),
+    abortOnLimit : true,
+    safeFileNames : true,
+    preserveExtension : true,
+    limits: {
+        fileSize: 500000 //0.5 mb
+    },
 }));
 
 var secureExpress = new SecureExpress();
