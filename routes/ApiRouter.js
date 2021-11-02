@@ -1,5 +1,8 @@
+<<<<<<< HEAD
 var aes256 = require('aes256');
 
+=======
+>>>>>>> 51c3f86b1e88f3e93ebc914cf1681af80153757d
 function ApiRouter(expressInstance) {
   var _this = this;
 
@@ -10,11 +13,14 @@ function ApiRouter(expressInstance) {
     "message": "Bad request"
   };
 
+<<<<<<< HEAD
   var response500 = {
     "code": 500,
     "message": "Internal Error"
   };
 
+=======
+>>>>>>> 51c3f86b1e88f3e93ebc914cf1681af80153757d
   expressInstance.get('/api/v1/variables', ["api"], (req, res) => {
     logger.info("get variables for app: "+req.query.application)
 

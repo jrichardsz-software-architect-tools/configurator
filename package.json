@@ -10,7 +10,10 @@
   },
   "license": "MIT",
   "dependencies": {
+<<<<<<< HEAD
     "aes256": "^1.1.0",
+=======
+>>>>>>> 51c3f86b1e88f3e93ebc914cf1681af80153757d
     "bcrypt": "5.0.1",
     "body-parser": "1.19.0",
     "captchapng": "0.0.1",

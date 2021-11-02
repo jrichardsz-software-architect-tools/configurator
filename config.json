@@ -7,10 +7,17 @@
     "name":"${CONFIGURATOR_DATABASE_NAME}"
   },
   "api":{
+<<<<<<< HEAD
     "key":"${CONFIGURATOR_API_KEY}"
   },
   "security":{
     "bfaThreshold":"${CONFIGURATOR_BFA_THRESHOLD}",
     "cryptKey":"${CONFIGURATOR_CRYPT_KEY}"
+=======
+    "key":"${API_KEY}"
+  },
+  "security":{
+    "bfaThreshold":"${BFA_THRESHOLD}"
+>>>>>>> 51c3f86b1e88f3e93ebc914cf1681af80153757d
   }
 }

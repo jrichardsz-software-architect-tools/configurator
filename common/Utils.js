@@ -16,6 +16,21 @@ Utils.hasProperty = function(obj, key) {
 
    // Nested property found, so return the value
    return (typeof obj !== "undefined" && obj != null) ;
+<<<<<<< HEAD
+=======
+};
+
+Utils.getIp = function(req) {
+  var ip;
+  if (req.headers['x-forwarded-for']) {
+      ip = req.headers['x-forwarded-for'].split(",")[0];
+  } else if (req.connection && req.connection.remoteAddress) {
+      ip = req.connection.remoteAddress;
+  } else {
+      ip = req.ip;
+  }
+  return ip;
+>>>>>>> 51c3f86b1e88f3e93ebc914cf1681af80153757d
 };
 
 Utils.getIp = function(req) {

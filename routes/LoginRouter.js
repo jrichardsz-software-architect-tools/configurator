@@ -80,9 +80,13 @@ function LoginRouter(expressInstance) {
     p.color(30, 104, 21, 255); // Second color: paint (red, green, blue, alpha)
     var img = p.getBase64();
     var imgbase64 = new Buffer(img,'base64');
+<<<<<<< HEAD
     //@TODO
     //(node:17659) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
     return Buffer.from(imgbase64).toString('base64');
+=======
+    return Buffer.from(imgbase64).toString('base64');   ;
+>>>>>>> 51c3f86b1e88f3e93ebc914cf1681af80153757d
   }
 
   this.goToLoginPage = function(req, res, redirectAttributes) {
