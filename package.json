@@ -1,6 +1,6 @@
 {
   "name": "configurator",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Centralize and Management configurations of all your applications.",
   "main": "app.js",
   "scripts": {
