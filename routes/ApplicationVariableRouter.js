@@ -231,9 +231,11 @@ function ApplicationVariableRouter(expressInstance) {
       })
     }
 
-    var safeReceivedVariables = Utils.obfuscateFieldAndTrimInArray(incomingVariablesToImport, "value", "****", 10);
+
+    var safeReceivedVariables = Utils.obfuscateFieldInArrayOfObjects(incomingVariablesToImport, "value", "****", 10);
     logger.info("received variables to import")
     logger.info(safeReceivedVariables);
+
     //get sub sets of the received variables
     //these subsets are variables that not exist
     var readyToInsertGlobals = await applicationVariableService.getNewVariablesReadyToInsertByScope(incomingVariablesToImport, "G");
@@ -252,29 +254,33 @@ function ApplicationVariableRouter(expressInstance) {
     //if it does not exist in its table, it does not exist in application_variable
 
     if(readyToInsertGlobals.length == 0){
-      logger.info("All the received globals already exist.");
+      logger.info("All the received globals already exist");
       //get the global names of received
       var receivedGlobalNames = Utils.arrayObjecsToArrayValuesFilterByField(incomingVariablesToImport,"name", "scope","G");
-      logger.info(receivedGlobalNames);
-      resultMessages.push({level:"warning", message:"Globals already exist: "+receivedGlobalNames})
-      //search if globals were added to this application
-      var alreadyGlobalsInApplication = await applicationVariableRepository.findAlreadyExistentVariablesInApplicationByNamesAndScope(applicationId, receivedGlobalNames, "G");
-      //if 3 were received and 3 already exist in this application
-      if(alreadyGlobalsInApplication.length == receivedGlobalNames.length){
-        resultMessages.push({level:"warning", message:"Globals have already been added to this application: "+detectedGlobals})
-        logger.info("All the received globals have already been added to this application");
+      if(receivedGlobalNames.length >0){
+        logger.info("global already existent, to be  added to the app:"+receivedGlobalNames);
+        resultMessages.push({level:"warning", message:"Globals already exist: "+receivedGlobalNames})
+        //search if globals were added to this application
+        var alreadyGlobalsInApplication = await applicationVariableRepository.findAlreadyExistentVariablesInApplicationByNamesAndScope(applicationId, receivedGlobalNames, "G");
+        //if 3 were received and 3 already exist in this application
+        if(alreadyGlobalsInApplication.length == receivedGlobalNames.length){
+          resultMessages.push({level:"warning", message:"Globals have already been added to this application: "+detectedGlobals})
+          logger.info("All the received globals have already been added to this application");
+        }else{
+          //there are some globals which exist but are not yet in this application
+          logger.info("there are some globals which exist but are not yet in this application");
+          var receivedGlobalVariablesFullData = await variableRepository.findVariablesByNamesAndScope(receivedGlobalNames, "G");
+          var applicationVariables = [];
+          receivedGlobalVariablesFullData.forEach((variable, i) => {
+            applicationVariables.push([applicationId, variable.id]);
+          });
+          logger.info("adding these globals to this application");
+          logger.info(applicationVariables);
+          await applicationVariableRepository.bulkInsert("application_id, variable_id", applicationVariables);
+          resultMessages.push({level:"success", message:"Globals were added to this application successfully"})
+        }
       }else{
-        //there are some globals which exist but are not yet in this application
-        logger.info("there are some globals which exist but are not yet in this application");
-        var receivedGlobalVariablesFullData = await variableRepository.findVariablesByNamesAndScope(receivedGlobalNames, "G");
-        var applicationVariables = [];
-        receivedGlobalVariablesFullData.forEach((variable, i) => {
-          applicationVariables.push([applicationId, variable.id]);
-        });
-        logger.info("adding these globals to this application");
-        logger.info(applicationVariables);
-        await applicationVariableRepository.bulkInsert("application_id, variable_id", applicationVariables);
-        resultMessages.push({level:"success", message:"Globals were added to this application successfully"})
+        logger.info("this app don't have globals");
       }
     }else{
       try {
@@ -317,7 +323,8 @@ function ApplicationVariableRouter(expressInstance) {
     //if it does not exist in its table, it does not exist in application_variable
 
     if(readyToInsertLocals.length == 0){
-      resultMessages.push({level:"warning", message:"Locals already exist in this application or others: "+Utils.arrayObjecsToArrayValuesFilterByField(incomingVariablesToImport,"name", "scope","L")})
+      resultMessages.push({level:"warning", message:"Locals already exist in this application or others: "+
+      Utils.arrayObjecsToArrayValuesFilterByField(incomingVariablesToImport,"name", "scope","L").join("\n")})
       //TODO: show in which application this variables already exist
       logger.info("Locals already exist in this application or others");
     }else{

@@ -100,5 +100,54 @@ describe('common/Utils.js', function() {
     var difference = Utils.getDifferenceBetweenObjectArraysByField(arrayA, arrayB, "name");
     expect(difference.length).to.equal(2);
   });
+  it('arrayObjecsToArrayValuesFilterByField search subset when exist subset', function() {
+
+    var array = [
+      {
+        name : "jane",
+        flag : "a"
+      },
+      {
+        name : "kurt",
+        flag : "a"
+      },
+      {
+        name : "rich",
+        flag : "b"
+      },
+      {
+        name : "william",
+        flag : "a"
+      }
+    ];
+
+    var newArray = Utils.arrayObjecsToArrayValuesFilterByField(array, "name", "flag", "b");
+    expect(newArray.length).to.equal(1);
+    expect(newArray[0]).to.equal("rich");
+  });
+  it('arrayObjecsToArrayValuesFilterByField search subset when dont exist subset', function() {
+
+    var array = [
+      {
+        name : "jane",
+        flag : "a"
+      },
+      {
+        name : "kurt",
+        flag : "a"
+      },
+      {
+        name : "rich",
+        flag : "a"
+      },
+      {
+        name : "william",
+        flag : "a"
+      }
+    ];
+
+    var newArray = Utils.arrayObjecsToArrayValuesFilterByField(array, "name", "flag", "b");
+    expect(newArray.length).to.equal(0);
+  });
 
 });
