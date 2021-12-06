@@ -23,6 +23,7 @@ export CONFIGURATOR_DATABASE_NAME=configurator
 export CONFIGURATOR_API_KEY=changeme
 export CONFIGURATOR_CRYPT_KEY=changeme
 export CONFIGURATOR_BFA_THRESHOLD=100
+export CONFIGURATOR_DISABLE_CAPTCHA=true
 ```
 
 ## For developers

@@ -57,11 +57,15 @@ function LoginRouter(expressInstance) {
           return;
         }
 
-        if (new Number(req.body.captcha) != req.session.captchaSecret) {
-          logger.info("Captcha incorrect for user:" + req.body.user);
-          req.session.error_message = "Incorrect user, password or captcha.";
-          res.redirect("/login")
-          return;
+        if(typeof properties.security.disableCaptcha === 'undefined' ||
+            properties.security.disableCaptcha == null || properties.security.disableCaptcha === true){
+          logger.info("captcha is disabled");
+        }else{
+          if (new Number(req.body.captcha) != req.session.captchaSecret) {
+            logger.info("Captcha incorrect for user:" + req.body.user);
+            req.session.error_message = "Incorrect user, password or captcha.";
+            return res.redirect("/login")
+          }
         }
 
         req.session.loginInformation = {
@@ -70,6 +74,7 @@ function LoginRouter(expressInstance) {
         };
         req.session.save();
         res.redirect('/');
+
       });
     });
   });
@@ -84,13 +89,16 @@ function LoginRouter(expressInstance) {
   }
 
   this.goToLoginPage = function(req, res, redirectAttributes) {
-    var captchaSecret = parseInt(Math.random()*90000000+10000000);
-    var captchaImageBase64 = _this.createCaptchaImageBase64(captchaSecret);
-    req.session.captchaSecret = captchaSecret;
-    redirectAttributes.captcha = captchaImageBase64;
+
     redirectAttributes.success_message = req.session.success_message;
     redirectAttributes.warning_message = req.session.warning_message;
     redirectAttributes.error_message = req.session.error_message;
+    if(typeof properties.security.disableCaptcha === 'undefined' || properties.security.disableCaptcha == null || properties.security.disableCaptcha === false){
+      var captchaSecret = parseInt(Math.random()*90000000+10000000);
+      var captchaImageBase64 = _this.createCaptchaImageBase64(captchaSecret);
+      req.session.captchaSecret = captchaSecret;
+      redirectAttributes.captcha = captchaImageBase64;
+    }
     res.render('login.hbs', redirectAttributes);
   }
 

@@ -204,6 +204,7 @@ function ApplicationVariableRouter(expressInstance) {
     try {
       rawVariablesToImportString = await readFile(targetFile.tempFilePath, "utf8");
     } catch (err) {
+      logger.error(err);
       return _this.goToHomePage(req, res, {
         redirect: '/application-variable',
         error_message: err,
@@ -216,6 +217,7 @@ function ApplicationVariableRouter(expressInstance) {
     try {
       incomingVariablesToImport = JSON.parse(rawVariablesToImportString);
     } catch (err) {
+      logger.error(err);
       return _this.goToHomePage(req, res, {
         redirect: '/application-variable',
         error_message:"Not valid json. "+ err,
@@ -224,13 +226,13 @@ function ApplicationVariableRouter(expressInstance) {
     }
 
     if(!Array.isArray(incomingVariablesToImport) || incomingVariablesToImport.length == 0 ){
+      logger.error("json to import is empty");
       return _this.goToHomePage(req, res, {
         redirect: '/application-variable',
         warning_message:"json is empty or is not a collection of variables",
         application_id: applicationId
       })
     }
-
 
     var safeReceivedVariables = Utils.obfuscateFieldInArrayOfObjects(incomingVariablesToImport, "value", "****", 10);
     logger.info("received variables to import")
