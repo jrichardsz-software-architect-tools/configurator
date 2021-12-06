@@ -4,8 +4,8 @@
   "description": "Centralize and Management configurations of all your applications.",
   "main": "app.js",
   "scripts": {
-    "start": "node  app.js",
-    "dev": "supervisor -e 'js|hbs'  app.js",
+    "start": "node src/Index.js",
+    "dev": "supervisor -e 'js|hbs' src/Index.js",
     "test": "mocha 'test/**/*.js'"
   },
   "license": "MIT",
