@@ -64,7 +64,7 @@ app.use(fileUpload({
 }));
 
 var secureExpress = new SecureExpress();
-secureExpress.setStaticAssets(["/vendor","/dist","/favicon.ico"]);
+secureExpress.setStaticAssets(["/vendor","/pages","/dist","/favicon.ico"]);
 secureExpress.setLoginEndpoints(["/login","/login/action"]);
 secureExpress.setApiEndpoints(["/api"]);
 secureExpress.setExpressInstance(app);

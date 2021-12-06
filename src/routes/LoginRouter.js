@@ -58,9 +58,8 @@ function LoginRouter(expressInstance) {
         }
 
         if(typeof properties.security.disableCaptcha === 'undefined' ||
-            properties.security.disableCaptcha == null || properties.security.disableCaptcha === true){
-          logger.info("captcha is disabled");
-        }else{
+            properties.security.disableCaptcha == null || properties.security.disableCaptcha === false){
+          logger.info("captcha is enabled");
           if (new Number(req.body.captcha) != req.session.captchaSecret) {
             logger.info("Captcha incorrect for user:" + req.body.user);
             req.session.error_message = "Incorrect user, password or captcha.";
@@ -73,8 +72,7 @@ function LoginRouter(expressInstance) {
           "role": userInformation.role
         };
         req.session.save();
-        res.redirect('/');
-
+        return res.redirect('/');
       });
     });
   });
