@@ -44,9 +44,9 @@ function GlobalVariableRouter(expressInstance) {
     res.render('global-variable/new.hbs', {"mode":"add"});
   });
 
-  expressInstance.post('/global-variable/action/save', ["admin"], (req, res) => {
+  expressInstance.post('/global-variable/action/:mode/save', ["admin"], async (req, res) => {
 
-    logger.info("Save global variable:");
+    logger.info("Save/edit global variable:");
     req.body.scope = 'G';
 
     var variable = Object.assign({}, req.body);
@@ -59,18 +59,31 @@ function GlobalVariableRouter(expressInstance) {
       variable.value = aes256.encrypt(cryptKey, variable.value);
     }
 
+    //if is a new variable (without id)
+    if(typeof req.body.id !== 'undefined' && req.params.mode === "add"){
+      //validate unique name
+      var variablesWhoAlreadyExist = await variableRepository.findByNameAndDeleted(req.body.name,"N");
+
+      if(typeof variablesWhoAlreadyExist !== 'undefined' && variablesWhoAlreadyExist.length > 0){
+        return res.render('global-variable/new.hbs', {
+          error_message: "A variable with local or global scope already exist with provided name: " + req.body.name,
+          mode: req.params.mode
+        });
+      }
+    }
+
     variableRepository.save(variable, function(err, result) {
       if (err) {
         logger.error(`Error while trying to persist variable: ${err.code} ${err.sqlMessage}`);
         if(err.code === 'ER_DUP_ENTRY'){
           res.render('global-variable/new.hbs', {
             error_message: "A variable already exist with provided name: "+req.body.name,
-            "mode":"add"
+            mode: req.params.mode
           });
         }else{
           res.render('global-variable/new.hbs', {
             error_message: "An error occurred when trying to save the global variable.",
-            "mode":"add"
+            mode: req.params.mode
           });
         }
       } else {

@@ -367,7 +367,7 @@ function ApplicationVariableRouter(expressInstance) {
 
   });
 
-  expressInstance.post('/application-variable/action/local/variable/save', ["admin"], (req, res) => {
+  expressInstance.post('/application-variable/action/local/variable/:mode/save', ["admin"], async (req, res) => {
 
     var variable = Object.assign({}, req.body);
     delete variable.application_id;
@@ -385,9 +385,35 @@ function ApplicationVariableRouter(expressInstance) {
     objectToLog.value = "****";
     logger.info(objectToLog);
 
+    var application = await applicationRepository.findOneById(req.body.application_id);
+
+    if(typeof application !== 'undefined' && application.length == 0){
+      return res.render('application-variable/new_local_var.hbs', {
+        error_message: "A variable with local or global scope already exist with provided name: " + variable.name,
+        application_id: req.body.application_id,
+        application_name: application.name,
+        mode: req.params.mode
+      });
+    }
+
     //safe value store
     if (variable.type === "S") {
       variable.value = aes256.encrypt(cryptKey, variable.value);
+    }
+
+    //if is a new variable (without id)
+    if(typeof req.body.id !== 'undefined' && req.params.mode === "add"){
+      //validate unique name
+      var variablesWhoAlreadyExist = await variableRepository.findByNameAndDeleted(req.body.name,"N");
+
+      if(typeof variablesWhoAlreadyExist !== 'undefined' && variablesWhoAlreadyExist.length > 0){
+        return res.render('application-variable/new_local_var.hbs', {
+          error_message: "A variable with local or global scope already exist with provided name: " + variable.name,
+          application_id: req.body.application_id,
+          application_name: application.name,
+          mode: req.params.mode
+        });
+      }
     }
 
     //save variable
@@ -397,16 +423,20 @@ function ApplicationVariableRouter(expressInstance) {
         if (err.code === 'ER_DUP_ENTRY') {
           return res.render('application-variable/new_local_var.hbs', {
             error_message: "A variable local or global already exist with provided name: " + variable.name,
-            application_id: req.body.application_id
+            application_id: req.body.application_id,
+            application_name: application.name,
+            mode: req.params.mode
           });
         } else {
           return res.render('application-variable/new_local_var.hbs', {
             error_message: "An error occurred when trying to save the variable.",
-            application_id: req.body.application_id
+            application_id: req.body.application_id,
+            application_name: application.name,
+            mode: req.params.mode
           });
         }
       } else {
-        console.log("variable was created");
+        logger.info("variable was created");
         // if variable is already created or updated, we just need add it
         // to  selected application
         if (!req.body.variable_id) {
@@ -423,7 +453,9 @@ function ApplicationVariableRouter(expressInstance) {
 
                 res.render('application-variable/new_local_var.hbs', {
                   error_message: "An error occurred when trying to save the variable.",
-                  application_id: req.body.application_id
+                  application_id: req.body.application_id,
+                  application_name: application.name,
+                  mode: req.params.mode
                 });
               });
 
@@ -481,9 +513,9 @@ function ApplicationVariableRouter(expressInstance) {
 
   });
 
-  expressInstance.get('/application-variable/view/edit/:id/:application_id/:variable_id', ["admin"], (req, res) => {
+  expressInstance.get('/application-variable/view/edit/:id/:application_id/:variable_id', ["admin"], async (req, res) => {
 
-    variableRepository.findOneById(req.params.variable_id, function(err, variable) {
+    variableRepository.findOneById(req.params.variable_id, async function(err, variable) {
       if (err) {
         logger.info(err);
         _this.goToHomePage(req, res, {
@@ -493,9 +525,13 @@ function ApplicationVariableRouter(expressInstance) {
         if (variable.type === "S") {
           variable.value = aes256.decrypt(cryptKey, variable.value);
         }
+
+        var application = await applicationRepository.findOneById(req.params.application_id);
+
         res.render('application-variable/new_local_var.hbs', {
           id: req.params.id,
           application_id: req.params.application_id,
+          application_name: application.name,
           variable: variable,
           mode: "edit"
         });

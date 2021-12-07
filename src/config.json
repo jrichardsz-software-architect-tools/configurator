@@ -11,6 +11,7 @@
   },
   "security":{
     "bfaThreshold":"${CONFIGURATOR_BFA_THRESHOLD}",
-    "cryptKey":"${CONFIGURATOR_CRYPT_KEY}"
+    "cryptKey":"${CONFIGURATOR_CRYPT_KEY}",
+    "disableCaptcha":"${CONFIGURATOR_DISABLE_CAPTCHA}"
   }
 }

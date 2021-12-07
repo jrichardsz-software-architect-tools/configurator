@@ -18,7 +18,7 @@
             <h1 class="page-header">Add Local Variable to: {{application_name}}</h1>
           {{/stringEquals}}
           {{#stringEquals @root.mode 'edit'}}
-          <h1 class="page-header">Editing local variable</h1>
+          <h1 class="page-header">Editing local variable of: {{application_name}}</h1>
           {{/stringEquals}}
         </div>
         <!-- /.col-lg-12 -->
@@ -45,7 +45,7 @@
             <div class="panel-body">
               <div class="row">
                 <div class="col-lg-6">
-                  <form action="/application-variable/action/local/variable/save" role="form" method="post"  >
+                  <form action="/application-variable/action/local/variable/{{@root.mode}}/save" role="form" method="post"  >
                     <input name="id" type="hidden" value="{{id}}" />
                     <input name="application_id" type="hidden" value="{{application_id}}" />
                     <input name="variable_id" type="hidden" value="{{variable.id}}" />
