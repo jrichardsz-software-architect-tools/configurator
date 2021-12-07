@@ -20,8 +20,23 @@ function VariableRepository() {
   this.findByScopeAndDeleted = function(scope,deleted, callback) {
     var params = [scope,deleted];
     databaseConnection.getConnection(function(err, connection) {
-      connection.query('select * from variable where scope = ? and deleted = ?', params, function(err, rows) {
+      connection.query('select * from variable where scope = ? and deleted = ? order by name', params, function(err, rows) {
         callback(err, rows);
+      });
+    });
+  }
+
+  this.findByNameAndDeleted = function (name, deleted) {
+
+    return new Promise(function (resolve, reject) {
+      var params = [name,deleted];
+      databaseConnection.getConnection(function(err, connection) {
+        connection.query('select * from variable where name = ? and deleted = ?', params, function(err, rows) {
+          if (err) {
+            reject(err);
+          }
+          resolve(rows);
+        });
       });
     });
   }
