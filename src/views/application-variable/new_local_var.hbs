@@ -15,12 +15,13 @@
       <div class="row">
         <div class="col-lg-12">
           {{#stringEquals @root.mode 'add'}}
-            <h1 class="page-header">New Global Variable</h1>
+            <h1 class="page-header">Add Local Variable to: {{application_name}}</h1>
           {{/stringEquals}}
           {{#stringEquals @root.mode 'edit'}}
-          <h1 class="page-header">Editing Global Variable</h1>
+          <h1 class="page-header">Editing local variable of: {{application_name}}</h1>
           {{/stringEquals}}
         </div>
+        <!-- /.col-lg-12 -->
       </div>
       <!-- /.row -->
       <div class="row">
@@ -44,31 +45,33 @@
             <div class="panel-body">
               <div class="row">
                 <div class="col-lg-6">
-                  <form action="/global-variable/action/save" role="form" method="post"  >
-                    <input name="id" type="hidden" value="{{global.id}}" />
+                  <form action="/application-variable/action/local/variable/{{@root.mode}}/save" role="form" method="post"  >
+                    <input name="id" type="hidden" value="{{id}}" />
+                    <input name="application_id" type="hidden" value="{{application_id}}" />
+                    <input name="variable_id" type="hidden" value="{{variable.id}}" />
                     <div class="form-group">
                       <label>Name</label>
-                      <input name="name" required=true class="form-control" placeholder="Enter text" value="{{global.name}}" onchange="this.value = $(this).val().trim()" />
+                      <input name="name" class="form-control" placeholder="Enter text" value="{{variable.name}}" onchange="this.value = $(this).val().trim()" />
                     </div>
                     <div class="form-group">
                       <label>Value</label>
-                      <textarea name="value" required=true class="form-control" placeholder="Enter text" rows="10" onchange="this.value = $(this).val().trim()"  >{{global.value}}</textarea>
+                      <textarea name="value" class="form-control" placeholder="Enter text" rows="10" onchange="this.value = $(this).val().trim()"  >{{variable.value}}</textarea>
                     </div>
                     <div class="form-group">
                       <label>Description</label>
-                      <input name="description" required=true  class="form-control" placeholder="Enter text" value="{{global.description}}" />
+                      <input name="description"  required=true  class="form-control" placeholder="Enter text" value="{{variable.description}}" />
                     </div>
                     <div class="form-group">
                      <label for="sel1">Select type:</label>
-                     <select name="type"  required=true  class="form-control">
-                       {{#select global.type}}
+                     <select name="type"  class="form-control">
+                       {{#select variable.type}}
                          <option value="P" >Plain</option>
                          <option value="S" >Secret</option>
                        {{/select}}
                      </select>
                    </div>
                     <button type="submit" class="btn btn-outline btn-primary">Submit</button>
-                    <a href="/global-variable" type="button" class="btn btn-outline btn-primary">Cancel</a>
+                    <a href="/application-variable?application_id={{application_id}}" type="button" class="btn btn-outline btn-primary">Cancel</a>
                   </form>
                 </div>
               </div>
@@ -77,7 +80,6 @@
         </div>
       </div>
     </div>
-
     {{> scripts}}
 
 </body>

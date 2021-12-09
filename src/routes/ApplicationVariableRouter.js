@@ -204,6 +204,7 @@ function ApplicationVariableRouter(expressInstance) {
     try {
       rawVariablesToImportString = await readFile(targetFile.tempFilePath, "utf8");
     } catch (err) {
+      logger.error(err);
       return _this.goToHomePage(req, res, {
         redirect: '/application-variable',
         error_message: err,
@@ -216,6 +217,7 @@ function ApplicationVariableRouter(expressInstance) {
     try {
       incomingVariablesToImport = JSON.parse(rawVariablesToImportString);
     } catch (err) {
+      logger.error(err);
       return _this.goToHomePage(req, res, {
         redirect: '/application-variable',
         error_message:"Not valid json. "+ err,
@@ -224,6 +226,7 @@ function ApplicationVariableRouter(expressInstance) {
     }
 
     if(!Array.isArray(incomingVariablesToImport) || incomingVariablesToImport.length == 0 ){
+      logger.error("json to import is empty");
       return _this.goToHomePage(req, res, {
         redirect: '/application-variable',
         warning_message:"json is empty or is not a collection of variables",
@@ -231,9 +234,10 @@ function ApplicationVariableRouter(expressInstance) {
       })
     }
 
-    var safeReceivedVariables = Utils.obfuscateFieldAndTrimInArray(incomingVariablesToImport, "value", "****", 10);
+    var safeReceivedVariables = Utils.obfuscateFieldInArrayOfObjects(incomingVariablesToImport, "value", "****", 10);
     logger.info("received variables to import")
     logger.info(safeReceivedVariables);
+
     //get sub sets of the received variables
     //these subsets are variables that not exist
     var readyToInsertGlobals = await applicationVariableService.getNewVariablesReadyToInsertByScope(incomingVariablesToImport, "G");
@@ -252,29 +256,33 @@ function ApplicationVariableRouter(expressInstance) {
     //if it does not exist in its table, it does not exist in application_variable
 
     if(readyToInsertGlobals.length == 0){
-      logger.info("All the received globals already exist.");
+      logger.info("All the received globals already exist");
       //get the global names of received
       var receivedGlobalNames = Utils.arrayObjecsToArrayValuesFilterByField(incomingVariablesToImport,"name", "scope","G");
-      logger.info(receivedGlobalNames);
-      resultMessages.push({level:"warning", message:"Globals already exist: "+receivedGlobalNames})
-      //search if globals were added to this application
-      var alreadyGlobalsInApplication = await applicationVariableRepository.findAlreadyExistentVariablesInApplicationByNamesAndScope(applicationId, receivedGlobalNames, "G");
-      //if 3 were received and 3 already exist in this application
-      if(alreadyGlobalsInApplication.length == receivedGlobalNames.length){
-        resultMessages.push({level:"warning", message:"Globals have already been added to this application: "+detectedGlobals})
-        logger.info("All the received globals have already been added to this application");
+      if(receivedGlobalNames.length >0){
+        logger.info("global already existent, to be  added to the app:"+receivedGlobalNames);
+        resultMessages.push({level:"warning", message:"Globals already exist: "+receivedGlobalNames})
+        //search if globals were added to this application
+        var alreadyGlobalsInApplication = await applicationVariableRepository.findAlreadyExistentVariablesInApplicationByNamesAndScope(applicationId, receivedGlobalNames, "G");
+        //if 3 were received and 3 already exist in this application
+        if(alreadyGlobalsInApplication.length == receivedGlobalNames.length){
+          resultMessages.push({level:"warning", message:"Globals have already been added to this application: "+detectedGlobals})
+          logger.info("All the received globals have already been added to this application");
+        }else{
+          //there are some globals which exist but are not yet in this application
+          logger.info("there are some globals which exist but are not yet in this application");
+          var receivedGlobalVariablesFullData = await variableRepository.findVariablesByNamesAndScope(receivedGlobalNames, "G");
+          var applicationVariables = [];
+          receivedGlobalVariablesFullData.forEach((variable, i) => {
+            applicationVariables.push([applicationId, variable.id]);
+          });
+          logger.info("adding these globals to this application");
+          logger.info(applicationVariables);
+          await applicationVariableRepository.bulkInsert("application_id, variable_id", applicationVariables);
+          resultMessages.push({level:"success", message:"Globals were added to this application successfully"})
+        }
       }else{
-        //there are some globals which exist but are not yet in this application
-        logger.info("there are some globals which exist but are not yet in this application");
-        var receivedGlobalVariablesFullData = await variableRepository.findVariablesByNamesAndScope(receivedGlobalNames, "G");
-        var applicationVariables = [];
-        receivedGlobalVariablesFullData.forEach((variable, i) => {
-          applicationVariables.push([applicationId, variable.id]);
-        });
-        logger.info("adding these globals to this application");
-        logger.info(applicationVariables);
-        await applicationVariableRepository.bulkInsert("application_id, variable_id", applicationVariables);
-        resultMessages.push({level:"success", message:"Globals were added to this application successfully"})
+        logger.info("this app don't have globals");
       }
     }else{
       try {
@@ -317,7 +325,8 @@ function ApplicationVariableRouter(expressInstance) {
     //if it does not exist in its table, it does not exist in application_variable
 
     if(readyToInsertLocals.length == 0){
-      resultMessages.push({level:"warning", message:"Locals already exist in this application or others: "+Utils.arrayObjecsToArrayValuesFilterByField(incomingVariablesToImport,"name", "scope","L")})
+      resultMessages.push({level:"warning", message:"Locals already exist in this application or others: "+
+      Utils.arrayObjecsToArrayValuesFilterByField(incomingVariablesToImport,"name", "scope","L").join("\n")})
       //TODO: show in which application this variables already exist
       logger.info("Locals already exist in this application or others");
     }else{
@@ -358,7 +367,7 @@ function ApplicationVariableRouter(expressInstance) {
 
   });
 
-  expressInstance.post('/application-variable/action/local/variable/save', ["admin"], (req, res) => {
+  expressInstance.post('/application-variable/action/local/variable/:mode/save', ["admin"], async (req, res) => {
 
     var variable = Object.assign({}, req.body);
     delete variable.application_id;
@@ -376,9 +385,35 @@ function ApplicationVariableRouter(expressInstance) {
     objectToLog.value = "****";
     logger.info(objectToLog);
 
+    var application = await applicationRepository.findOneById(req.body.application_id);
+
+    if(typeof application !== 'undefined' && application.length == 0){
+      return res.render('application-variable/new_local_var.hbs', {
+        error_message: "A variable with local or global scope already exist with provided name: " + variable.name,
+        application_id: req.body.application_id,
+        application_name: application.name,
+        mode: req.params.mode
+      });
+    }
+
     //safe value store
     if (variable.type === "S") {
       variable.value = aes256.encrypt(cryptKey, variable.value);
+    }
+
+    //if is a new variable (without id)
+    if(typeof req.body.id !== 'undefined' && req.params.mode === "add"){
+      //validate unique name
+      var variablesWhoAlreadyExist = await variableRepository.findByNameAndDeleted(req.body.name,"N");
+
+      if(typeof variablesWhoAlreadyExist !== 'undefined' && variablesWhoAlreadyExist.length > 0){
+        return res.render('application-variable/new_local_var.hbs', {
+          error_message: "A variable with local or global scope already exist with provided name: " + variable.name,
+          application_id: req.body.application_id,
+          application_name: application.name,
+          mode: req.params.mode
+        });
+      }
     }
 
     //save variable
@@ -388,16 +423,20 @@ function ApplicationVariableRouter(expressInstance) {
         if (err.code === 'ER_DUP_ENTRY') {
           return res.render('application-variable/new_local_var.hbs', {
             error_message: "A variable local or global already exist with provided name: " + variable.name,
-            application_id: req.body.application_id
+            application_id: req.body.application_id,
+            application_name: application.name,
+            mode: req.params.mode
           });
         } else {
           return res.render('application-variable/new_local_var.hbs', {
             error_message: "An error occurred when trying to save the variable.",
-            application_id: req.body.application_id
+            application_id: req.body.application_id,
+            application_name: application.name,
+            mode: req.params.mode
           });
         }
       } else {
-        console.log("variable was created");
+        logger.info("variable was created");
         // if variable is already created or updated, we just need add it
         // to  selected application
         if (!req.body.variable_id) {
@@ -414,7 +453,9 @@ function ApplicationVariableRouter(expressInstance) {
 
                 res.render('application-variable/new_local_var.hbs', {
                   error_message: "An error occurred when trying to save the variable.",
-                  application_id: req.body.application_id
+                  application_id: req.body.application_id,
+                  application_name: application.name,
+                  mode: req.params.mode
                 });
               });
 
@@ -472,9 +513,9 @@ function ApplicationVariableRouter(expressInstance) {
 
   });
 
-  expressInstance.get('/application-variable/view/edit/:id/:application_id/:variable_id', ["admin"], (req, res) => {
+  expressInstance.get('/application-variable/view/edit/:id/:application_id/:variable_id', ["admin"], async (req, res) => {
 
-    variableRepository.findOneById(req.params.variable_id, function(err, variable) {
+    variableRepository.findOneById(req.params.variable_id, async function(err, variable) {
       if (err) {
         logger.info(err);
         _this.goToHomePage(req, res, {
@@ -484,9 +525,13 @@ function ApplicationVariableRouter(expressInstance) {
         if (variable.type === "S") {
           variable.value = aes256.decrypt(cryptKey, variable.value);
         }
+
+        var application = await applicationRepository.findOneById(req.params.application_id);
+
         res.render('application-variable/new_local_var.hbs', {
           id: req.params.id,
           application_id: req.params.application_id,
+          application_name: application.name,
           variable: variable,
           mode: "edit"
         });

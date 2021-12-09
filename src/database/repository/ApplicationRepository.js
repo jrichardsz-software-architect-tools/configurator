@@ -11,13 +11,33 @@ function ApplicationRepository() {
   this.findByDeleted = function(deleted, callback) {
     var params = [deleted];
     databaseConnection.getConnection(function(err, connection) {
-      connection.query('select * from application where deleted = ?', params, function(err, rows) {
+      connection.query('select * from application where deleted = ? order by name', params, function(err, rows) {
         callback(err, rows);
       });
     });
   }
 
   this.findOneById = function(id, callback) {
+
+    // is not callback
+    if(typeof callback === 'undefined'){
+      return new Promise(function (resolve, reject) {
+        databaseConnection.getConnection(function(err, connection) {
+          connection.query('select * from application where id = ?', [id], function(err, rows) {
+            if (err) {
+              reject(err);
+            }
+            if (rows.length > 1) {
+              reject("More than one row was found for id:" + id);
+            } else {
+              resolve(rows[0]);
+            }
+          });
+        });
+      });
+    }
+
+    //is a callback
     databaseConnection.getConnection(function(err, connection) {
       connection.query('select * from application where id = ?', [id], function(err, rows) {
         if (err) {

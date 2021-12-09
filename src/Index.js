@@ -64,13 +64,13 @@ app.use(fileUpload({
 }));
 
 var secureExpress = new SecureExpress();
-secureExpress.setStaticAssets(["/vendor","/dist","/favicon.ico"]);
+secureExpress.setStaticAssets(["/vendor","/pages","/dist","/favicon.ico"]);
 secureExpress.setLoginEndpoints(["/login","/login/action"]);
 secureExpress.setApiEndpoints(["/api"]);
 secureExpress.setExpressInstance(app);
 secureExpress.configure();
 
-hbs.registerPartials("./views/partials");
+hbs.registerPartials(path.join(__dirname, 'views', 'partials'));
 
 HandleBarsConfigurator.configure(hbs);
 
@@ -96,7 +96,7 @@ defaultUserConfigurator.createUserIfNoExist("guest", "reader");
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'views'));
 
-app.use(express.static("./public"));
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.listen(port, () => {
   logger.info('serving on port ' + port);

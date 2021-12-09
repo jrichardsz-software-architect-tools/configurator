@@ -1,12 +1,13 @@
 {
   "name": "configurator",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Centralize and Management configurations of all your applications.",
   "main": "app.js",
   "scripts": {
-    "start": "node  app.js",
-    "dev": "supervisor -e 'js|hbs'  app.js",
-    "test": "mocha 'test/**/*.js'"
+    "start": "node src/Index.js",
+    "dev": "supervisor -e 'js|hbs' src/Index.js",
+    "test": "mocha 'test/**/*.js'",
+    "coverage": "nyc --reporter=html --reporter=text --reporter=json-summary mocha 'test/**/*.js'"
   },
   "license": "MIT",
   "dependencies": {
@@ -19,16 +20,20 @@
     "express": "4.17.1",
     "express-fileupload": "^1.2.1",
     "express-session": "1.16.2",
-    "hbs": "4.1.2",
+    "hbs": "4.2.0",
     "jsonpath": "1.1.1",
     "log4js": "6.3.0",
     "mysql": "2.18.1",
     "os": "^0.1.2",
     "request": "2.88.0",
     "supervisor": "0.12.0",
-    "uuid": "3.3.3",
+    "uuid": "3.3.3"
+  },
+  "devDependencies": {
     "chai": "4.2.0",
-    "mocha": "8.1.3"
+    "coverage-badge-creator": "^1.0.8",
+    "mocha": "9.1.3",
+    "nyc": "^15.1.0"
   },
   "repository": {
     "type": "git",

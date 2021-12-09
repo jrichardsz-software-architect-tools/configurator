@@ -20,8 +20,23 @@ function VariableRepository() {
   this.findByScopeAndDeleted = function(scope,deleted, callback) {
     var params = [scope,deleted];
     databaseConnection.getConnection(function(err, connection) {
-      connection.query('select * from variable where scope = ? and deleted = ?', params, function(err, rows) {
+      connection.query('select * from variable where scope = ? and deleted = ? order by name', params, function(err, rows) {
         callback(err, rows);
+      });
+    });
+  }
+
+  this.findByNameAndDeleted = function (name, deleted) {
+
+    return new Promise(function (resolve, reject) {
+      var params = [name,deleted];
+      databaseConnection.getConnection(function(err, connection) {
+        connection.query('select * from variable where name = ? and deleted = ?', params, function(err, rows) {
+          if (err) {
+            reject(err);
+          }
+          resolve(rows);
+        });
       });
     });
   }
@@ -102,24 +117,44 @@ function VariableRepository() {
   https://stackoverflow.com/questions/45076191/mysql-bulk-insert-in-node-js-how-to-get-all-insertids
   https://github.com/mysqljs/mysql/issues/1284
   */
-  this.bulkInsert = function(columns, variables, callback) {
+  this.bulkInsert = function(columns, variables) {
+    return new Promise(function (resolve, reject) {
+      databaseConnection.getConnection(function(getConnectionErr, connection) {
+        if (getConnectionErr) {
+          reject(getConnectionErr);
+        }
+        var sql = `INSERT into variable (@columns) VALUES ?`;
+        sql = sql.replace("@columns", columns.toString());
 
-    var sql = `INSERT into variable (@columns) VALUES ?`;
-    sql = sql.replace("@columns", columns.toString());
-
-    databaseConnection.getConnection(function(conecctionErr, connection) {
-      connection.query(sql, [variables], function(bulkInsertErr, bulkResult, fields) {
-        callback(bulkInsertErr, bulkResult);
+        //create a new array instead to objects arrays
+        //https://stackoverflow.com/a/68596834/3957754
+        var rows = variables.map(row => [row.name, row.value, row.description, row.type, row.scope]);
+        connection.query(sql, [rows], function(err, result) {
+          if (err) {
+            reject(err);
+          }
+          resolve(result);
+        });
       });
-    });
+    })
   }
 
-  this.findIdsFromNames = function(names, callback) {
-    databaseConnection.getConnection(function(err, connection) {
-      connection.query('select id from variable where name in (?)', [names], function(err, rows) {
-        callback(err, rows);
+
+  this.findVariablesByNamesAndScope = function(names,scope) {
+    return new Promise(function (resolve, reject) {
+      databaseConnection.getConnection(function(getConnectionErr, connection) {
+        if (getConnectionErr) {
+          reject(getConnectionErr);
+        }
+        var sql = 'select * from variable where name in (?) and scope = ? ';
+        connection.query(sql, [names, scope], function(err, rows) {
+          if (err) {
+            reject(err);
+          }
+          resolve(rows);
+        });
       });
-    });
+    })
   }
 
 }

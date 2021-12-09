@@ -1,7 +1,7 @@
 var chai = require('chai');
 var expect = chai.expect;
 var assert = chai.assert;
-const ApplicationVariableService = require('../../service/ApplicationVariableService.js');
+const ApplicationVariableService = require('../../src/service/ApplicationVariableService.js');
 var applicationVariableService = new ApplicationVariableService();
 
 describe('service/ApplicationVariableService.js', function() {

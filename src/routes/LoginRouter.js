@@ -57,11 +57,14 @@ function LoginRouter(expressInstance) {
           return;
         }
 
-        if (new Number(req.body.captcha) != req.session.captchaSecret) {
-          logger.info("Captcha incorrect for user:" + req.body.user);
-          req.session.error_message = "Incorrect user, password or captcha.";
-          res.redirect("/login")
-          return;
+        if(typeof properties.security.disableCaptcha === 'undefined' ||
+            properties.security.disableCaptcha == null || properties.security.disableCaptcha === false){
+          logger.info("captcha is enabled");
+          if (new Number(req.body.captcha) != req.session.captchaSecret) {
+            logger.info("Captcha incorrect for user:" + req.body.user);
+            req.session.error_message = "Incorrect user, password or captcha.";
+            return res.redirect("/login")
+          }
         }
 
         req.session.loginInformation = {
@@ -69,7 +72,7 @@ function LoginRouter(expressInstance) {
           "role": userInformation.role
         };
         req.session.save();
-        res.redirect('/');
+        return res.redirect('/');
       });
     });
   });
@@ -79,20 +82,21 @@ function LoginRouter(expressInstance) {
     p.color(115, 95, 197, 100);  // First color: background (red, green, blue, alpha)
     p.color(30, 104, 21, 255); // Second color: paint (red, green, blue, alpha)
     var img = p.getBase64();
-    var imgbase64 = new Buffer(img,'base64');
-    //@TODO
-    //(node:17659) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
-    return Buffer.from(imgbase64).toString('base64');
+    var imgbase64 = Buffer.from(img, 'base64').toString('base64');
+    return imgbase64;
   }
 
   this.goToLoginPage = function(req, res, redirectAttributes) {
-    var captchaSecret = parseInt(Math.random()*90000000+10000000);
-    var captchaImageBase64 = _this.createCaptchaImageBase64(captchaSecret);
-    req.session.captchaSecret = captchaSecret;
-    redirectAttributes.captcha = captchaImageBase64;
+
     redirectAttributes.success_message = req.session.success_message;
     redirectAttributes.warning_message = req.session.warning_message;
     redirectAttributes.error_message = req.session.error_message;
+    if(typeof properties.security.disableCaptcha === 'undefined' || properties.security.disableCaptcha == null || properties.security.disableCaptcha === false){
+      var captchaSecret = parseInt(Math.random()*90000000+10000000);
+      var captchaImageBase64 = _this.createCaptchaImageBase64(captchaSecret);
+      req.session.captchaSecret = captchaSecret;
+      redirectAttributes.captcha = captchaImageBase64;
+    }
     res.render('login.hbs', redirectAttributes);
   }
 

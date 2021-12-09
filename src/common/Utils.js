@@ -88,17 +88,18 @@ Utils.arrayFilterByField = function(array, fieldNameToEvaluate, expectedValue) {
   return newArray;
 };
 
-Utils.obfuscateFieldAndTrimInArray = function(array, fieldName, obfuscateValue, maximumLength) {
+Utils.obfuscateFieldInArrayOfObjects = function(array, fieldName, obfuscateValue, maximumLength) {
   var newArray = [];
   array.forEach(function(object) {
+    let newObject  = {};
     for(key in object){
       if(key == fieldName){
-        object[fieldName] = obfuscateValue;
+        newObject[fieldName] = obfuscateValue;
       }else if(object[key].length > maximumLength){
-        object[key] = object[key].substring(0, maximumLength-1);
+        newObject[key] = object[key];
       }
     }
-    newArray.push(object);
+    newArray.push(newObject);
   });
   return newArray;
 };
