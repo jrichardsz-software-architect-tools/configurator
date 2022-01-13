@@ -60,6 +60,10 @@ Utils.getDifferenceBetweenObjectArraysByField = function(arrayA, arrayB, fieldNa
   return onlyInA.concat(onlyInB);
 };
 
+Utils.getDifferenceBetweenArrays = function(arrayA, arrayB) {
+  return arrayA.filter(x => !arrayB.includes(x));
+};
+
 Utils.arrayObjecsToArrayValues = function(array, fieldName) {
   var newArray = [];
   array.forEach(function(object) {
@@ -93,10 +97,15 @@ Utils.obfuscateFieldInArrayOfObjects = function(array, fieldName, obfuscateValue
   array.forEach(function(object) {
     let newObject  = {};
     for(key in object){
+      var newValue;
       if(key == fieldName){
         newObject[fieldName] = obfuscateValue;
-      }else if(object[key].length > maximumLength){
-        newObject[key] = object[key];
+      }else{
+        if(object[key].length > maximumLength){
+          newObject[key] = object[key].substring(0,9);
+        }else{
+          newObject[key] = object[key];
+        }
       }
     }
     newArray.push(newObject);

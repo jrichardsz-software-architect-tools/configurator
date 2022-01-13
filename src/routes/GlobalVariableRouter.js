@@ -47,11 +47,11 @@ function GlobalVariableRouter(expressInstance) {
   expressInstance.post('/global-variable/action/:mode/save', ["admin"], async (req, res) => {
 
     logger.info("Save/edit global variable:");
-    req.body.scope = 'G';
 
     var variable = Object.assign({}, req.body);
+    variable.scope = 'G';
 
-    let objectToLog = {...req.body}; objectToLog.value = "****";
+    let objectToLog = {...variable.body}; objectToLog.value = "****";
     logger.info(objectToLog);
 
     //safe value store
@@ -62,11 +62,11 @@ function GlobalVariableRouter(expressInstance) {
     //if is a new variable (without id)
     if(typeof req.body.id !== 'undefined' && req.params.mode === "add"){
       //validate unique name
-      var variablesWhoAlreadyExist = await variableRepository.findByNameAndDeleted(req.body.name,"N");
+      var variablesWhoAlreadyExist = await variableRepository.findByNameAndScopeAndDeleted(variable.name, "G", "N");
 
       if(typeof variablesWhoAlreadyExist !== 'undefined' && variablesWhoAlreadyExist.length > 0){
         return res.render('global-variable/new.hbs', {
-          error_message: "A variable with local or global scope already exist with provided name: " + req.body.name,
+          error_message: "A variable already exist as global with provided name: " + variable.name,
           mode: req.params.mode
         });
       }
@@ -75,17 +75,10 @@ function GlobalVariableRouter(expressInstance) {
     variableRepository.save(variable, function(err, result) {
       if (err) {
         logger.error(`Error while trying to persist variable: ${err.code} ${err.sqlMessage}`);
-        if(err.code === 'ER_DUP_ENTRY'){
-          res.render('global-variable/new.hbs', {
-            error_message: "A variable already exist with provided name: "+req.body.name,
-            mode: req.params.mode
-          });
-        }else{
-          res.render('global-variable/new.hbs', {
-            error_message: "An error occurred when trying to save the global variable.",
-            mode: req.params.mode
-          });
-        }
+        res.render('global-variable/new.hbs', {
+          error_message: "An error occurred when trying to save the global variable.",
+          mode: req.params.mode
+        });
       } else {
         _this.goToHomePage(req, res, {
           redirect: '/global-variable',
