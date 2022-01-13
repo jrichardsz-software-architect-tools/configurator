@@ -115,6 +115,27 @@ Utils.obfuscateFieldInArrayOfObjects = function(array, fieldName, obfuscateValue
   return newArray;
 };
 
+Utils.overrideFieldWithConditionInArrayOfObjects = function(array, fieldName, overrideValue, conditionalFieldName, conditionalFieldValue) {
+  var newArray = [];
+  array.forEach(function(object) {
+    let newObject  = {};
+    for(key in object){
+      var newValue;
+      if(key == fieldName){
+        if(object[conditionalFieldName] == conditionalFieldValue){
+          newObject[fieldName] = overrideValue;
+        }else{
+          newObject[key] = object[key];  
+        }
+      }else{
+        newObject[key] = object[key];
+      }
+    }
+    newArray.push(newObject);
+  });
+  return newArray;
+};
+
 Utils.arrayObjecsToArrayValuesWithFilter = function(array, fieldName, fieldNameToEvaluate, expectedValue) {
   var newArray = [];
   array.forEach(function(object) {

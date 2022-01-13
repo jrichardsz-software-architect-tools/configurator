@@ -10,7 +10,7 @@ var escape = require('escape-html');
 function ApplicationVariableRouter(expressInstance) {
 
   var cryptKey = properties.security.cryptKey;
-  var dummySecret = aes256.encrypt(cryptKey, "changeme");
+  var defaultCryptedValueForImport = aes256.encrypt(cryptKey, "changeme");
   var _this = this;
 
   expressInstance.get('/application-variable', ["admin", "reader"], (req, res) => {
@@ -243,10 +243,7 @@ function ApplicationVariableRouter(expressInstance) {
     //these subsets are variables that not exist
     var readyToInsertGlobals = await applicationVariableService.getNewVariablesReadyToInsertByScope(incomingVariablesToImport, "G");
     logger.info("globals ready to insert");
-    var readyToInsertLocals = await applicationVariableService.getNewVariablesReadyToInsertByScope(incomingVariablesToImport, "L");
     logger.info(Utils.arrayObjecsToArrayValues(readyToInsertGlobals, "name"));
-    logger.info("locals ready to insert");
-    logger.info(Utils.arrayObjecsToArrayValues(readyToInsertLocals, "name"));
 
     //globals
     //if readyToInsertGlobals length == 0, it means that exist as variables
@@ -255,7 +252,7 @@ function ApplicationVariableRouter(expressInstance) {
     //if readyToInsertGlobals length > 0, user wants to import some globals
     //these global variables does not exist in table: variable
     //if it does not exist in its table, it does not exist in application_variable
-
+    logger.info("Importing globals");
     if(readyToInsertGlobals.length == 0){
       logger.info("All the received globals already exist");
       //get the global names of received
@@ -294,8 +291,10 @@ function ApplicationVariableRouter(expressInstance) {
       }
     }else{
       try {
-        //step 1 : insert the variables
-        await variableRepository.bulkInsert("name, value, description, type, scope", readyToInsertGlobals);
+        //step 1 : insert the global variables
+        var safeGlobalsToInsert = Utils.overrideFieldWithConditionInArrayOfObjects(readyToInsertGlobals, "value", defaultCryptedValueForImport, "type", "S");
+        logger.info(safeGlobalsToInsert);
+        await variableRepository.bulkInsert("name, value, description, type, scope", safeGlobalsToInsert);
         resultMessages.push({level:"success", message:"Globals were created successfully"})
         logger.info("Globals were created successfully");
         //due to mysql behavior, after bulk insert, we don't have its primary keys.
@@ -322,11 +321,23 @@ function ApplicationVariableRouter(expressInstance) {
       }
     }
 
-
+    logger.info("Importing locals");
     //locals
 
     //compare incoming locals with existent locas
     var incomingLocalVariableNames = Utils.arrayObjecsToArrayValuesWithFilter(incomingVariablesToImport, "name", "scope", "L");
+    logger.info("incomingLocalVariableNames")
+    logger.info(incomingLocalVariableNames)
+
+    if(typeof incomingLocalVariableNames === 'undefined' || incomingLocalVariableNames.length == 0){
+      logger.info("Import file don't have local variables");
+      return _this.goToHomePage(req, res, {
+        redirect: '/application-variable',
+        multiple_messages: resultMessages,
+        application_id: applicationId
+      })
+    }
+
     var localVariablesAlreadyAddedToThisApplication = await applicationVariableRepository.
       findAlreadyExistentVariablesInApplicationByNamesAndScope(applicationId, incomingLocalVariableNames, "L");
 
@@ -354,14 +365,12 @@ function ApplicationVariableRouter(expressInstance) {
         //get variable to insert
         var applicationVariables = [];
         for(var incomingVariable of incomingVariablesToImport){
-          logger.info("incomingVariable")
-          logger.info(incomingVariable)
-          logger.info(incomingVariable.scope == 'L' && localsDontAddedToThisApplication.includes(incomingVariable.name))
-          if(incomingVariable.scope == 'L' && localsDontAddedToThisApplication.includes(incomingVariable.name)){
-            // incomingLocalVariablesToImport.push(incomingVariable);
-            var createdVariable = await variableRepository.saveWithPromise(incomingVariable)
-            console.log("createdVariable");
-            console.log(createdVariable);
+          var variableToInsert = {...incomingVariable};
+          if(variableToInsert.scope == 'L' && localsDontAddedToThisApplication.includes(variableToInsert.name)){
+            if(variableToInsert.type == 'S'){
+                variableToInsert.value = defaultCryptedValueForImport;
+            }
+            var createdVariable = await variableRepository.saveWithPromise(variableToInsert)
             applicationVariables.push([applicationId, createdVariable.insertId]);
           }
         }
@@ -369,7 +378,7 @@ function ApplicationVariableRouter(expressInstance) {
         logger.info("applicationVariables");
         logger.info(applicationVariables);
 
-        //add the global variables to the application
+        //add the local variables to the application
         await applicationVariableRepository.bulkInsert("application_id, variable_id", applicationVariables);
         resultMessages.push({level:"success", message:"Locals were added to this application successfully: "+localsDontAddedToThisApplication})
       } catch (err) {
