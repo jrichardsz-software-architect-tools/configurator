@@ -1,3 +1,5 @@
+var escape = require('escape-html');
+
 function Utils() {
 
 }
@@ -130,6 +132,15 @@ function comparer(otherArray, fieldKey){
     }).length == 0;
   }
 }
+
+
+Utils.sanitizeObject = function(rawObject) {
+  var newObject = {...rawObject};
+  for(var key in newObject){
+    newObject[key] = escape(newObject[key])
+  }
+  return newObject;
+};
 
 
 module.exports = Utils;

@@ -1,4 +1,5 @@
 const Utils = require('../common/Utils.js');
+var escape = require('escape-html');
 
 function ApplicationRouter(expressInstance) {
 
@@ -9,13 +10,15 @@ function ApplicationRouter(expressInstance) {
   expressInstance.post('/application/action/save', ["admin"], (req, res) => {
 
     logger.info("Save application:");
-    logger.info(req.body);
-    applicationRepository.save(req.body, function(err, result) {
+    var applicationParameters = Utils.sanitizeObject(req.body)
+    logger.info(applicationParameters);
+
+    applicationRepository.save(applicationParameters, function(err, result) {
       if (err) {
         logger.error(`Error while trying to persist an application: ${err.code} ${err.sqlMessage}`);
         if (err.code === 'ER_DUP_ENTRY') {
           return res.render('application/new.hbs', {
-            error_message: "An application already exist with provided name: " + req.body.name
+            error_message: "An application already exist with provided name: " + applicationParameters.name
           });
         } else {
           logger.error(err);
@@ -33,7 +36,7 @@ function ApplicationRouter(expressInstance) {
 
   expressInstance.get('/application/view/edit/:id', ["admin"], (req, res) => {
 
-   applicationRepository.findOneById(req.params.id,function(err,application){
+   applicationRepository.findOneById(escape(req.params.id),function(err,application){
      if (err) {
        logger.info(err);
        homeRouter.goToHomePage(req, res, {
@@ -49,7 +52,7 @@ function ApplicationRouter(expressInstance) {
 
   expressInstance.get('/application/view/delete/:id', ["admin"], (req, res) => {
 
-    applicationRepository.findOneById(req.params.id,function(err,application){
+    applicationRepository.findOneById(escape(req.params.id),function(err,application){
       if (err) {
         logger.info(err);
         homeRouter.goToHomePage(req, res, {
@@ -86,7 +89,7 @@ function ApplicationRouter(expressInstance) {
   expressInstance.post('/application/action/delete', ["admin"], (req, res) => {
 
     logger.info("Delete application:");
-    applicationRepository.delete(req.body.id, function(err, result) {
+    applicationRepository.delete(escape(req.body.id), function(err, result) {
       if (err) {
         logger.info(err);
         res.render('common/delete.hbs', {

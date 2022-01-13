@@ -5,6 +5,7 @@ const ApplicationVariableService = require(appHomePath+'/service/ApplicationVari
 var applicationVariableService = new ApplicationVariableService();
 const util = require('util');
 const readFile = util.promisify(fs.readFile);
+var escape = require('escape-html');
 
 function ApplicationVariableRouter(expressInstance) {
 
@@ -38,7 +39,7 @@ function ApplicationVariableRouter(expressInstance) {
 
       var applicationId;
       if (req.query.application_id && req.query.application_id != "-1") {
-        applicationId = req.query.application_id;
+        applicationId = escape(req.query.application_id);
       } else if (typeof redirectAttributes !== 'undefined' && typeof redirectAttributes.application_id !== 'undefined' && redirectAttributes.application_id != "-1") {
         applicationId = redirectAttributes.application_id;
       }
@@ -78,8 +79,8 @@ function ApplicationVariableRouter(expressInstance) {
 
   expressInstance.get('/application-variable/view/:selectedApplicationId/:scope/new', ["admin"], (req, res) => {
 
-    var scope = req.params.scope;
-    var applicationId = req.params.selectedApplicationId;
+    var scope = escape(req.params.scope);
+    var applicationId = escape(req.params.selectedApplicationId);
 
     //validate id application exist
     applicationRepository.findOneById(applicationId, function(err, application) {
@@ -130,7 +131,7 @@ function ApplicationVariableRouter(expressInstance) {
                 }
 
                 res.render('application-variable/add_global_var.hbs', {
-                  application_id: req.params.selectedApplicationId,
+                  application_id: escape(req.params.selectedApplicationId),
                   variables: availableGlobalVariables,
                   application_name: application.name
                 });
@@ -146,7 +147,7 @@ function ApplicationVariableRouter(expressInstance) {
 
   expressInstance.get('/application-variable/action/:selectedApplicationId/variables/export', ["admin", "reader"], (req, res) => {
 
-    var applicationId = req.params.selectedApplicationId;
+    var applicationId = escape(req.params.selectedApplicationId);
     applicationRepository.findOneById(applicationId, function(err, application) {
       if (err) {
         logger.info(err);
@@ -179,7 +180,7 @@ function ApplicationVariableRouter(expressInstance) {
 
   expressInstance.post('/application-variable/action/:selectedApplicationId/variables/import', ["admin", "reader"], async (req, res) => {
 
-    var applicationId = req.params.selectedApplicationId;
+    var applicationId = escape(req.params.selectedApplicationId);
     var resultMessages = [];
 
     if (!req.files || Object.keys(req.files).length === 0) {
@@ -380,12 +381,7 @@ function ApplicationVariableRouter(expressInstance) {
         })
       }
     }else{
-      logger.error("Locals which are not added to this application is zero");
-      return _this.goToHomePage(req, res, {
-        redirect: '/application-variable',
-        error_message: "Internal error",
-        application_id: applicationId
-      })
+      logger.info("Nothing to add");
     }
 
 
@@ -399,14 +395,14 @@ function ApplicationVariableRouter(expressInstance) {
 
   expressInstance.post('/application-variable/action/local/variable/:mode/save', ["admin"], async (req, res) => {
 
-    var variable = Object.assign({}, req.body);
+    var variable = Utils.sanitizeObject(req.body);
     delete variable.application_id;
     delete variable.variable_id;
 
     variable.scope = 'L';
 
     if (req.body.variable_id) {
-      variable.id = req.body.variable_id;
+      variable.id = escape(req.body.variable_id);
     }
 
     let objectToLog = {
@@ -415,12 +411,12 @@ function ApplicationVariableRouter(expressInstance) {
     objectToLog.value = "****";
     logger.info(objectToLog);
 
-    var application = await applicationRepository.findOneById(req.body.application_id);
+    var application = await applicationRepository.findOneById(escape(req.body.application_id));
 
     if(typeof application !== 'undefined' && application.length == 0){
       return res.render('application-variable/new_local_var.hbs', {
         error_message: "Application was not found",
-        application_id: req.body.application_id,
+        application_id: escape(req.body.application_id),
         application_name: application.name,
         mode: req.params.mode
       });
@@ -432,14 +428,14 @@ function ApplicationVariableRouter(expressInstance) {
     }
 
     //if is a new variable (without id)
-    if(typeof req.body.id !== 'undefined' && req.params.mode === "add"){
+    if(typeof escape(req.body.id) !== 'undefined' && escape(req.params.mode) === "add"){
       //validate unique name
       var locaVariablesWhoAlreadyExist = await applicationVariableRepository.findVariableInApplication(application.name, variable.name,"L");
 
       if(typeof locaVariablesWhoAlreadyExist !== 'undefined' && locaVariablesWhoAlreadyExist.length > 0){
         return res.render('application-variable/new_local_var.hbs', {
           error_message: "A variable already exist in this application with this name and local scope",
-          application_id: req.body.application_id,
+          application_id: escape(req.body.application_id),
           application_name: application.name,
           mode: req.params.mode
         });
@@ -450,7 +446,7 @@ function ApplicationVariableRouter(expressInstance) {
       if(typeof globalVariablesWhoAlreadyExist !== 'undefined' && globalVariablesWhoAlreadyExist.length > 0){
         return res.render('application-variable/new_local_var.hbs', {
           error_message: "A variable already exist in this application with this name but with global scope",
-          application_id: req.body.application_id,
+          application_id: escape(req.body.application_id),
           application_name: application.name,
           mode: req.params.mode
         });
@@ -463,7 +459,7 @@ function ApplicationVariableRouter(expressInstance) {
         logger.error(`Error while trying to persist variable: ${err.code} ${err.sqlMessage}`);
         return res.render('application-variable/new_local_var.hbs', {
           error_message: "An error occurred when trying to save the variable.",
-          application_id: req.body.application_id,
+          application_id: escape(req.body.application_id),
           application_name: application.name,
           mode: req.params.mode
         });
@@ -473,7 +469,7 @@ function ApplicationVariableRouter(expressInstance) {
         // to  selected application
         if (!req.body.variable_id) {
           var application_variable = {
-            application_id: req.body.application_id,
+            application_id: escape(req.body.application_id),
             variable_id: variableSaveResult.insertId
           };
           applicationVariableRepository.save(application_variable, function(applicationVariableErr, applicationVariableResult) {
@@ -485,7 +481,7 @@ function ApplicationVariableRouter(expressInstance) {
 
                 res.render('application-variable/new_local_var.hbs', {
                   error_message: "An error occurred when trying to save the variable.",
-                  application_id: req.body.application_id,
+                  application_id: escape(req.body.application_id),
                   application_name: application.name,
                   mode: req.params.mode
                 });
@@ -495,7 +491,7 @@ function ApplicationVariableRouter(expressInstance) {
               _this.goToHomePage(req, res, {
                 redirect: '/application-variable',
                 success_message: "The variable was saved successfully.",
-                application_id: req.body.application_id
+                application_id: escape(req.body.application_id)
               })
             }
           });
@@ -503,7 +499,7 @@ function ApplicationVariableRouter(expressInstance) {
           _this.goToHomePage(req, res, {
             redirect: '/application-variable',
             success_message: "The variable was edited successfully.",
-            application_id: req.body.application_id
+            application_id: escape(req.body.application_id)
           })
         }
       }
@@ -513,14 +509,15 @@ function ApplicationVariableRouter(expressInstance) {
   expressInstance.post('/application-variable/action/global/variable/add', ["admin"], (req, res) => {
 
     logger.info("Add global variables:");
-    logger.debug(req.body);
+    var body = Utils.sanitizeObject(req.body)
+    logger.debug(body);
 
-    var selectedApplicationId = req.body.application_id;
+    var selectedApplicationId = body.application_id;
 
     var columns = ["application_id", "variable_id"];
     var variables_id = [];
 
-    for (var key in req.body) {
+    for (var key in body) {
       if (key.startsWith("global_var_id_selected_")) {
         variables_id.push(key.replace("global_var_id_selected_", ""))
       }
@@ -538,7 +535,7 @@ function ApplicationVariableRouter(expressInstance) {
         _this.goToHomePage(req, res, {
           redirect: '/application-variable',
           success_message: "The variables were added successfully.",
-          application_id: req.body.application_id
+          application_id: body.application_id
         })
       }
     });
@@ -546,8 +543,8 @@ function ApplicationVariableRouter(expressInstance) {
   });
 
   expressInstance.get('/application-variable/view/edit/:id/:application_id/:variable_id', ["admin"], async (req, res) => {
-
-    variableRepository.findOneById(req.params.variable_id, async function(err, variable) {
+    var variable_id = escape(req.params.variable_id);
+    variableRepository.findOneById(variable_id, async function(err, variable) {
       if (err) {
         logger.info(err);
         _this.goToHomePage(req, res, {
@@ -558,11 +555,11 @@ function ApplicationVariableRouter(expressInstance) {
           variable.value = aes256.decrypt(cryptKey, variable.value);
         }
 
-        var application = await applicationRepository.findOneById(req.params.application_id);
+        var application = await applicationRepository.findOneById(escape(req.params.application_id));
 
         res.render('application-variable/new_local_var.hbs', {
-          id: req.params.id,
-          application_id: req.params.application_id,
+          id: escape(req.params.id),
+          application_id: escape(req.params.application_id),
           application_name: application.name,
           variable: variable,
           mode: "edit"
@@ -573,14 +570,14 @@ function ApplicationVariableRouter(expressInstance) {
 
   expressInstance.get('/application-variable/view/read/:application_id/:variable_id', ["reader"], (req, res) => {
 
-    applicationRepository.findOneById(req.params.application_id, function(err, application) {
+    applicationRepository.findOneById(escape(req.params.application_id), function(err, application) {
       if (err) {
         logger.info(err);
         _this.goToHomePage(req, res, {
           error_message: "An error occurred when trying to read the application."
         })
       } else {
-        variableRepository.findOneById(req.params.variable_id, function(err, entity) {
+        variableRepository.findOneById(escape(req.params.variable_id), function(err, entity) {
           if (err) {
             logger.info(err);
             _this.goToHomePage(req, res, {
@@ -597,7 +594,7 @@ function ApplicationVariableRouter(expressInstance) {
 
             res.render('application-variable/read_var.hbs', {
               id: req.params.id,
-              application_id: req.params.application_id,
+              application_id: escape(req.params.application_id),
               variable: entity
             });
           }
@@ -608,7 +605,7 @@ function ApplicationVariableRouter(expressInstance) {
 
   expressInstance.get('/application-variable/view/delete/:id/:scope', ["admin"], (req, res) => {
 
-    var id = req.params.id;
+    var id = escape(req.params.id);
 
     applicationVariableRepository.findOneById(id, function(err, applicationVariable) {
       if (err) {
@@ -638,7 +635,7 @@ function ApplicationVariableRouter(expressInstance) {
                     "name": "scope",
                     "value": req.params.scope
                   }],
-                  warningMessage: "Are you sure you want to delete this {0} variable: \"{1}\" from this application \"{2}\"?".format(req.params.scope, variable.name, application.name),
+                  warningMessage: "Are you sure you want to delete this {0} variable: \"{1}\" from this application \"{2}\"?".format(escape(req.params.scope), variable.name, application.name),
                   entityType: "application-variable",
                   "mode": "confirm"
                 });
@@ -652,8 +649,8 @@ function ApplicationVariableRouter(expressInstance) {
 
   expressInstance.post('/application-variable/action/delete', ["admin"], (req, res) => {
 
-    var id = req.body.id;
-    var variableScope = req.body.scope;
+    var id = escape(req.body.id);
+    var variableScope = escape(req.body.scope);
 
     if (variableScope != "global" && variableScope != "local") {
       _this.goToHomePage(req, res, {

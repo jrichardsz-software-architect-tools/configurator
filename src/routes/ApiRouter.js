@@ -1,4 +1,5 @@
 var aes256 = require('aes256');
+var escape = require('escape-html');
 
 function ApiRouter(expressInstance) {
   var _this = this;
@@ -16,10 +17,13 @@ function ApiRouter(expressInstance) {
   };
 
   expressInstance.get('/api/v1/variables', ["api"], (req, res) => {
-    logger.info("get variables for app: "+req.query.application)
 
-    var type;
-    if(req.query.type === 'json' || req.query.type === 'env'){
+    var application = escape(req.query.application);
+    var type = escape(req.query.type);
+
+    logger.info("get variables for app: "+application)
+
+    if(type === 'json' || type === 'env'){
       type = req.query.type;
     }else{
       type = 'env';
@@ -31,7 +35,7 @@ function ApiRouter(expressInstance) {
       return;
     }
 
-    applicationVariableRepository.findVariablesByApplicationName(req.query.application, function(findVariablesByApplicationIdErr, variables) {
+    applicationVariableRepository.findVariablesByApplicationName(application, function(findVariablesByApplicationIdErr, variables) {
 
       if (findVariablesByApplicationIdErr) {
         logger.error(errVarApplications);
