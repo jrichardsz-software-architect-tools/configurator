@@ -56,7 +56,8 @@ function ApplicationVariableRepository() {
                 where
                 	ap.name = ?
                 	and av.application_id = ap.id
-                	and av.variable_id = v.id`;
+                	and av.variable_id = v.id
+                  order by v.scope, v.name`;
       try {
         connection.query(sql, [applicationName], function(err, selectResult) {
           if (err) {
