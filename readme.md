@@ -8,7 +8,7 @@ Centralize and Management configurations of all your applications.
 
 - Node.js > 14.*
 - Mysql database. You could use [docker](https://gist.github.com/jrichardsz/73142c5c7eb7136d80b165e75d3a1e22)
-- Create a database and execute this ddl to create the required tables: [./database/ddl.sql](./database/ddl.sql)
+- Create a database and execute this ddl to create the required tables: [./database/ddl.sql](./src/database/dump/ddl.sql)
 
 
 # Settings
@@ -55,13 +55,13 @@ npm run start
 
 # For servers with docker
 
-## Docker build
+**Docker build**
 
 ```
 docker build -t configurator .
 ```
 
-## Docker run
+**Docker run**
 
 ```
 docker run --name configurator -it --rm -p 8080:2708 \
@@ -82,6 +82,10 @@ docker run --name configurator -it --rm -p 8080:2708 \
 docker-compose up -d
 ```
 
+# For servers with public docker image
+
+Follow this [guide](https://github.com/software-architect-tools/configurator/wiki/Launch-with-Docker).
+
 # Usage
 
 Open your browser pointing at:
@@ -95,7 +99,7 @@ If no errors, you will see:
 
 ![home](./src/logo/home.png)
 
-# Users
+# Login
 
 By default two user are created:
 
@@ -107,9 +111,9 @@ Password are printed in the first log. Take care to delete them of the log!!. If
 Admin can make anything. Guest user only can enter to few options and can't view secrets values.
 
 
-# Get variables endpoint
+# Api: /variables
 
-If you have created an app called **helicarrier-api** with at least one variable, this is how can we get its variables:
+If you have created an app called **helicarrier-api** with at least one variable, this is how you can get its variables:
 
 ```
 curl localhost:2708/api/v1/variables?application=helicarrier-api -H "apiKey:changeme"
@@ -134,24 +138,60 @@ These variables are an option to the following strategies in several languages:
 - AppSettings.json on c#
 - etc
 
-So as several platforms like heroku advice us: Use environment variables instead hardcoded values.
+The previous files are inherited from first languages as a way to centralize the **configurations** of the application. Use them today in distributed enterprise environments **is not an option anymore**
 
-If this is your case, you just need to call the **Get variables endpoint** in the startup of your application and expose that variables to your entire system in transparent way, so that your classes won't know the origin of the variables: development ide or exported values on testing/prod
+The famous [The Twelve Factors](https://12factor.net/) for modern software, mention this on its third statement:
+
+> III. Config : Store config in the environment
+
+Also several platforms like [heroku](https://devcenter.heroku.com/articles/config-vars) recommends us the use environment variables instead hardcoded values:
+
+> An app’s environment-specific configuration should be stored in environment variables (not in the app’s source code)
+
+If this is your case, you just need to call the **/variables** endpoint in the startup of your application and expose that variables to your entire system in transparent way, so that your classes won't know the origin of the variables: development ide, developer shell or testing/prod shell
 
 I will develop clients for every language. At this moment, just the client for bash or docker based apps are here:
 
 - https://github.com/software-architect-tools/configurator/wiki/Linux-Client
 
-# Docker
+# Success stories
 
-Follow this [guide](https://github.com/software-architect-tools/configurator/wiki/Launch-with-Docker)
+I successful use the configurator for the following technologies based on docker:
+
+- java : spring-boot
+- java : war on tomcats
+- java : pentaho
+- nodejs : express aplications
+- php : pure without frameworks
+- php : drupal
+- php : wordpress
+- php : moodle
+- c# : netcore
+
+# Alternatives
+
+Here some platforms:
+- [zookeeper](https://zookeeper.apache.org)
+  - http://www.therore.net/java/2015/05/03/distributed-configuration-with-zookeeper-curator-and-spring-cloud-config.html
+- [Spring Cloud](http://spring.io/projects/spring-cloud-config#overview)
+  - https://www.baeldung.com/spring-cloud-configuration
+  - This is a java spring framework functionality in which you can create properties file with configurations and configure your applications to read them.
+- [Consul](https://www.consul.io/intro)
+  - Consul is a service mesh solution providing a full featured control plane with service discovery, configuration, and segmentation functionality.
+- https://www.vaultproject.io/
+- https://www.doppler.com/
+- doozerd
+- etcd
+
 
 # Roadmap
 
+- [ ] highlight variables who exist in another applications
 - [ ] solve/implement [issues](https://github.com/software-architect-tools/configurator/issues)
 - [ ] add changelog column for each app or variable
 - [ ] add dependency injection
-- [ ] unit tests/selenium tests
+- [ ] improve unit tests tests
+- [ ] unit selenium tests
 - [ ] java and nodejs libraries to be used in application as **configurator client**
 
 

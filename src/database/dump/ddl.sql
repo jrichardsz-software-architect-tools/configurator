@@ -79,13 +79,12 @@ DROP TABLE IF EXISTS `variable`;
 CREATE TABLE `variable` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
-  `value` longtext,
+  `value` longtext  NOT NULL,
   `description` varchar(100) DEFAULT NULL,
   `type` char(1) NOT NULL,
   `scope` char(1) NOT NULL,
   `deleted` char(1) NOT NULL DEFAULT 'N',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `variable_unique_name` (`name`)
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 

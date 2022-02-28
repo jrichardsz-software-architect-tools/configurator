@@ -162,8 +162,8 @@ function SecureExpress() {
       res.json(response422);
       return;
     }
-
-    if (typeof apiKey === 'undefined' || apiKey.length == 0) {
+    
+    if (typeof apiKey === 'undefined' || apiKey === null || apiKey.length == 0) {
       logger.error("apikey from configuration is wrong or empty.");
       res.status(response422.status);
       res.json(response422);

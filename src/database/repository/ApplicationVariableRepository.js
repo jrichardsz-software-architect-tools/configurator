@@ -56,7 +56,8 @@ function ApplicationVariableRepository() {
                 where
                 	ap.name = ?
                 	and av.application_id = ap.id
-                	and av.variable_id = v.id`;
+                	and av.variable_id = v.id
+                  order by v.scope, v.name`;
       try {
         connection.query(sql, [applicationName], function(err, selectResult) {
           if (err) {
@@ -68,6 +69,42 @@ function ApplicationVariableRepository() {
         callback(connectionErr, null);
       }
     });
+  }
+
+  this.findVariableInApplication = function(applicationName, variableName, variableScope) {
+    return new Promise(function (resolve, reject) {
+      databaseConnection.getConnection(function(err, connection) {
+
+        var sql = `select
+                  	av.id,
+                  	av.variable_id,
+                  	v.name,
+                  	v.value,
+                  	v.description,
+                  	v.type,
+                  	v.scope
+                  from
+                  	application_variable av,
+                  	variable v,
+                  	application ap
+                  where
+                  	ap.name = ?
+                  	and av.application_id = ap.id
+                  	and av.variable_id = v.id
+                  	and v.name = ?
+                  	and v.scope = ?`;
+        try {
+          connection.query(sql, [applicationName, variableName, variableScope], function(err, rows) {
+            if (err) {
+              reject(err);
+            }
+            resolve(rows);
+          });
+        } catch (connectionErr) {
+          reject(connectionErr);
+        }
+      });
+    })
   }
 
   this.findApplicationAndVariableById = function(id, callback) {

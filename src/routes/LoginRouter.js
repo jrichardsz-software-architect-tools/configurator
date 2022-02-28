@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 var captchapng = require('captchapng');
+var escape = require('escape-html');
 
 function LoginRouter(expressInstance) {
 
@@ -31,7 +32,11 @@ function LoginRouter(expressInstance) {
   expressInstance.post('/login/action', ["anonymous"], (req, res) => {
     logger.info("Login validation for user:"+req.body.user);
 
-    authenticationRepository.findOneByUserName(req.body.user.toLowerCase(), function(err, userInformation) {
+    var incomingUser = escape(req.body.user);
+    var incomingPassword = escape(req.body.password);
+    var incomingCaptcha = escape(req.body.captcha);
+
+    authenticationRepository.findOneByUserName(incomingUser.toLowerCase(), function(err, userInformation) {
 
       if (err || userInformation == null) {
         logger.info(err);
@@ -40,7 +45,7 @@ function LoginRouter(expressInstance) {
         return;
       }
 
-      bcrypt.compare(req.body.password, userInformation.password, function(compareErr, compareResult) {
+      bcrypt.compare(incomingPassword, userInformation.password, function(compareErr, compareResult) {
 
         if (compareErr) {
           logger.info("Failed at compare password with bcrypt");
@@ -51,7 +56,7 @@ function LoginRouter(expressInstance) {
         }
 
         if(!compareResult){
-          logger.info("Password incorrect for user:" + req.body.user);
+          logger.info("Password incorrect for user:" + incomingUser);
           req.session.error_message = "Incorrect user, password or captcha.";
           res.redirect("/login")
           return;
@@ -60,8 +65,8 @@ function LoginRouter(expressInstance) {
         if(typeof properties.security.disableCaptcha === 'undefined' ||
             properties.security.disableCaptcha == null || properties.security.disableCaptcha === false){
           logger.info("captcha is enabled");
-          if (new Number(req.body.captcha) != req.session.captchaSecret) {
-            logger.info("Captcha incorrect for user:" + req.body.user);
+          if (new Number(incomingCaptcha) != req.session.captchaSecret) {
+            logger.info("Captcha incorrect for user:" + incomingUser);
             req.session.error_message = "Incorrect user, password or captcha.";
             return res.redirect("/login")
           }
