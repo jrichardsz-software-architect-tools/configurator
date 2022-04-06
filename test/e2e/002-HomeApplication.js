@@ -1,5 +1,6 @@
 var chai = require('chai');
 var Settings = require('./Settings.js');
+const CommonSteps = require('./CommonSteps.js');
 var expect = chai.expect;
 var assert = chai.assert;
 var webdriver = require('selenium-webdriver');
@@ -8,6 +9,7 @@ var driverPath = require('chromedriver').path;
 var By = webdriver.By;
 var Key = webdriver.Key;
 var until = webdriver.until;
+var commonSteps = new CommonSteps();
 
 var service = new chrome.ServiceBuilder(driverPath).build();
 chrome.setDefaultService(service);
@@ -21,29 +23,16 @@ describe('Application', function() {
       .withCapabilities(webdriver.Capabilities.chrome())
       .build();
 
-    await driver.get(Settings.getConfiguratorUrl());
-    var usernameBox = await driver.findElement(By.name('user'));
-    await usernameBox.sendKeys(Settings.getConfiguratorAdminUser());
-    var passwordBox = await driver.findElement(By.name('password'));
-    await passwordBox.sendKeys(Settings.getConfiguratorAdminPassword());
-    const loginButton = await driver.wait(
-      until.elementsLocated(By.css(".btn.btn-primary.btn-block"))
-    );
-    await loginButton[0].click();
-    await driver.wait(
-      until.elementsLocated(By.css(".page-header"))
-    );
-    var applicationHomeTitle = await driver.findElement(By.css(".page-header")).getText();
+    var applicationHomeTitle = await commonSteps.login(driver);
     expect(applicationHomeTitle).to.equal("Applications");
 
   });
 
   after(async function() {
-
     await driver.quit();
   });
 
-  it('should keep on same page if parameters are not entered', async function() {
+  it('app:create - should keep on same page if parameters are empty', async function() {
 
     await driver.get(Settings.getConfiguratorUrl());
     var buttonNewApp = await driver.findElements(By.css("a[href='/application/view/new']"));
@@ -61,7 +50,25 @@ describe('Application', function() {
     expect(formTitle).to.equal("new application");
   });
 
-  it('should create the application and exist on result table if attributes are valid', async function() {
+  it('app:create - should be returned to the app home page when cancel button is clicked', async function() {
+
+    await driver.get(Settings.getConfiguratorUrl());
+    var buttonNewApp = await driver.findElements(By.css("a[href='/application/view/new']"));
+    await buttonNewApp[0].click();
+
+    //wait until the title
+    var formTitle = await driver.findElement(By.css(".page-header")).getText();
+    expect(formTitle).to.equal("new application");
+
+    var cancelButton = await driver.findElements(By.id("cancelCreationButton"));
+    await cancelButton[0].click();
+
+    //new title should be the home page
+    var applicationHomeTitle = await driver.findElement(By.css(".page-header")).getText();
+    expect(applicationHomeTitle).to.equal("Applications");
+  });
+
+  it('app:create - should work the app creation and should exist on result table if parameters are valid', async function() {
 
     await driver.get(Settings.getConfiguratorUrl());
 
@@ -99,7 +106,7 @@ describe('Application', function() {
 
   });
 
-  it('should edit the application attributes and validate it on result table if attributes are valid', async function() {
+  it('app:edit - should work the application edit and should exist on result table if parameters are valid', async function() {
     //at this point, the application was created.
     //I just need to search the row, get the edit button and click on it
     var rowsCollection = await driver.findElements(By.css("[class='table table-bordered table-hover table-striped'] tbody > tr"));
@@ -146,7 +153,7 @@ describe('Application', function() {
   });
 
 
-  it('should work the cancel of application deletion and return to the table', async function() {
+  it('app:delete - should work the cancel of application deletion and return to the table', async function() {
     //at this point, the application was created.
     //I just need to search the row, get the edit button and click on it
     var rowsCollection = await driver.findElements(By.css("[class='table table-bordered table-hover table-striped'] tbody > tr"));
@@ -170,9 +177,9 @@ describe('Application', function() {
     expect(applicationHomeTitle).to.equal("Applications");
   });
 
-  it('should work the application deletion and dissapear from the result table without any probems', async function() {
+  it('app:delete - should work the application deletion and dissapear from the result table', async function() {
 
-    await driver.get(Settings.getConfiguratorUrl());  
+    await driver.get(Settings.getConfiguratorUrl());
     await driver.wait(
       until.elementsLocated(By.css(".page-header"))
     );
@@ -218,6 +225,31 @@ describe('Application', function() {
     }
     //deleted application should not exist
     expect(false).to.equal(appNames.includes(process.env.APP_NAME + "-edited"));
+
+  });
+
+
+  it('app:variables - should see the variables if variables button is clicked', async function() {
+      //at this point, the application was created.
+      //I just need to search the row, get the edit button and click on it
+      var rowsCollection = await driver.findElements(By.css("[class='table table-bordered table-hover table-striped'] tbody > tr"));
+      //iterate rows looking for the second column which contains the app name
+      //get the columns of first application
+      var tdElements = await rowsCollection[0].findElements(By.xpath('td'));
+
+      var firstAppName = await tdElements[1].getText();
+
+      //click on variables button of first application
+      var variablesButton = await tdElements[4].findElements(By.css("a[title='Variables']"));
+      await variablesButton[0].click();
+
+      var formTitle = await driver.findElement(By.css(".page-header")).getText();
+      expect(formTitle).to.equal("Application Variables");
+
+      var selectedElements = await driver.findElements(By.css("select[name='applicationId']"));
+      var selectedApplicationElements = await selectedElements[0].findElements(By.xpath('//option[@selected]'));
+      var selectedApplicationNameText = await selectedApplicationElements[0].getText();
+      expect(selectedApplicationNameText).to.equal(firstAppName);
 
   });
 

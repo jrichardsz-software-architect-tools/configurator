@@ -7,8 +7,8 @@
     "start": "node src/Index.js",
     "dev": "supervisor -e 'js|hbs' src/Index.js",
     "test_unit": "mocha 'test/unit/**/*.js'",
-    "test_e2e": "mocha --timeout 15000 'test/e2e/**/*.js' --require mocha-suppress-logs",
-    "test_e2ev": "mocha --timeout 15000 'test/e2e/tests.js'",
+    "test_e2e": "mocha --timeout 15000 'test/e2e/**/Tests.js' --require mocha-suppress-logs",
+    "test_e2ev": "mocha --timeout 15000 'test/e2e/Tests.js'",
     "coverage": "nyc --reporter=html --reporter=text --reporter=json-summary mocha 'test/**/*.js'"
   },
   "license": "MIT",
