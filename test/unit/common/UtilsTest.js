@@ -1,7 +1,7 @@
 var chai = require('chai');
 var expect = chai.expect;
 var assert = chai.assert;
-var Utils = require('../../src//common/Utils.js');
+var Utils = require('../../../src/common/Utils.js');
 
 describe('common/Utils.js', function() {
   it('getDifferenceBetweenObjectArraysByField equal sets', function() {

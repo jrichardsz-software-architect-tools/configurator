@@ -89,6 +89,9 @@ function SecureExpress() {
       }else if(isContained(req.originalUrl, _this.staticAssets)){ //assets
         logger.debug("asset endpoint");
         return next();
+      }else if(req.originalUrl=="/health"){ //assets
+        logger.debug("health endpoint");
+        return next();
       }else { //is unknown
         logger.debug("unknown endpoint");
         res.redirect('/login');
@@ -104,6 +107,14 @@ function SecureExpress() {
 
   this.validateInteractiveAccess = function(req, res, next) {
 
+    var clientRemoteIp = Utils.getIp(req);
+    if(blackListBruteIps[clientRemoteIp]>_this.getBfaThreshold()){
+      logger.error("brute force attack ip detected : "+clientRemoteIp+" for these parameters:" +req.originalUrl);
+      res.status(response500.status);
+      res.json(response500);
+      return;
+    }    
+
     let allowedRolesForThisRoute;
 
     if(typeof req.session.loginInformation === 'undefined'){
@@ -118,12 +129,12 @@ function SecureExpress() {
 
 
     if(typeof req.session.loginInformation === 'undefined'){
-      if(!req.route.path.startsWith('/login')){
-        logger.error("session.loginInformation is null and just /login/.. endpoints are allowed. Requested route:"+req.route.path);
+      if(!(req.route.path.startsWith('/login') || req.route.path.startsWith('/health'))){
+        logger.error("session.loginInformation is null and just /login and /health endpoints are allowed. Requested route:"+req.route.path);
         res.redirect('/login');
         return
       }
-      //there ir not a valid session and is login, go!
+      //there ir not a valid session but is /login /health, go!
       next()
     }else{
       //exist a login information for this user
@@ -162,7 +173,7 @@ function SecureExpress() {
       res.json(response422);
       return;
     }
-    
+
     if (typeof apiKey === 'undefined' || apiKey === null || apiKey.length == 0) {
       logger.error("apikey from configuration is wrong or empty.");
       res.status(response422.status);
