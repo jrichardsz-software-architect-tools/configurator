@@ -70,39 +70,7 @@ describe('Application', function() {
 
   it('app:create - should work the app creation and should exist on result table if parameters are valid', async function() {
 
-    await driver.get(Settings.getConfiguratorUrl());
-
-    //get application count from table: table-responsive
-    var rowsBeforeCollection = await driver.findElements(By.css("[class='table table-bordered table-hover table-striped'] tbody > tr"));
-    var rowsBefore = rowsBeforeCollection.length
-
-    var buttonNewApp = await driver.findElements(By.css("a[href='/application/view/new']"));
-    await buttonNewApp[0].click();
-
-    var nameBox = await driver.findElement(By.name('name'));
-    await nameBox.sendKeys(process.env.APP_NAME);
-
-    var descriptionBox = await driver.findElement(By.css("input[name='description']"));
-    await descriptionBox.sendKeys(process.env.APP_DESC);
-
-    var buttonCreateApp = await driver.findElements(By.css("button[type='submit']"));
-    await buttonCreateApp[0].click();
-
-    await driver.wait(
-      until.elementsLocated(By.css(".page-header"))
-    );
-
-    var rowsAfterCollection = await driver.findElements(By.css("[class='table table-bordered table-hover table-striped'] tbody > tr"));
-    var rowsAfter = rowsAfterCollection.length
-
-    var appNames = [];
-    for (var webElementRow of rowsAfterCollection) {
-      var tdElements = await webElementRow.findElements(By.xpath('td'));
-      appNames.push(await tdElements[1].getText());
-    }
-
-    expect(rowsAfter).to.equal(rowsBefore + 1);
-    expect(true).to.equal(appNames.includes(process.env.APP_NAME));
+    await commonSteps.createApplication(driver);
 
   });
 

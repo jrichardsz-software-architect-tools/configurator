@@ -16,7 +16,7 @@ chrome.setDefaultService(service);
 var driver;
 var globalHomePageUrl = Settings.getConfiguratorUrl()+"/global-variable";
 
-describe('Application', function() {
+describe('Global Variables', function() {
 
   before(async function() {
     driver = await new webdriver.Builder()
@@ -271,58 +271,7 @@ describe('Application', function() {
   });
 
   it('global:create - should work the global secret creation and should exist on result table with hide value if parameters are valid', async function() {
-
-    await driver.get(globalHomePageUrl);
-
-    //get application count from table: table-responsive
-    var rowsBeforeCollection = await driver.findElements(By.css("[class='table table-bordered table-hover table-striped'] tbody > tr"));
-    var rowsBefore = rowsBeforeCollection.length
-
-    var buttonNewGlobal = await driver.findElements(By.css("a[href='/global-variable/view/new']"));
-    await buttonNewGlobal[0].click();
-
-    var nameBox = await driver.findElement(By.name('name'));
-    await nameBox.sendKeys(process.env.GLOBAL_NAME);
-
-    var valueBox = await driver.findElement(By.css("textarea[name='value']"));
-    await valueBox.sendKeys(process.env.GLOBAL_VALUE);
-
-    var descriptionBox = await driver.findElement(By.css("input[name='description']"));
-    await descriptionBox.sendKeys(process.env.GLOBAL_DESC);
-
-    await driver.findElement(By.css("select[name='type'] > option[value=S]")).click();
-
-    var buttonCreateGlobal = await driver.findElements(By.css("button[type='submit']"));
-    await buttonCreateGlobal[0].click();
-
-    var formTitle = await driver.findElement(By.css(".page-header")).getText();
-    expect(formTitle).to.equal("Global Variables");
-
-    var success_message = await driver.findElement(By.css(".alert.alert-success")).getText();
-    expect(success_message.trim()).to.equal("The global variable was saved successfully.");
-
-    var rowsAfterCollection = await driver.findElements(By.css("[class='table table-bordered table-hover table-striped'] tbody > tr"));
-    var rowsAfter = rowsAfterCollection.length
-
-    var globalWasFound = false;
-    var globalTypeFound;
-    var globalValueFound;
-    for (var webElementRow of rowsAfterCollection) {
-      var tdElements = await webElementRow.findElements(By.xpath('td'));
-      var currentGlobalName = await tdElements[1].getText();
-      if(currentGlobalName.trim()==process.env.GLOBAL_NAME){
-        globalWasFound = true;
-        globalTypeFound = await tdElements[2].getText();
-        globalValueFound = await tdElements[3].getText();
-        break;
-      }
-    }
-
-    expect(rowsAfter).to.equal(rowsBefore + 1);
-    expect(true).to.equal(globalWasFound);
-    expect(globalTypeFound).to.equal("Secret");
-    expect(true).to.equal(globalValueFound.includes("*"));
-
+    await commonSteps.createGlobalVariable(driver, globalHomePageUrl, process.env.GLOBAL_NAME, process.env.GLOBAL_VALUE, process.env.GLOBAL_DESC, "S", "Secret")
   });
 
   it('global:edit - should work the global secret edit and its value should be readable', async function() {
