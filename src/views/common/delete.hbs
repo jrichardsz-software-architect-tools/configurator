@@ -46,7 +46,7 @@
                       <input name="{{this.name}}" type="hidden" value="{{this.value}}" />
                     {{/each}}
                     <div class="form-group">
-                      <p>{{warningMessage}}</p>
+                      <p id="deleteWarningMessage" >{{warningMessage}}</p>
                     </div>
                     {{#stringEquals @root.mode 'cannot-delete'}}
                       <a href="/{{entityType}}" type="button" onclick="window.history.go(-1); return false;" class="btn btn-outline btn-primary">Accept</a>

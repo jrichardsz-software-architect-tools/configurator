@@ -1,6 +1,7 @@
 const uuid = require('uuid');
 const bcrypt = require('bcrypt');
 const Utils = require('../common/Utils.js');
+var escape = require('escape-html');
 
 function SecureExpress() {
 
@@ -113,7 +114,7 @@ function SecureExpress() {
       res.status(response500.status);
       res.json(response500);
       return;
-    }    
+    }
 
     let allowedRolesForThisRoute;
 
@@ -163,7 +164,7 @@ function SecureExpress() {
       return;
     }
 
-    var incomingApiKey = req.headers['apikey'];
+    var incomingApiKey = escape(req.headers['apikey']);
     var apiKey;
     try{
       apiKey = properties.api.key;
