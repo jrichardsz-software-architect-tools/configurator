@@ -1,3 +1,4 @@
+const { v4: uuidv4 } = require('uuid');
 var chai = require('chai');
 var Settings = require('./Settings.js');
 const CommonSteps = require('./CommonSteps.js');
@@ -23,6 +24,7 @@ describe('Application', function() {
       .withCapabilities(webdriver.Capabilities.chrome())
       .build();
 
+    driver.manage().window().maximize()
     var applicationHomeTitle = await commonSteps.login(driver);
     expect(applicationHomeTitle).to.equal("Applications");
 
@@ -69,13 +71,19 @@ describe('Application', function() {
   });
 
   it('app:create - should work the app creation and should exist on result table if parameters are valid', async function() {
-
-    await commonSteps.createApplication(driver);
-
+    var appName = uuidv4();
+    var appDesc = uuidv4();
+    await commonSteps.createApplicationAndValidate(driver, appName, appDesc);
   });
 
   it('app:edit - should work the application edit and should exist on result table if parameters are valid', async function() {
-    //at this point, the application was created.
+    var appName = uuidv4();
+    var appDesc = uuidv4();
+    await commonSteps.createApplicationAndValidate(driver, appName, appDesc);
+
+    var applicationHomeTitle = await driver.findElement(By.css(".page-header")).getText();
+    expect(applicationHomeTitle).to.equal("Applications");
+
     //I just need to search the row, get the edit button and click on it
     var rowsCollection = await driver.findElements(By.css("[class='table table-bordered table-hover table-striped'] tbody > tr"));
     //iterate rows looking for the second column which contains the app name
@@ -83,7 +91,7 @@ describe('Application', function() {
     for (var webElementRow of rowsCollection) {
       var tdElements = await webElementRow.findElements(By.xpath('td'));
       var thisAppName = await tdElements[1].getText();
-      if (thisAppName.trim() == process.env.APP_NAME.trim()) {
+      if (thisAppName.trim() == appName) {
         expectedColumnsContainingTheAppToBeEdited = tdElements;
         break;
       }
@@ -97,11 +105,11 @@ describe('Application', function() {
 
     var nameBox = await driver.findElement(By.name('name'));
     nameBox.clear();
-    await nameBox.sendKeys(process.env.APP_NAME + "-edited");
+    await nameBox.sendKeys(appName + "-edited");
 
     var descriptionBox = await driver.findElement(By.css("input[name='description']"));
     descriptionBox.clear();
-    await descriptionBox.sendKeys(process.env.APP_DESC + "-edited");
+    await descriptionBox.sendKeys(appDesc + "-edited");
 
     await driver.findElement(By.css("select[name='type'] > option[value=WEB]")).click();
 
@@ -116,51 +124,29 @@ describe('Application', function() {
       appNames.push(await tdElements[1].getText());
     }
 
-    expect(true).to.equal(appNames.includes(process.env.APP_NAME + "-edited"));
+    expect(true).to.equal(appNames.includes(appName + "-edited"));
 
   });
 
 
   it('app:delete - should work the cancel of application deletion and return to the table', async function() {
-    //at this point, the application was created.
-    //I just need to search the row, get the edit button and click on it
-    var rowsCollection = await driver.findElements(By.css("[class='table table-bordered table-hover table-striped'] tbody > tr"));
-    //iterate rows looking for the second column which contains the app name
-    //get the columns of first application
-    var tdElements = await rowsCollection[0].findElements(By.xpath('td'));
-    var deleteButton = await tdElements[4].findElements(By.css("a[title='Delete']"));
-    await deleteButton[0].click();
 
-    var formTitle = await driver.findElement(By.css(".page-header")).getText();
-    expect(formTitle).to.equal("delete");
-
-    var cancelButton = await driver.findElements(By.id("cancelDeletionButton"));
-    await cancelButton[0].click();
-
-    await driver.wait(
-      until.elementsLocated(By.css(".page-header"))
-    );
+    var appName = uuidv4();
+    var appDesc = uuidv4();
+    await commonSteps.createApplicationAndValidate(driver, appName, appDesc);
 
     var applicationHomeTitle = await driver.findElement(By.css(".page-header")).getText();
     expect(applicationHomeTitle).to.equal("Applications");
-  });
 
-  it('app:delete - should work the application deletion and dissapear from the result table', async function() {
-
-    await driver.get(Settings.getConfiguratorUrl());
-    await driver.wait(
-      until.elementsLocated(By.css(".page-header"))
-    );
-
-    //at this point, the application was created.
     //I just need to search the row, get the edit button and click on it
     var rowsCollection = await driver.findElements(By.css("[class='table table-bordered table-hover table-striped'] tbody > tr"));
 
+    //get our app
     var expectedColumnsContainingTheAppToBeDeleted;
     for (var webElementRow of rowsCollection) {
       var tdElements = await webElementRow.findElements(By.xpath('td'));
       var thisAppName = await tdElements[1].getText();
-      if (thisAppName.trim() == (process.env.APP_NAME + "-edited".trim())) {
+      if (thisAppName.trim() == (appName)) {
         expectedColumnsContainingTheAppToBeDeleted = tdElements;
         break;
       }
@@ -169,7 +155,42 @@ describe('Application', function() {
     var deleteButton = await expectedColumnsContainingTheAppToBeDeleted[4].findElements(By.css("a[title='Delete']"));
     await deleteButton[0].click();
 
-    //validate the title of delete form
+    var formTitle = await driver.findElement(By.css(".page-header")).getText();
+    expect(formTitle).to.equal("delete");
+
+    var cancelButton = await driver.findElements(By.id("cancelDeletionButton"));
+    await cancelButton[0].click();
+
+    var applicationHomeTitle = await driver.findElement(By.css(".page-header")).getText();
+    expect(applicationHomeTitle).to.equal("Applications");
+  });
+
+  it('app:delete - should work the application deletion and dissapear from the result table', async function() {
+
+    var appName = uuidv4();
+    var appDesc = uuidv4();
+    await commonSteps.createApplicationAndValidate(driver, appName, appDesc);
+
+    var applicationHomeTitle = await driver.findElement(By.css(".page-header")).getText();
+    expect(applicationHomeTitle).to.equal("Applications");
+
+    //I just need to search the row, get the edit button and click on it
+    var rowsCollection = await driver.findElements(By.css("[class='table table-bordered table-hover table-striped'] tbody > tr"));
+
+    //get our app
+    var expectedColumnsContainingTheAppToBeDeleted;
+    for (var webElementRow of rowsCollection) {
+      var tdElements = await webElementRow.findElements(By.xpath('td'));
+      var thisAppName = await tdElements[1].getText();
+      if (thisAppName.trim() == (appName)) {
+        expectedColumnsContainingTheAppToBeDeleted = tdElements;
+        break;
+      }
+    }
+
+    var deleteButton = await expectedColumnsContainingTheAppToBeDeleted[4].findElements(By.css("a[title='Delete']"));
+    await deleteButton[0].click();
+
     var formTitle = await driver.findElement(By.css(".page-header")).getText();
     expect(formTitle).to.equal("delete");
 
@@ -178,7 +199,7 @@ describe('Application', function() {
     var rawDisclaimer = await deleteForm[0].getText();
 
     //disclaimer shoould contain the name of app to delete
-    expect(true).to.equal(rawDisclaimer.includes(process.env.APP_NAME + "-edited"));
+    expect(true).to.equal(rawDisclaimer.includes(appName));
     //click on delete button
     var buttonDeleteApp = await driver.findElements(By.css("button[type='submit']"));
     await buttonDeleteApp[0].click();
@@ -192,32 +213,44 @@ describe('Application', function() {
       appNames.push(await tdElements[1].getText());
     }
     //deleted application should not exist
-    expect(false).to.equal(appNames.includes(process.env.APP_NAME + "-edited"));
+    expect(false).to.equal(appNames.includes(appName));
 
   });
 
 
   it('app:variables - should see the variables if variables button is clicked', async function() {
-      //at this point, the application was created.
-      //I just need to search the row, get the edit button and click on it
-      var rowsCollection = await driver.findElements(By.css("[class='table table-bordered table-hover table-striped'] tbody > tr"));
-      //iterate rows looking for the second column which contains the app name
-      //get the columns of first application
-      var tdElements = await rowsCollection[0].findElements(By.xpath('td'));
+    var appName = uuidv4();
+    var appDesc = uuidv4();
+    await commonSteps.createApplicationAndValidate(driver, appName, appDesc);
 
-      var firstAppName = await tdElements[1].getText();
+    var applicationHomeTitle = await driver.findElement(By.css(".page-header")).getText();
+    expect(applicationHomeTitle).to.equal("Applications");
 
-      //click on variables button of first application
-      var variablesButton = await tdElements[4].findElements(By.css("a[title='Variables']"));
-      await variablesButton[0].click();
+    //I just need to search the row, get the edit button and click on it
+    var rowsCollection = await driver.findElements(By.css("[class='table table-bordered table-hover table-striped'] tbody > tr"));
 
-      var formTitle = await driver.findElement(By.css(".page-header")).getText();
-      expect(formTitle).to.equal("Application Variables");
+    //get our app
+    var expectedColumnsContainingTheApp;
+    for (var webElementRow of rowsCollection) {
+      var tdElements = await webElementRow.findElements(By.xpath('td'));
+      var thisAppName = await tdElements[1].getText();
+      if (thisAppName.trim() == (appName)) {
+        expectedColumnsContainingTheApp = tdElements;
+        break;
+      }
+    }
 
-      var selectedElements = await driver.findElements(By.css("select[name='applicationId']"));
-      var selectedApplicationElements = await selectedElements[0].findElements(By.xpath('//option[@selected]'));
-      var selectedApplicationNameText = await selectedApplicationElements[0].getText();
-      expect(selectedApplicationNameText).to.equal(firstAppName);
+    //click on variables button of first application
+    var variablesButton = await expectedColumnsContainingTheApp[4].findElements(By.css("a[title='Variables']"));
+    await variablesButton[0].click();
+
+    var formTitle = await driver.findElement(By.css(".page-header")).getText();
+    expect(formTitle).to.equal("Application Variables");
+
+    var selectedElements = await driver.findElements(By.css("select[name='applicationId']"));
+    var selectedApplicationElements = await selectedElements[0].findElements(By.xpath('//option[@selected]'));
+    var selectedApplicationNameText = await selectedApplicationElements[0].getText();
+    expect(selectedApplicationNameText).to.equal(appName);
 
   });
 

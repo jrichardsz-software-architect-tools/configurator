@@ -36,7 +36,9 @@ const SecureExpress = require('./security/SecureExpress.js');
 const port = process.env.PORT || 2708;
 const app = express();
 
-app.use(cookieParser())
+app.disable('x-powered-by');
+
+app.use(cookieParser());
 
 app.use(session({
   secret: uuid.v4(),

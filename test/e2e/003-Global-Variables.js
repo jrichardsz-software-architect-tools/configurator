@@ -1,3 +1,4 @@
+const { v4: uuidv4 } = require('uuid');
 var chai = require('chai');
 var Settings = require('./Settings.js');
 const CommonSteps = require('./CommonSteps.js');
@@ -23,6 +24,7 @@ describe('Global Variables', function() {
       .withCapabilities(webdriver.Capabilities.chrome())
       .build();
 
+    driver.manage().window().maximize()
     var applicationHomeTitle = await commonSteps.login(driver);
     expect(applicationHomeTitle).to.equal("Applications");
 
@@ -68,65 +70,77 @@ describe('Global Variables', function() {
 
   it('global:create - should work the global plain creation and should exist on result table if parameters are valid', async function() {
 
-    await driver.get(globalHomePageUrl);
+    var globalVarName = uuidv4();
+    var globalVarValue = uuidv4();
+    var globalVarDesc = uuidv4();
 
-    //get application count from table: table-responsive
-    var rowsBeforeCollection = await driver.findElements(By.css("[class='table table-bordered table-hover table-striped'] tbody > tr"));
-    var rowsBefore = rowsBeforeCollection.length
+    await commonSteps.createGlobalVariable(driver, globalHomePageUrl, globalVarName, globalVarValue, globalVarDesc, "P", "Plain");
 
-    var buttonNewGlobal = await driver.findElements(By.css("a[href='/global-variable/view/new']"));
-    await buttonNewGlobal[0].click();
-
-    var nameBox = await driver.findElement(By.name('name'));
-    await nameBox.sendKeys(process.env.GLOBAL_NAME);
-
-    var valueBox = await driver.findElement(By.css("textarea[name='value']"));
-    await valueBox.sendKeys(process.env.GLOBAL_VALUE);
-
-    var descriptionBox = await driver.findElement(By.css("input[name='description']"));
-    await descriptionBox.sendKeys(process.env.GLOBAL_DESC);
-
-    await driver.findElement(By.css("select[name='type'] > option[value=P]")).click();
-
-    var buttonCreateGlobal = await driver.findElements(By.css("button[type='submit']"));
-    await buttonCreateGlobal[0].click();
-
-    var formTitle = await driver.findElement(By.css(".page-header")).getText();
-    expect(formTitle).to.equal("Global Variables");
-
-    var success_message = await driver.findElement(By.css(".alert.alert-success")).getText();
-    expect(success_message.trim()).to.equal("The global variable was saved successfully.");
-
-    var rowsAfterCollection = await driver.findElements(By.css("[class='table table-bordered table-hover table-striped'] tbody > tr"));
-    var rowsAfter = rowsAfterCollection.length
-
-    var globalWasFound = false;
-    var globalTypeFound;
-    var globalValueFound;
-    for (var webElementRow of rowsAfterCollection) {
-      var tdElements = await webElementRow.findElements(By.xpath('td'));
-      var currentGlobalName = await tdElements[1].getText();
-      if(currentGlobalName==process.env.GLOBAL_NAME){
-        globalWasFound = true;
-        globalTypeFound = await tdElements[2].getText();
-        globalValueFound = await tdElements[3].getText();
-        break;
-      }
-    }
-
-    expect(rowsAfter).to.equal(rowsBefore + 1);
-    expect(true).to.equal(globalWasFound);
-    expect(globalTypeFound).to.equal("Plain");
-    expect(false).to.equal(globalValueFound.includes("*"));
+    // await driver.get(globalHomePageUrl);
+    //
+    // //get application count from table: table-responsive
+    // var rowsBeforeCollection = await driver.findElements(By.css("[class='table table-bordered table-hover table-striped'] tbody > tr"));
+    // var rowsBefore = rowsBeforeCollection.length
+    //
+    // var buttonNewGlobal = await driver.findElements(By.css("a[href='/global-variable/view/new']"));
+    // await buttonNewGlobal[0].click();
+    //
+    // var nameBox = await driver.findElement(By.name('name'));
+    // await nameBox.sendKeys(process.env.GLOBAL_NAME);
+    //
+    // var valueBox = await driver.findElement(By.css("textarea[name='value']"));
+    // await valueBox.sendKeys(process.env.GLOBAL_VALUE);
+    //
+    // var descriptionBox = await driver.findElement(By.css("input[name='description']"));
+    // await descriptionBox.sendKeys(process.env.GLOBAL_DESC);
+    //
+    // await driver.findElement(By.css("select[name='type'] > option[value=P]")).click();
+    //
+    // var buttonCreateGlobal = await driver.findElements(By.css("button[type='submit']"));
+    // await buttonCreateGlobal[0].click();
+    //
+    // var formTitle = await driver.findElement(By.css(".page-header")).getText();
+    // expect(formTitle).to.equal("Global Variables");
+    //
+    // var success_message = await driver.findElement(By.css(".alert.alert-success")).getText();
+    // expect(success_message.trim()).to.equal("The global variable was saved successfully.");
+    //
+    // var rowsAfterCollection = await driver.findElements(By.css("[class='table table-bordered table-hover table-striped'] tbody > tr"));
+    // var rowsAfter = rowsAfterCollection.length
+    //
+    // var globalWasFound = false;
+    // var globalTypeFound;
+    // var globalValueFound;
+    // for (var webElementRow of rowsAfterCollection) {
+    //   var tdElements = await webElementRow.findElements(By.xpath('td'));
+    //   var currentGlobalName = await tdElements[1].getText();
+    //   if(currentGlobalName==process.env.GLOBAL_NAME){
+    //     globalWasFound = true;
+    //     globalTypeFound = await tdElements[2].getText();
+    //     globalValueFound = await tdElements[3].getText();
+    //     break;
+    //   }
+    // }
+    //
+    // expect(rowsAfter).to.equal(rowsBefore + 1);
+    // expect(true).to.equal(globalWasFound);
+    // expect(globalTypeFound).to.equal("Plain");
+    // expect(false).to.equal(globalValueFound.includes("*"));
 
   });
 
-  it('global:edit - should work the global edit and should exist on result table if parameters are valid', async function() {
+  it('global:edit - should work the global edit from plain to secret and should exist on result table if parameters are valid', async function() {
+
+    var globalVarName = uuidv4();
+    var globalVarValue = uuidv4();
+    var globalVarDesc = uuidv4();
+
+    await commonSteps.createGlobalVariable(driver, globalHomePageUrl, globalVarName, globalVarValue, globalVarDesc, "P", "Plain");
 
     await driver.get(globalHomePageUrl);
     var formTitle = await driver.findElement(By.css(".page-header")).getText();
     expect(formTitle).to.equal("Global Variables");
-    //at this point, the application was created.
+
     //I just need to search the row, get the edit button and click on it
     var rowsCollection = await driver.findElements(By.css("[class='table table-bordered table-hover table-striped'] tbody > tr"));
     //iterate rows looking for the second column which contains the app name
@@ -134,7 +148,7 @@ describe('Global Variables', function() {
     for (var webElementRow of rowsCollection) {
       var tdElements = await webElementRow.findElements(By.xpath('td'));
       var thisGlobalName = await tdElements[1].getText();
-      if (thisGlobalName.trim() == process.env.GLOBAL_NAME.trim()) {
+      if (thisGlobalName.trim() == globalVarName) {
         expectedColumnsContainingTheGlobalToBeEdited = tdElements;
         break;
       }
@@ -148,15 +162,15 @@ describe('Global Variables', function() {
 
     var nameBox = await driver.findElement(By.name('name'));
     nameBox.clear();
-    await nameBox.sendKeys(process.env.GLOBAL_NAME+"-edited");
+    await nameBox.sendKeys(globalVarName+"-edited");
 
     var valueBox = await driver.findElement(By.css("textarea[name='value']"));
     valueBox.clear();
-    await valueBox.sendKeys(process.env.GLOBAL_VALUE+"-edited");
+    await valueBox.sendKeys(globalVarValue+"-edited");
 
     var descriptionBox = await driver.findElement(By.css("input[name='description']"));
     descriptionBox.clear();
-    await descriptionBox.sendKeys(process.env.GLOBAL_DESC+"-edited");
+    await descriptionBox.sendKeys(globalVarDesc+"-edited");
 
     await driver.findElement(By.css("select[name='type'] > option[value=S]")).click();
 
@@ -171,7 +185,7 @@ describe('Global Variables', function() {
     for (var webElementRow of rowsAfterCollection) {
       var tdElements = await webElementRow.findElements(By.xpath('td'));
       var currentGlobalName = await tdElements[1].getText();
-      if(currentGlobalName==process.env.GLOBAL_NAME+"-edited"){
+      if(currentGlobalName==globalVarName+"-edited"){
         globalWasFound = true;
         globalTypeFound = await tdElements[2].getText();
         globalValueFound = await tdElements[3].getText();
@@ -186,16 +200,31 @@ describe('Global Variables', function() {
   });
 
   it('global:delete - should be returned to the global home page when cancel button is clicked', async function() {
+
+    var globalVarName = uuidv4();
+    var globalVarValue = uuidv4();
+    var globalVarDesc = uuidv4();
+
+    await commonSteps.createGlobalVariable(driver, globalHomePageUrl, globalVarName, globalVarValue, globalVarDesc, "P", "Plain");
+
     await driver.get(globalHomePageUrl);
     var formTitle = await driver.findElement(By.css(".page-header")).getText();
     expect(formTitle).to.equal("Global Variables");
-    //at this point, the application was created.
+
     //I just need to search the row, get the edit button and click on it
     var rowsCollection = await driver.findElements(By.css("[class='table table-bordered table-hover table-striped'] tbody > tr"));
     //iterate rows looking for the second column which contains the app name
-    //get the columns of first application
-    var tdElements = await rowsCollection[0].findElements(By.xpath('td'));
-    var deleteButton = await tdElements[5].findElements(By.css("a[title='Delete']"));
+    var expectedColumnsContainingTheGlobalToBeEdited;
+    for (var webElementRow of rowsCollection) {
+      var tdElements = await webElementRow.findElements(By.xpath('td'));
+      var thisGlobalName = await tdElements[1].getText();
+      if (thisGlobalName.trim() == globalVarName) {
+        expectedColumnsContainingTheGlobalToBeEdited = tdElements;
+        break;
+      }
+    }
+
+    var deleteButton = await expectedColumnsContainingTheGlobalToBeEdited[5].findElements(By.css("a[title='Delete']"));
     await deleteButton[0].click();
 
     var formTitle = await driver.findElement(By.css(".page-header")).getText();
@@ -210,28 +239,32 @@ describe('Global Variables', function() {
 
   it('global:delete - should work the global deletion and dissapear from the result table', async function() {
 
+    var globalVarName = uuidv4();
+    var globalVarValue = uuidv4();
+    var globalVarDesc = uuidv4();
+
+    await commonSteps.createGlobalVariable(driver, globalHomePageUrl, globalVarName, globalVarValue, globalVarDesc, "P", "Plain");
+
     await driver.get(globalHomePageUrl);
     var formTitle = await driver.findElement(By.css(".page-header")).getText();
     expect(formTitle).to.equal("Global Variables");
 
-    //at this point, the application was created.
     //I just need to search the row, get the edit button and click on it
     var rowsCollection = await driver.findElements(By.css("[class='table table-bordered table-hover table-striped'] tbody > tr"));
-
-    var expectedColumnsContainingTheGlobalToBeDeleted;
+    //iterate rows looking for the second column which contains the app name
+    var expectedColumnsContainingTheGlobalToBeEdited;
     for (var webElementRow of rowsCollection) {
       var tdElements = await webElementRow.findElements(By.xpath('td'));
-      var thisAppName = await tdElements[1].getText();
-      if (thisAppName.trim() == (process.env.GLOBAL_NAME + "-edited".trim())) {
-        expectedColumnsContainingTheGlobalToBeDeleted = tdElements;
+      var thisGlobalName = await tdElements[1].getText();
+      if (thisGlobalName.trim() == globalVarName) {
+        expectedColumnsContainingTheGlobalToBeEdited = tdElements;
         break;
       }
     }
 
-    var deleteButton = await expectedColumnsContainingTheGlobalToBeDeleted[5].findElements(By.css("a[title='Delete']"));
+    var deleteButton = await expectedColumnsContainingTheGlobalToBeEdited[5].findElements(By.css("a[title='Delete']"));
     await deleteButton[0].click();
 
-    //validate the title of delete form
     var formTitle = await driver.findElement(By.css(".page-header")).getText();
     expect(formTitle).to.equal("delete");
 
@@ -240,21 +273,13 @@ describe('Global Variables', function() {
     var rawDisclaimer = await deleteForm[0].getText();
 
     //disclaimer shoould contain the name of global to delete
-    expect(true).to.equal(rawDisclaimer.includes(process.env.GLOBAL_NAME + "-edited"));
+    expect(true).to.equal(rawDisclaimer.includes(globalVarName));
     //click on delete button
     var buttonDeleteApp = await driver.findElements(By.css("button[type='submit']"));
     await buttonDeleteApp[0].click();
 
     //get new rows
     var rowsAfterCollection = await driver.findElements(By.css("[class='table table-bordered table-hover table-striped'] tbody > tr"));
-    //get all app names
-    var appNames = [];
-    for (var webElementRow of rowsAfterCollection) {
-      var tdElements = await webElementRow.findElements(By.xpath('td'));
-      appNames.push(await tdElements[1].getText());
-    }
-    //deleted application should not exist
-    expect(false).to.equal(appNames.includes(process.env.APP_NAME + "-edited"));
 
     //search the global in the table
     var globalWasFound = false;
@@ -271,10 +296,18 @@ describe('Global Variables', function() {
   });
 
   it('global:create - should work the global secret creation and should exist on result table with hide value if parameters are valid', async function() {
-    await commonSteps.createGlobalVariable(driver, globalHomePageUrl, process.env.GLOBAL_NAME, process.env.GLOBAL_VALUE, process.env.GLOBAL_DESC, "S", "Secret")
+    var globalVarName = uuidv4();
+    var globalVarValue = uuidv4();
+    var globalVarDesc = uuidv4();
+    await commonSteps.createGlobalVariable(driver, globalHomePageUrl, globalVarName, globalVarValue, globalVarDesc, "S", "Secret")
   });
 
   it('global:edit - should work the global secret edit and its value should be readable', async function() {
+
+    var globalVarName = uuidv4();
+    var globalVarValue = uuidv4();
+    var globalVarDesc = uuidv4();
+    await commonSteps.createGlobalVariable(driver, globalHomePageUrl, globalVarName, globalVarValue, globalVarDesc, "S", "Secret")
 
     await driver.get(globalHomePageUrl);
     var formTitle = await driver.findElement(By.css(".page-header")).getText();
@@ -287,7 +320,7 @@ describe('Global Variables', function() {
     for (var webElementRow of rowsCollection) {
       var tdElements = await webElementRow.findElements(By.xpath('td'));
       var thisGlobalName = await tdElements[1].getText();
-      if (thisGlobalName.trim() == process.env.GLOBAL_NAME) {
+      if (thisGlobalName.trim() == globalVarName) {
         expectedColumnsContainingTheGlobalToBeEdited = tdElements;
         break;
       }
@@ -301,7 +334,7 @@ describe('Global Variables', function() {
 
     var secretValue = await driver.findElement(By.css("textarea[name='value']")).getText();
 
-    expect(secretValue).to.equal(process.env.GLOBAL_VALUE);
+    expect(secretValue).to.equal(globalVarValue);
 
   });
 

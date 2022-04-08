@@ -1,3 +1,4 @@
+const { v4: uuidv4 } = require('uuid');
 var chai = require('chai');
 var Settings = require('./Settings.js');
 const CommonSteps = require('./CommonSteps.js');
@@ -24,6 +25,7 @@ describe('Application Local Variables', function() {
       .withCapabilities(webdriver.Capabilities.chrome())
       .build();
 
+    driver.manage().window().maximize() 
     var applicationHomeTitle = await commonSteps.login(driver);
     expect(applicationHomeTitle).to.equal("Applications");
 
@@ -33,12 +35,13 @@ describe('Application Local Variables', function() {
     await driver.quit();
   });
 
-  it('app-variables - should appear in the select the created application', async function() {
-
-    await commonSteps.createApplication(driver);
+  it('home page : a created app should appear in the select application-variables home page', async function() {
+    var appName = uuidv4();
+    var appDesc = uuidv4();
+    await commonSteps.createApplicationAndValidate(driver, appName, appDesc);
     await driver.get(applicationVariableHomePageUrl);
     var selectElements = await driver.findElements(By.css("select[name='applicationId']"))
-    var selectedApplicationElement = await selectElements[0].findElements(By.xpath('option[.="' + process.env.APP_NAME + '"]'))
+    var selectedApplicationElement = await selectElements[0].findElements(By.xpath('option[.="' + appName + '"]'))
     await selectedApplicationElement[0].click();
 
     await driver.findElement(By.id('newLocalVariableButton'));
@@ -48,65 +51,59 @@ describe('Application Local Variables', function() {
 
   });
 
-  it('app:add-local-var - should work the local plain variable creation and should appear in the result table ', async function() {
+  it('add local var : when cancel button is clicked, user should be redirected to the global home page with app selected', async function() {
+
+    var appName = uuidv4();
+    var appDesc = uuidv4();
+    await commonSteps.createApplicationAndValidate(driver, appName, appDesc);
 
     await driver.get(applicationVariableHomePageUrl);
+
+    var formTitle = await driver.findElement(By.css(".page-header")).getText();
+    expect(formTitle.trim()).to.equal("Application Variables");
+
     var selectElements = await driver.findElements(By.css("select[name='applicationId']"))
-    var selectedApplicationElement = await selectElements[0].findElements(By.xpath('option[.="' + process.env.APP_NAME + '"]'))
+    var selectedApplicationElement = await selectElements[0].findElements(By.xpath('option[.="' + appName + '"]'))
     await selectedApplicationElement[0].click();
 
     await driver.findElement(By.id('newLocalVariableButton')).click();
 
     var formTitle = await driver.findElement(By.css(".page-header")).getText();
-    expect(true).to.equal(formTitle.includes(process.env.APP_NAME));
+    expect(true).to.equal(formTitle.includes(appName));
 
-    var nameBox = await driver.findElement(By.name('name'));
-    await nameBox.sendKeys(process.env.LOCAL_VARIABLE_NAME);
-
-    var valueBox = await driver.findElement(By.css("textarea[name='value']"));
-    await valueBox.sendKeys(process.env.LOCAL_VARIABLE_VALUE);
-
-    var descriptionBox = await driver.findElement(By.css("input[name='description']"));
-    await descriptionBox.sendKeys(process.env.LOCAL_VARIABLE_DESC);
-
-    await driver.findElement(By.css("select[name='type'] > option[value=P]")).click();
-
-    var buttonCreateGlobal = await driver.findElements(By.css("button[type='submit']"));
-    await buttonCreateGlobal[0].click();
+    var cancelButton = await driver.findElements(By.id("cancelAddLocalVarButton"));
+    await cancelButton[0].click();
 
     var formTitle = await driver.findElement(By.css(".page-header")).getText();
     expect(formTitle.trim()).to.equal("Application Variables");
 
-    var success_message = await driver.findElement(By.css(".alert.alert-success")).getText();
-    expect(success_message.trim()).to.equal("The variable was saved successfully.");
-
-    var rowsAfterCollection = await driver.findElements(By.css("[class='table table-bordered table-hover table-striped'] tbody > tr"));
-
-    var localVariableWasFound = false;
-    var localVariableTypeFound;
-    var localVariableValueFound;
-    for (var webElementRow of rowsAfterCollection) {
-      var tdElements = await webElementRow.findElements(By.xpath('td'));
-      var currentGlobalName = await tdElements[1].getText();
-      if(currentGlobalName==process.env.LOCAL_VARIABLE_NAME){
-        localVariableWasFound = true;
-        localVariableTypeFound = await tdElements[2].getText();
-        localVariableValueFound = await tdElements[3].getText();
-        break;
-      }
-    }
-
-    expect(true).to.equal(localVariableWasFound);
-    expect(localVariableTypeFound).to.equal("Plain");
-    expect(false).to.equal(localVariableValueFound.includes("*"));
+    var selectedElementsAfter = await driver.findElements(By.css("select[name='applicationId']"));
+    var selectedApplicationElementsAfter = await selectedElementsAfter[0].findElements(By.xpath('//option[@selected]'));
+    var selectedApplicationNameText = await selectedApplicationElementsAfter[0].getText();
+    expect(selectedApplicationNameText).to.equal(appName);
 
   });
 
-  it('app:edit-local-var - should work the local plain variable edition, value should be readable and should appear in the result table ', async function() {
+  it('add local var : a local plain variable should be able to be created, should appear in the result table', async function() {
+    var appName = uuidv4();
+    var appDesc = uuidv4();
+    var localVarName = uuidv4();
+    var localVarValue = uuidv4();
+    var localVarDesc = uuidv4();
+    await commonSteps.createAppAndAddOneVariable(driver, appName, appDesc, localVarName, localVarValue, localVarDesc, "P", "Plain")
+  });
+
+  it('add local var : a local plain variable should be readable on edition', async function() {
+    var appName = uuidv4();
+    var appDesc = uuidv4();
+    var localVarName = uuidv4();
+    var localVarValue = uuidv4();
+    var localVarDesc = uuidv4();
+    await commonSteps.createAppAndAddOneVariable(driver, appName, appDesc, localVarName, localVarValue, localVarDesc, "P", "Plain")
 
     await driver.get(applicationVariableHomePageUrl);
     var selectElements = await driver.findElements(By.css("select[name='applicationId']"))
-    var selectedApplicationElement = await selectElements[0].findElements(By.xpath('option[.="' + process.env.APP_NAME + '"]'))
+    var selectedApplicationElement = await selectElements[0].findElements(By.xpath('option[.="' + appName + '"]'))
     await selectedApplicationElement[0].click();
 
     //at this point, the variables was created.
@@ -117,7 +114,7 @@ describe('Application Local Variables', function() {
     for (var webElementRow of rowsCollection) {
       var tdElements = await webElementRow.findElements(By.xpath('td'));
       var thisGlobalName = await tdElements[1].getText();
-      if (thisGlobalName.trim() == process.env.LOCAL_VARIABLE_NAME) {
+      if (thisGlobalName.trim() == localVarName) {
         expectedColumnsContainingTheLocalVariableToBeEdited = tdElements;
         break;
       }
@@ -128,24 +125,114 @@ describe('Application Local Variables', function() {
 
     //validate the text: Editing local variable of: app-1067-edited
     var formTitle = await driver.findElement(By.css(".page-header")).getText();
-    expect(true).to.equal(formTitle.includes(process.env.APP_NAME));
+    expect(true).to.equal(formTitle.includes(appName));
+
+    var plainValue = await driver.findElement(By.css("textarea[name='value']")).getText();
+    expect(plainValue).to.equal(localVarValue);
+
+  });
+
+
+  it('add local var : a local secret variable should be able to be created, should appear in the result table', async function() {
+    var appName = uuidv4();
+    var appDesc = uuidv4();
+    var localVarName = uuidv4();
+    var localVarValue = uuidv4();
+    var localVarDesc = uuidv4();
+    await commonSteps.createAppAndAddOneVariable(driver, appName, appDesc, localVarName, localVarValue, localVarDesc, "S", "Secret")
+  });
+
+  it('add local var : a local secret variable should be readable on edition', async function() {
+    var appName = uuidv4();
+    var appDesc = uuidv4();
+    var localVarName = uuidv4();
+    var localVarValue = uuidv4();
+    var localVarDesc = uuidv4();
+    await commonSteps.createAppAndAddOneVariable(driver, appName, appDesc, localVarName, localVarValue, localVarDesc, "S", "Secret")
+
+    await driver.get(applicationVariableHomePageUrl);
+    var selectElements = await driver.findElements(By.css("select[name='applicationId']"))
+    var selectedApplicationElement = await selectElements[0].findElements(By.xpath('option[.="' + appName + '"]'))
+    await selectedApplicationElement[0].click();
+
+    //at this point, the variables was created.
+    //I just need to search the row, get the edit button and click on it
+    var rowsCollection = await driver.findElements(By.css("[class='table table-bordered table-hover table-striped'] tbody > tr"));
+    //iterate rows looking for the second column which contains the app name
+    var expectedColumnsContainingTheLocalVariableToBeEdited;
+    for (var webElementRow of rowsCollection) {
+      var tdElements = await webElementRow.findElements(By.xpath('td'));
+      var thisGlobalName = await tdElements[1].getText();
+      if (thisGlobalName.trim() == localVarName) {
+        expectedColumnsContainingTheLocalVariableToBeEdited = tdElements;
+        break;
+      }
+    }
+
+    var editButton = await expectedColumnsContainingTheLocalVariableToBeEdited[6].findElements(By.css("a[title='Edit']"));
+    await editButton[0].click();
+
+    //validate the text: Editing local variable of: app-1067-edited
+    var formTitle = await driver.findElement(By.css(".page-header")).getText();
+    expect(true).to.equal(formTitle.includes(appName));
+
+    var plainValue = await driver.findElement(By.css("textarea[name='value']")).getText();
+    expect(plainValue).to.equal(localVarValue);
+
+  });
+
+  it('edit local var : should work the edition of variable from plain to secret and should appear in the result table ', async function() {
+
+    var appName = uuidv4();
+    var appDesc = uuidv4();
+    var localVarName = uuidv4();
+    var localVarValue = uuidv4();
+    var localVarDesc = uuidv4();
+    await commonSteps.createAppAndAddOneVariable(driver, appName, appDesc, localVarName, localVarValue, localVarDesc, "P", "Plain")
+
+    await driver.get(applicationVariableHomePageUrl);
+
+    var selectElements = await driver.findElements(By.css("select[name='applicationId']"))
+    var selectedApplicationElement = await selectElements[0].findElements(By.xpath('option[.="' + appName + '"]'))
+    await selectedApplicationElement[0].click();
+
+    //at this point, the variables was created.
+    //I just need to search the row, get the edit button and click on it
+    var rowsCollection = await driver.findElements(By.css("[class='table table-bordered table-hover table-striped'] tbody > tr"));
+    //iterate rows looking for the second column which contains the app name
+    var expectedColumnsContainingTheLocalVariableToBeEdited;
+    for (var webElementRow of rowsCollection) {
+      var tdElements = await webElementRow.findElements(By.xpath('td'));
+      var thisGlobalName = await tdElements[1].getText();
+      if (thisGlobalName.trim() == localVarName) {
+        expectedColumnsContainingTheLocalVariableToBeEdited = tdElements;
+        break;
+      }
+    }
+
+    var editButton = await expectedColumnsContainingTheLocalVariableToBeEdited[6].findElements(By.css("a[title='Edit']"));
+    await editButton[0].click();
+
+    //validate the text: Editing local variable of: app-1067-edited
+    var formTitle = await driver.findElement(By.css(".page-header")).getText();
+    expect(true).to.equal(formTitle.includes(appName));
 
     var nameBox = await driver.findElement(By.name('name'));
     nameBox.clear();
-    await nameBox.sendKeys(process.env.LOCAL_VARIABLE_NAME+"-edited");
+    await nameBox.sendKeys(localVarName+"-edited");
 
     var valueBox = await driver.findElement(By.css("textarea[name='value']"));
     valueBox.clear();
-    await valueBox.sendKeys(process.env.LOCAL_VARIABLE_VALUE+"-edited");
+    await valueBox.sendKeys(localVarValue+"-edited");
 
     var descriptionBox = await driver.findElement(By.css("input[name='description']"));
     descriptionBox.clear();
-    await descriptionBox.sendKeys(process.env.LOCAL_VARIABLE_DESC+"-edited");
+    await descriptionBox.sendKeys(localVarDesc+"-edited");
 
     await driver.findElement(By.css("select[name='type'] > option[value=S]")).click();
 
-    var buttonCreateGlobal = await driver.findElements(By.css("button[type='submit']"));
-    await buttonCreateGlobal[0].click();
+    var buttonSave = await driver.findElements(By.css("button[type='submit']"));
+    await buttonSave[0].click();
 
     var formTitle = await driver.findElement(By.css(".page-header")).getText();
     expect(formTitle.trim()).to.equal("Application Variables");
@@ -161,7 +248,7 @@ describe('Application Local Variables', function() {
     for (var webElementRow of rowsAfterCollection) {
       var tdElements = await webElementRow.findElements(By.xpath('td'));
       var currentGlobalName = await tdElements[1].getText();
-      if(currentGlobalName==process.env.LOCAL_VARIABLE_NAME+"-edited"){
+      if(currentGlobalName==localVarName+"-edited"){
         localVariableWasFound = true;
         localVariableTypeFound = await tdElements[2].getText();
         localVariableValueFound = await tdElements[3].getText();
@@ -175,48 +262,18 @@ describe('Application Local Variables', function() {
 
   });
 
-  it('app:edit-local-var - secret value should be readable in edition mode', async function() {
-    //thre prevous test give us a secret variable
-    await driver.get(applicationVariableHomePageUrl);
-    var selectElements = await driver.findElements(By.css("select[name='applicationId']"))
-    var selectedApplicationElement = await selectElements[0].findElements(By.xpath('option[.="' + process.env.APP_NAME + '"]'))
-    await selectedApplicationElement[0].click();
-
-    //at this point, the variables was created.
-    //I just need to search the row, get the edit button and click on it
-    var rowsCollection = await driver.findElements(By.css("[class='table table-bordered table-hover table-striped'] tbody > tr"));
-    //iterate rows looking for the second column which contains the app name
-    var expectedColumnsContainingTheLocalVariableToBeEdited;
-    for (var webElementRow of rowsCollection) {
-      var tdElements = await webElementRow.findElements(By.xpath('td'));
-      var thisGlobalName = await tdElements[1].getText();
-      if (thisGlobalName.trim() == process.env.LOCAL_VARIABLE_NAME+"-edited") {
-        expectedColumnsContainingTheLocalVariableToBeEdited = tdElements;
-        break;
-      }
-    }
-
-    var editButton = await expectedColumnsContainingTheLocalVariableToBeEdited[6].findElements(By.css("a[title='Edit']"));
-    await editButton[0].click();
-
-    //validate the text: Editing local variable of: app-1067-edited
-    var formTitle = await driver.findElement(By.css(".page-header")).getText();
-    expect(true).to.equal(formTitle.includes(process.env.APP_NAME));
-
-    var secretValue = await driver.findElement(By.css("textarea[name='value']")).getText();
-    expect(secretValue).to.equal(process.env.LOCAL_VARIABLE_VALUE+"-edited");
-
-  });
-
   it('app:cancel-delete-var - should be returned to the global home page with app selected when cancel button is clicked', async function() {
-    //it is expected to have an app with two variables created in the previous tests
+    var appName = uuidv4();
+    var appDesc = uuidv4();
+    var localVarName = uuidv4();
+    var localVarValue = uuidv4();
+    var localVarDesc = uuidv4();
+    await commonSteps.createAppAndAddOneVariable(driver, appName, appDesc, localVarName, localVarValue, localVarDesc, "P", "Plain")
+
     await driver.get(applicationVariableHomePageUrl);
 
-    var formTitle = await driver.findElement(By.css(".page-header")).getText();
-    expect(formTitle.trim()).to.equal("Application Variables");
-
     var selectElements = await driver.findElements(By.css("select[name='applicationId']"))
-    var selectedApplicationElement = await selectElements[0].findElements(By.xpath('option[.="' + process.env.APP_NAME + '"]'))
+    var selectedApplicationElement = await selectElements[0].findElements(By.xpath('option[.="' + appName + '"]'))
     await selectedApplicationElement[0].click();
 
     //at this point, the application was created.
@@ -233,7 +290,7 @@ describe('Application Local Variables', function() {
     expect(formTitle).to.equal("delete");
 
     var deleteWarningMessage = await driver.findElement(By.id("deleteWarningMessage")).getText();
-    expect(true).to.equal(deleteWarningMessage.includes(process.env.APP_NAME));
+    expect(true).to.equal(deleteWarningMessage.includes(appName));
     expect(true).to.equal(deleteWarningMessage.includes(selectedVariableName));
 
     var cancelButton = await driver.findElements(By.id("cancelDeletionButton"));
@@ -245,36 +302,7 @@ describe('Application Local Variables', function() {
     var selectedElementsAfter = await driver.findElements(By.css("select[name='applicationId']"));
     var selectedApplicationElementsAfter = await selectedElementsAfter[0].findElements(By.xpath('//option[@selected]'));
     var selectedApplicationNameText = await selectedApplicationElementsAfter[0].getText();
-    expect(selectedApplicationNameText).to.equal(process.env.APP_NAME);
-
-  });
-
-  it('app:cancel-add-local-var - should be returned to the global home page with app selected when cancel button is clicked', async function() {
-    //it is expected to have an app with two variables created in the previous tests
-    await driver.get(applicationVariableHomePageUrl);
-
-    var formTitle = await driver.findElement(By.css(".page-header")).getText();
-    expect(formTitle.trim()).to.equal("Application Variables");
-
-    var selectElements = await driver.findElements(By.css("select[name='applicationId']"))
-    var selectedApplicationElement = await selectElements[0].findElements(By.xpath('option[.="' + process.env.APP_NAME + '"]'))
-    await selectedApplicationElement[0].click();
-
-    await driver.findElement(By.id('newLocalVariableButton')).click();
-
-    var formTitle = await driver.findElement(By.css(".page-header")).getText();
-    expect(true).to.equal(formTitle.includes(process.env.APP_NAME));
-
-    var cancelButton = await driver.findElements(By.id("cancelAddLocalVarButton"));
-    await cancelButton[0].click();
-
-    var formTitle = await driver.findElement(By.css(".page-header")).getText();
-    expect(formTitle.trim()).to.equal("Application Variables");
-
-    var selectedElementsAfter = await driver.findElements(By.css("select[name='applicationId']"));
-    var selectedApplicationElementsAfter = await selectedElementsAfter[0].findElements(By.xpath('//option[@selected]'));
-    var selectedApplicationNameText = await selectedApplicationElementsAfter[0].getText();
-    expect(selectedApplicationNameText).to.equal(process.env.APP_NAME);
+    expect(selectedApplicationNameText).to.equal(appName);
 
   });
 

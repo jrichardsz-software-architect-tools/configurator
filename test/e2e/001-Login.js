@@ -19,6 +19,7 @@ describe('Login', function() {
     driver = await new webdriver.Builder()
       .withCapabilities(webdriver.Capabilities.chrome())
       .build();
+    driver.manage().window().maximize()   
   });
 
   after(async function() {

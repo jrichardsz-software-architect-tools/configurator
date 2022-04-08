@@ -21,7 +21,8 @@ process.env.LOCAL_VARIABLE_DESC=localVariableDesc
 console.log("app: "+process.env.APP_NAME);
 console.log("global: "+process.env.GLOBAL_NAME);
 
-// require('./001-Login.js')
-// require('./002-HomeApplication.js')
-// require('./003-Global-Variables.js')
+require('./001-Login.js')
+require('./002-HomeApplication.js')
+require('./003-Global-Variables.js')
 require('./004-Application-Local-Variable.js')
+require('./005-Application-Global-Variable.js')
