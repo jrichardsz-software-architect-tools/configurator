@@ -221,6 +221,68 @@ function CommonSteps() {
 
   }
 
+  this.addLocalVariableToApp = async function(driver, appName, localVarName, localVarValue, localVarDesc, localType, localTypeDesc){
+
+    await driver.get(applicationVariableHomePageUrl);
+
+    var formTitle = await driver.findElement(By.css(".page-header")).getText();
+    expect(formTitle.trim()).to.equal("Application Variables");
+
+    var selectElements = await driver.findElements(By.css("select[name='applicationId']"))
+    var selectedApplicationElement = await selectElements[0].findElements(By.xpath('option[.="' + appName + '"]'))
+    await selectedApplicationElement[0].click();
+
+    await driver.findElement(By.id('newLocalVariableButton')).click();
+
+    var formTitle = await driver.findElement(By.css(".page-header")).getText();
+    expect(true).to.equal(formTitle.includes(appName));
+
+    var nameBox = await driver.findElement(By.name('name'));
+    await nameBox.sendKeys(localVarName);
+
+    var valueBox = await driver.findElement(By.css("textarea[name='value']"));
+    await valueBox.sendKeys(localVarValue);
+
+    var descriptionBox = await driver.findElement(By.css("input[name='description']"));
+    await descriptionBox.sendKeys(localVarDesc);
+
+    await driver.findElement(By.css(`select[name='type'] > option[value=${localType}]`)).click();
+
+    var buttonCreateGlobal = await driver.findElements(By.css("button[type='submit']"));
+    await buttonCreateGlobal[0].click();
+
+    var formTitle = await driver.findElement(By.css(".page-header")).getText();
+    expect(formTitle.trim()).to.equal("Application Variables");
+
+    var success_message = await driver.findElement(By.css(".alert.alert-success")).getText();
+    expect(success_message.trim()).to.equal("The variable was saved successfully.");
+
+    var rowsAfterCollection = await driver.findElements(By.css("[class='table table-bordered table-hover table-striped'] tbody > tr"));
+
+    var localVariableWasFound = false;
+    var localVariableTypeFound;
+    var localVariableValueFound;
+    for (var webElementRow of rowsAfterCollection) {
+      var tdElements = await webElementRow.findElements(By.xpath('td'));
+      var currentGlobalName = await tdElements[1].getText();
+      if(currentGlobalName==localVarName){
+        localVariableWasFound = true;
+        localVariableTypeFound = await tdElements[2].getText();
+        localVariableValueFound = await tdElements[3].getText();
+        break;
+      }
+    }
+
+    expect(true).to.equal(localVariableWasFound);
+    expect(localVariableTypeFound).to.equal(localTypeDesc);
+    if(localType=="P"){
+      expect(false).to.equal(localVariableValueFound.includes("*"));
+    }else if(localType=="S"){
+      expect(true).to.equal(localVariableValueFound.includes("*"));
+    }
+
+  }
+
 
   this.addGlobalVarToAplicationAndValidate = async function(driver, applicationVariableHomePageUrl, appName, globalVarName){
 
