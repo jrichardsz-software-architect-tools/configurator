@@ -18,7 +18,7 @@ var driver;
 var globalHomePageUrl = Settings.getConfiguratorUrl()+"/global-variable";
 var applicationVariableHomePageUrl = Settings.getConfiguratorUrl()+"/application-variable";
 
-describe('Application Variables', function() {
+describe('Application Global Variables', function() {
 
   before(async function() {
     driver = await new webdriver.Builder()
@@ -78,11 +78,11 @@ describe('Application Variables', function() {
     var globalVarId1 = "foo-"+ Math.floor((Math.random() * 999999) + 100000);
     var globalVarId2 = "foo-"+ Math.floor((Math.random() * 999999) + 100000);
 
-    await commonSteps.createGlobalVariable(driver, globalHomePageUrl, globalVarId1, globalVarId1, globalVarId1, "S", "Secret")
-    await commonSteps.addGlobalVarToAplicationAndValidate(driver, applicationVariableHomePageUrl, appName, globalVarId1)
+    await commonSteps.createGlobalVariable(driver, globalVarId1, globalVarId1, globalVarId1, "S", "Secret")
+    await commonSteps.addGlobalVarToAplicationAndValidate(driver, appName, globalVarId1)
 
-    await commonSteps.createGlobalVariable(driver, globalHomePageUrl, globalVarId2, globalVarId2, globalVarId2, "P", "Plain")
-    await commonSteps.addGlobalVarToAplicationAndValidate(driver, applicationVariableHomePageUrl, appName, globalVarId2)
+    await commonSteps.createGlobalVariable(driver, globalVarId2, globalVarId2, globalVarId2, "P", "Plain")
+    await commonSteps.addGlobalVarToAplicationAndValidate(driver, appName, globalVarId2)
 
   });
 
@@ -96,9 +96,9 @@ describe('Application Variables', function() {
     //create app
     await commonSteps.createApplicationAndValidate(driver, appName, appDesc);
     // create global
-    await commonSteps.createGlobalVariable(driver, globalHomePageUrl, globalVarId1, globalVarId1, globalVarId1, "P", "Plain")
+    await commonSteps.createGlobalVariable(driver, globalVarId1, globalVarId1, globalVarId1, "P", "Plain")
     //add global to app
-    await commonSteps.addGlobalVarToAplicationAndValidate(driver, applicationVariableHomePageUrl, appName, globalVarId1)
+    await commonSteps.addGlobalVarToAplicationAndValidate(driver, appName, globalVarId1)
     //delete global from app
 
     await driver.get(applicationVariableHomePageUrl);

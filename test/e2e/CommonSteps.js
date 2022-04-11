@@ -7,6 +7,7 @@ var until = webdriver.until;
 var expect = chai.expect;
 
 var applicationVariableHomePageUrl = Settings.getConfiguratorUrl()+"/application-variable";
+var globalHomePageUrl = Settings.getConfiguratorUrl()+"/global-variable";
 
 function CommonSteps() {
 
@@ -99,7 +100,7 @@ function CommonSteps() {
     expect(true).to.equal(appNames.includes(name));
   }
 
-  this.createGlobalVariable = async function(driver, globalHomePageUrl, name, value, desc, type, typeDesc) {
+  this.createGlobalVariable = async function(driver, name, value, desc, type, typeDesc) {
     await driver.get(globalHomePageUrl);
 
     //get application count from table: table-responsive
@@ -155,7 +156,6 @@ function CommonSteps() {
       expect(false).to.equal(globalValueFound.includes("*"));
     }
   }
-
 
   this.createAppAndAddOneVariable = async function(driver, appName, appDesc, localVarName, localVarValue, localVarDesc, localType, localTypeDesc){
 
@@ -283,8 +283,7 @@ function CommonSteps() {
 
   }
 
-
-  this.addGlobalVarToAplicationAndValidate = async function(driver, applicationVariableHomePageUrl, appName, globalVarName){
+  this.addGlobalVarToAplicationAndValidate = async function(driver, appName, globalVarName){
 
     await driver.get(applicationVariableHomePageUrl);
 

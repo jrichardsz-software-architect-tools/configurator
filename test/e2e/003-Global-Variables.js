@@ -74,7 +74,7 @@ describe('Global Variables', function() {
     var globalVarValue = uuidv4();
     var globalVarDesc = uuidv4();
 
-    await commonSteps.createGlobalVariable(driver, globalHomePageUrl, globalVarName, globalVarValue, globalVarDesc, "P", "Plain");
+    await commonSteps.createGlobalVariable(driver, globalVarName, globalVarValue, globalVarDesc, "P", "Plain");
 
     // await driver.get(globalHomePageUrl);
     //
@@ -135,7 +135,7 @@ describe('Global Variables', function() {
     var globalVarValue = uuidv4();
     var globalVarDesc = uuidv4();
 
-    await commonSteps.createGlobalVariable(driver, globalHomePageUrl, globalVarName, globalVarValue, globalVarDesc, "P", "Plain");
+    await commonSteps.createGlobalVariable(driver, globalVarName, globalVarValue, globalVarDesc, "P", "Plain");
 
     await driver.get(globalHomePageUrl);
     var formTitle = await driver.findElement(By.css(".page-header")).getText();
@@ -205,7 +205,7 @@ describe('Global Variables', function() {
     var globalVarValue = uuidv4();
     var globalVarDesc = uuidv4();
 
-    await commonSteps.createGlobalVariable(driver, globalHomePageUrl, globalVarName, globalVarValue, globalVarDesc, "P", "Plain");
+    await commonSteps.createGlobalVariable(driver, globalVarName, globalVarValue, globalVarDesc, "P", "Plain");
 
     await driver.get(globalHomePageUrl);
     var formTitle = await driver.findElement(By.css(".page-header")).getText();
@@ -243,7 +243,7 @@ describe('Global Variables', function() {
     var globalVarValue = uuidv4();
     var globalVarDesc = uuidv4();
 
-    await commonSteps.createGlobalVariable(driver, globalHomePageUrl, globalVarName, globalVarValue, globalVarDesc, "P", "Plain");
+    await commonSteps.createGlobalVariable(driver, globalVarName, globalVarValue, globalVarDesc, "P", "Plain");
 
     await driver.get(globalHomePageUrl);
     var formTitle = await driver.findElement(By.css(".page-header")).getText();
@@ -299,7 +299,7 @@ describe('Global Variables', function() {
     var globalVarName = uuidv4();
     var globalVarValue = uuidv4();
     var globalVarDesc = uuidv4();
-    await commonSteps.createGlobalVariable(driver, globalHomePageUrl, globalVarName, globalVarValue, globalVarDesc, "S", "Secret")
+    await commonSteps.createGlobalVariable(driver, globalVarName, globalVarValue, globalVarDesc, "S", "Secret")
   });
 
   it('global:edit - should work the global secret edit and its value should be readable', async function() {
@@ -307,7 +307,7 @@ describe('Global Variables', function() {
     var globalVarName = uuidv4();
     var globalVarValue = uuidv4();
     var globalVarDesc = uuidv4();
-    await commonSteps.createGlobalVariable(driver, globalHomePageUrl, globalVarName, globalVarValue, globalVarDesc, "S", "Secret")
+    await commonSteps.createGlobalVariable(driver, globalVarName, globalVarValue, globalVarDesc, "S", "Secret")
 
     await driver.get(globalHomePageUrl);
     var formTitle = await driver.findElement(By.css(".page-header")).getText();
