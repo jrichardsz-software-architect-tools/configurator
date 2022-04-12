@@ -382,6 +382,60 @@ function CommonSteps() {
     expect(importedVarNameOnEdit).to.equal(variableName);
 
     var importedVarValueOnEdit = await driver.findElement(By.css("textarea[name='value']")).getText();
+    expect(importedVarValueOnEdit).to.equal(variableValue);
+    // if(variableType=="P"){
+    // }else if(variableType=="S"){
+    //   expect(importedVarValueOnEdit).to.equal("changeme");
+    // }
+
+    var importedVarDescOnEdit = await driver.findElement(By.css("input[name='description']")).getAttribute("value");
+    expect(importedVarDescOnEdit).to.equal(variableDesc);
+
+    var selectUiElements = await driver.findElements(By.css("select[name='type']"));
+    var selectedElements = await selectUiElements[0].findElements(By.xpath('//option[@selected]'));
+    var selectedTypeText = await selectedElements[0].getText();
+    expect(selectedTypeText).to.equal(variableTypeDesc);
+
+  }
+
+  this.validateGlobalVariableExistence = async function(driver, variableName, variableDesc, variableValue, variableType, variableTypeDesc){
+    await driver.get(globalHomePageUrl);
+
+    formTitle = await driver.findElement(By.css(".page-header")).getText();
+    expect(formTitle.trim()).to.equal("Global Variables");
+
+    var tableElementRows = await driver.findElements(By.css("[class='table table-bordered table-hover table-striped'] tbody > tr"));
+
+    //validating variable 1
+    var expectedColumnsContainingTheGlobalVariable;
+    for (var webElementRow of tableElementRows) {
+      var tdElements = await webElementRow.findElements(By.xpath('td'));
+      var thisAppName = await tdElements[1].getText();
+      if (thisAppName.trim() == variableName) {
+        expectedColumnsContainingTheGlobalVariable = tdElements;
+        break;
+      }
+    }
+    //validate the existence on table
+    expect(expectedColumnsContainingTheGlobalVariable);
+
+    expect(variableTypeDesc).to.equal(await expectedColumnsContainingTheGlobalVariable[2].getText());
+    var importedVar1ValueOnTable = await expectedColumnsContainingTheGlobalVariable[3].getText();
+    if(variableType=="P"){
+      expect(false).to.equal(importedVar1ValueOnTable.includes("*"));
+    }else if(variableType=="S"){
+      expect(importedVar1ValueOnTable).to.equal("****");
+    }
+
+    var editButton = await expectedColumnsContainingTheGlobalVariable[5].findElements(By.css("a[title='Edit']"));
+    await editButton[0].click();
+    var formTitle = await driver.findElement(By.css(".page-header")).getText();
+    expect(formTitle).to.equal("editing global variable");
+
+    var importedVarNameOnEdit = await driver.findElement(By.css("input[name='name']")).getAttribute("value");
+    expect(importedVarNameOnEdit).to.equal(variableName);
+
+    var importedVarValueOnEdit = await driver.findElement(By.css("textarea[name='value']")).getText();
     if(variableType=="P"){
       expect(importedVarValueOnEdit).to.equal(variableValue);
     }else if(variableType=="S"){

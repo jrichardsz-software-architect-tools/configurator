@@ -236,6 +236,8 @@ function ApplicationVariableRouter(expressInstance) {
       })
     }
 
+    //TODO: validate the consistence of item on json
+
     var safeReceivedVariables = Utils.obfuscateFieldInArrayOfObjects(incomingVariablesToImport, "value", "****", 10);
     logger.info("received variables to import")
     logger.info(safeReceivedVariables);
