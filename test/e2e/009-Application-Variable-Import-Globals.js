@@ -27,7 +27,7 @@ var applicationVariableHomePageUrl = Settings.getConfiguratorUrl()+"/application
 
 var importDir = path.join(os.tmpdir(), uuidv4());
 
-describe('Application Variables: Import Globals: '+importDir, function() {
+describe.only('Application Variables: Import Globals: '+importDir, function() {
 
   before(async function() {
     await fsPromises.mkdir(importDir);
@@ -103,7 +103,9 @@ describe('Application Variables: Import Globals: '+importDir, function() {
     expect(rowsCountAfterImport).to.equal(rowsCountBeforeImport+2);
 
     await commonSteps.validateGlobalVariableExistence(driver, var1Name, var1Desc, var1Value, "P", "Plain")
+    await commonSteps.validateVariableExistenceOnApplication(driver, appName, var1Name, "P", "Plain")
     await commonSteps.validateGlobalVariableExistence(driver, var2Name, var2Desc, var2Value, "P", "Plain")
+    await commonSteps.validateVariableExistenceOnApplication(driver, appName, var2Name, "P", "Plain")
   });
 
   it('file with non-existent global secret variables should import only global variables with changeme as value', async function() {
@@ -164,7 +166,9 @@ describe('Application Variables: Import Globals: '+importDir, function() {
     expect(rowsCountAfterImport).to.equal(rowsCountBeforeImport+2);
 
     await commonSteps.validateGlobalVariableExistence(driver, var1Name, var1Desc, var1Value, "S", "Secret")
+    await commonSteps.validateVariableExistenceOnApplication(driver, appName, var1Name, "S", "Secret")
     await commonSteps.validateGlobalVariableExistence(driver, var2Name, var2Desc, var2Value, "S", "Secret")
+    await commonSteps.validateVariableExistenceOnApplication(driver, appName, var2Name, "S", "Secret")
 
   });
 
@@ -226,7 +230,78 @@ describe('Application Variables: Import Globals: '+importDir, function() {
     expect(rowsCountAfterImport).to.equal(rowsCountBeforeImport+2);
 
     await commonSteps.validateGlobalVariableExistence(driver, var1Name, var1Desc, var1Value, "S", "Secret")
+    await commonSteps.validateVariableExistenceOnApplication(driver, appName, var1Name, "S", "Secret")
     await commonSteps.validateGlobalVariableExistence(driver, var2Name, var2Desc, var2Value, "P", "Plain")
+    await commonSteps.validateVariableExistenceOnApplication(driver, appName, var2Name, "P", "Plain")
+
+  });
+
+  it.only('file with pre-existent orphan global plain variable should import only the new vars', async function() {
+    var appName = uuidv4();
+    var appDesc = uuidv4();
+    await commonSteps.createApplicationAndValidate(driver, appName, appDesc)
+
+    var var1Name = uuidv4();
+    var var1Value = uuidv4();
+    var var1Desc = uuidv4();
+    await commonSteps.createGlobalVariable(driver, var1Name, var1Value, var1Desc, "P", "Plain")
+
+    await driver.get(applicationVariableHomePageUrl);
+
+    var formTitle = await driver.findElement(By.css(".page-header")).getText();
+    expect(formTitle.trim()).to.equal("Application Variables");
+
+    var selectElements = await driver.findElements(By.css("select[name='applicationId']"))
+    var selectedApplicationElement = await selectElements[0].findElements(By.xpath('option[.="' + appName + '"]'))
+    await selectedApplicationElement[0].click();
+
+    var rowsBeforeImport = await driver.findElements(By.css("[class='table table-bordered table-hover table-striped'] tbody > tr"));
+    var rowsCountBeforeImport = rowsBeforeImport.length;
+
+    //input file
+    var input = await driver.findElement(By.id('import_file'));
+    var importFile = path.join(importDir, uuidv4()+".json");
+
+    var var2Name = uuidv4();
+    var var2Value = uuidv4();
+    var var2Desc = uuidv4();
+
+    var variablesToImport = [
+        {
+            "name": var1Name,
+            "value": var1Value,
+            "description": var1Desc,
+            "type": "P",
+            "scope": "G"
+        },
+        {
+            "name": var2Name,
+            "value": var2Value,
+            "description": var2Desc,
+            "type": "P",
+            "scope": "G"
+        }
+    ]
+    console.log(appName);
+    console.log(variablesToImport);
+
+    await fsPromises.writeFile(importFile, JSON.stringify(variablesToImport));
+    await input.sendKeys(importFile);
+
+    await driver.sleep(15000)
+
+    formTitle = await driver.findElement(By.css(".page-header")).getText();
+    expect(formTitle.trim()).to.equal("Application Variables");
+
+    var rowsAfterImport = await driver.findElements(By.css("[class='table table-bordered table-hover table-striped'] tbody > tr"));
+    var rowsCountAfterImport = rowsAfterImport.length;
+
+    expect(rowsCountAfterImport).to.equal(rowsCountBeforeImport+1);
+
+    await commonSteps.validateGlobalVariableExistence(driver, var1Name, var1Desc, var1Value, "P", "Plain")
+    await commonSteps.validateVariableExistenceOnApplication(driver, appName, var1Name, "P", "Plain")
+    await commonSteps.validateGlobalVariableExistence(driver, var2Name, var2Desc, var2Value, "P", "Plain")
+    await commonSteps.validateVariableExistenceOnApplication(driver, appName, var2Name, "P", "Plain")
 
   });
 

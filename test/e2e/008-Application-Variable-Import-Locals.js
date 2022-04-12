@@ -230,7 +230,7 @@ describe('Application Variables: Import Locals: '+importDir, function() {
 
   });
 
-  it('file with pre-existent local plain variables should be imported ignoring the existents', async function() {
+  it('file with pre-existent local plain variables should import only the new vars', async function() {
     var appName = uuidv4();
     var appDesc = uuidv4();
     await commonSteps.createApplicationAndValidate(driver, appName, appDesc)
@@ -293,7 +293,7 @@ describe('Application Variables: Import Locals: '+importDir, function() {
 
   });
 
-  it('file with pre-existent local secret variables should be imported ignoring the existents', async function() {
+  it('file with pre-existent local secret variables should import only the new vars', async function() {
     var appName = uuidv4();
     var appDesc = uuidv4();
     await commonSteps.createApplicationAndValidate(driver, appName, appDesc)
@@ -356,7 +356,7 @@ describe('Application Variables: Import Locals: '+importDir, function() {
 
   });
 
-  it('file with pre-existent local plain & secret variables should be imported ignoring the existents', async function() {
+  it('file with pre-existent local plain & secret variables should import only the new vars', async function() {
     var appName = uuidv4();
     var appDesc = uuidv4();
     await commonSteps.createApplicationAndValidate(driver, appName, appDesc)
