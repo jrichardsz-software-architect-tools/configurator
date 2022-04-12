@@ -6,7 +6,6 @@ const applicationVariableService = new ApplicationVariableService();
 const util = require('util');
 const readFile = util.promisify(fs.readFile);
 const escape = require('escape-html');
-const magicBytes = require('magic-bytes.js');
 
 function ApplicationVariableRouter(expressInstance) {
 
