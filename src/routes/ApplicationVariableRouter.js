@@ -2,10 +2,11 @@ var aes256 = require('aes256');
 const fs = require('fs');
 const Utils = require('../common/Utils.js');
 const ApplicationVariableService = require(appHomePath+'/service/ApplicationVariableService.js');
-var applicationVariableService = new ApplicationVariableService();
+const applicationVariableService = new ApplicationVariableService();
 const util = require('util');
 const readFile = util.promisify(fs.readFile);
-var escape = require('escape-html');
+const escape = require('escape-html');
+const magicBytes = require('magic-bytes.js');
 
 function ApplicationVariableRouter(expressInstance) {
 
@@ -208,7 +209,7 @@ function ApplicationVariableRouter(expressInstance) {
       logger.error(err);
       return _this.goToHomePage(req, res, {
         redirect: '/application-variable',
-        error_message: err,
+        error_message: "Failed to read the file",
         application_id: applicationId
       })
     }
@@ -221,7 +222,7 @@ function ApplicationVariableRouter(expressInstance) {
       logger.error(err);
       return _this.goToHomePage(req, res, {
         redirect: '/application-variable',
-        error_message:"Not valid json. "+ err,
+        error_message:"Not valid json.",
         application_id: applicationId
       })
     }

@@ -25,7 +25,8 @@ describe('Application Local Variables', function() {
       .withCapabilities(webdriver.Capabilities.chrome())
       .build();
 
-    driver.manage().window().maximize() 
+    await driver.sleep(500)
+    driver.manage().window().maximize()
     var applicationHomeTitle = await commonSteps.login(driver);
     expect(applicationHomeTitle).to.equal("Applications");
 

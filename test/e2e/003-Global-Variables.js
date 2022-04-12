@@ -25,6 +25,8 @@ describe('Global Variables', function() {
       .build();
 
     driver.manage().window().maximize()
+
+    await driver.sleep(500)
     var applicationHomeTitle = await commonSteps.login(driver);
     expect(applicationHomeTitle).to.equal("Applications");
 

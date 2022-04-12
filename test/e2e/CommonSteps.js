@@ -336,6 +336,68 @@ function CommonSteps() {
     expect(true).to.equal(global1WasFound);
   }
 
+  this.getTableRowCount = async function(driver, tableClass){
+    var rowsCollection = await driver.findElements(By.css(`[class='${tableClass}'] tbody > tr`));
+    return rowsCollection.length;
+  }
+
+  this.validateLocalVariableExistence = async function(driver, appName, variableName, variableDesc, variableValue, variableType, variableTypeDesc){
+    await driver.get(applicationVariableHomePageUrl);
+    formTitle = await driver.findElement(By.css(".page-header")).getText();
+    expect(formTitle.trim()).to.equal("Application Variables");
+
+    var selectElements = await driver.findElements(By.css("select[name='applicationId']"))
+    var selectedApplicationElement = await selectElements[0].findElements(By.xpath('option[.="' + appName + '"]'))
+    await selectedApplicationElement[0].click();
+
+    var tableElementRows = await driver.findElements(By.css("[class='table table-bordered table-hover table-striped'] tbody > tr"));
+
+    //validating variable 1
+    var expectedColumnsContainingTheLocalVariable;
+    for (var webElementRow of tableElementRows) {
+      var tdElements = await webElementRow.findElements(By.xpath('td'));
+      var thisAppName = await tdElements[1].getText();
+      if (thisAppName.trim() == variableName) {
+        expectedColumnsContainingTheLocalVariable = tdElements;
+        break;
+      }
+    }
+    //validate the existence on table
+    expect(expectedColumnsContainingTheLocalVariable);
+
+    expect(variableTypeDesc).to.equal(await expectedColumnsContainingTheLocalVariable[2].getText());
+    var importedVar1ValueOnTable = await expectedColumnsContainingTheLocalVariable[3].getText();
+    if(variableType=="P"){
+      expect(false).to.equal(importedVar1ValueOnTable.includes("*"));
+    }else if(variableType=="S"){
+      expect(true).to.equal(importedVar1ValueOnTable.includes("*"));
+    }
+
+    var editButton = await expectedColumnsContainingTheLocalVariable[6].findElements(By.css("a[title='Edit']"));
+    await editButton[0].click();
+    var formTitle = await driver.findElement(By.css(".page-header")).getText();
+    expect(true).to.equal(formTitle.includes(appName));
+
+    var importedVarNameOnEdit = await driver.findElement(By.css("input[name='name']")).getAttribute("value");
+    expect(importedVarNameOnEdit).to.equal(variableName);
+
+    var importedVarValueOnEdit = await driver.findElement(By.css("textarea[name='value']")).getText();
+    if(variableType=="P"){
+      expect(importedVarValueOnEdit).to.equal(variableValue);
+    }else if(variableType=="S"){
+      expect(importedVarValueOnEdit).to.equal("changeme");
+    }
+
+    var importedVarDescOnEdit = await driver.findElement(By.css("input[name='description']")).getAttribute("value");
+    expect(importedVarDescOnEdit).to.equal(variableDesc);
+
+    var selectUiElements = await driver.findElements(By.css("select[name='type']"));
+    var selectedElements = await selectUiElements[0].findElements(By.xpath('//option[@selected]'));
+    var selectedTypeText = await selectedElements[0].getText();
+    expect(selectedTypeText).to.equal(variableTypeDesc);
+
+  }
+
 }
 
 
