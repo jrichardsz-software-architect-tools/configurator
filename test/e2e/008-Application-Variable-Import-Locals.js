@@ -168,7 +168,7 @@ describe('Application Variables: Import Locals: '+importDir, function() {
 
   });
 
-  it('file with non-existent local secret & plain variables should be imported correctly', async function() {
+  it('file with non-existent local secret & plain variables should be import all the variables correctly', async function() {
     var appName = uuidv4();
     var appDesc = uuidv4();
     await commonSteps.createApplicationAndValidate(driver, appName, appDesc)

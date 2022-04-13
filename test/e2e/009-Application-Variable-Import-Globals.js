@@ -236,7 +236,7 @@ describe.only('Application Variables: Import Globals: '+importDir, function() {
 
   });
 
-  it.only('file with pre-existent orphan global plain variable should import only the new vars', async function() {
+  it('file with pre-existent orphan global plain variable should import only the new vars', async function() {
     var appName = uuidv4();
     var appDesc = uuidv4();
     await commonSteps.createApplicationAndValidate(driver, appName, appDesc)
@@ -282,13 +282,9 @@ describe.only('Application Variables: Import Globals: '+importDir, function() {
             "scope": "G"
         }
     ]
-    console.log(appName);
-    console.log(variablesToImport);
 
     await fsPromises.writeFile(importFile, JSON.stringify(variablesToImport));
     await input.sendKeys(importFile);
-
-    await driver.sleep(15000)
 
     formTitle = await driver.findElement(By.css(".page-header")).getText();
     expect(formTitle.trim()).to.equal("Application Variables");
@@ -296,7 +292,7 @@ describe.only('Application Variables: Import Globals: '+importDir, function() {
     var rowsAfterImport = await driver.findElements(By.css("[class='table table-bordered table-hover table-striped'] tbody > tr"));
     var rowsCountAfterImport = rowsAfterImport.length;
 
-    expect(rowsCountAfterImport).to.equal(rowsCountBeforeImport+1);
+    expect(rowsCountAfterImport).to.equal(rowsCountBeforeImport+2);
 
     await commonSteps.validateGlobalVariableExistence(driver, var1Name, var1Desc, var1Value, "P", "Plain")
     await commonSteps.validateVariableExistenceOnApplication(driver, appName, var1Name, "P", "Plain")

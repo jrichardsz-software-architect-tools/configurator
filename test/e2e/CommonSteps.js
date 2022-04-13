@@ -470,7 +470,6 @@ function CommonSteps() {
       }
     }
 
-    await driver.sleep(60000)
     //validate the existence on table
     expect(expectedColumnsContainingTheVariable);
 

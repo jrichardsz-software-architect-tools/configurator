@@ -293,7 +293,8 @@ function ApplicationVariableRouter(expressInstance) {
       }
     }else{
       try {
-        //step 1 : insert the global variables
+        logger.info("Some globals already exist and other needs to be created");
+        //step 1 : insert the new global variables
         var safeGlobalsToInsert = Utils.overrideFieldWithConditionInArrayOfObjects(readyToInsertGlobals, "value", defaultCryptedValueForImport, "type", "S");
         logger.info(safeGlobalsToInsert);
         await variableRepository.bulkInsert("name, value, description, type, scope", safeGlobalsToInsert);
@@ -301,7 +302,8 @@ function ApplicationVariableRouter(expressInstance) {
         logger.info("Globals were created successfully");
         //due to mysql behavior, after bulk insert, we don't have its primary keys.
         //we need to query them
-        var variableNames = Utils.arrayObjecsToArrayValuesWithFilter(readyToInsertGlobals, "name", "scope", "G");
+        //at this point the new created globals and the pre-existent global are ready to be added to the application
+        var variableNames = Utils.arrayObjecsToArrayValuesFilterByField(incomingVariablesToImport,"name", "scope","G");
         var recentlyCreatedVariablesFullData = await variableRepository.findVariablesByNamesAndScope(variableNames, "G");
         //step 2: retrieve the ids of created variables
         // create an array with the new variable ids
