@@ -432,11 +432,11 @@ function CommonSteps() {
     expect(importedVarNameOnEdit).to.equal(variableName);
 
     var importedVarValueOnEdit = await driver.findElement(By.css("textarea[name='value']")).getText();
-    if(variableType=="P"){
-      expect(importedVarValueOnEdit).to.equal(variableValue);
-    }else if(variableType=="S"){
-      expect(importedVarValueOnEdit).to.equal("changeme");
-    }
+    expect(importedVarValueOnEdit).to.equal(variableValue);
+    // if(variableType=="P"){
+    // }else if(variableType=="S"){
+    //   expect(importedVarValueOnEdit).to.equal("changeme");
+    // }
 
     var importedVarDescOnEdit = await driver.findElement(By.css("input[name='description']")).getAttribute("value");
     expect(importedVarDescOnEdit).to.equal(variableDesc);
