@@ -8,22 +8,18 @@ var driverPath = require('chromedriver').path;
 var By = webdriver.By;
 var Key = webdriver.Key;
 var until = webdriver.until;
+const os = require('os');
+const fs = require('fs');
+const path = require('path');
+const fsPromises = fs.promises;
+const { v4: uuidv4 } = require('uuid');
 
-var service = new chrome.ServiceBuilder(driverPath).build();
-chrome.setDefaultService(service);
 var driver;
 
 describe('Login', function() {
 
   before(async function() {
-    driver = await new webdriver.Builder()
-      .withCapabilities(webdriver.Capabilities.chrome())
-      .build();
-    driver.manage().window().maximize()
-  });
-
-  after(async function() {
-    await driver.quit();
+    driver = global.driver;
   });
 
   it('should show error message on empty credentials', async function() {

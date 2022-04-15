@@ -3,6 +3,7 @@ function AuthenticationRepository() {
   this.findOneByUserName = function(username, callback) {
     databaseConnection.getConnection(function(err, connection) {
       connection.query('select * from authentication where username = ?', [username], function(err, rows) {
+        connection.release();
         if (err) {
           callback(err, null);
         }
@@ -44,6 +45,7 @@ function AuthenticationRepository() {
         logger.info(sql);
 
         connection.query(sql, params, function(errUpdate, result) {
+          connection.release();
           callback(errUpdate, result);
         });
 
@@ -68,6 +70,7 @@ function AuthenticationRepository() {
         sql = sql.replace("@jokers", jokers.toString());
 
         connection.query(sql, values, function(errInsert, result) {
+          connection.release();
           callback(errInsert, result);
         });
       }

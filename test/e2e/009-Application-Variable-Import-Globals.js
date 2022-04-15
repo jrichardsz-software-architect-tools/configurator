@@ -19,30 +19,16 @@ var Key = webdriver.Key;
 var until = webdriver.until;
 var commonSteps = new CommonSteps();
 
-var service = new chrome.ServiceBuilder(driverPath).build();
-chrome.setDefaultService(service);
 var driver;
 var globalHomePageUrl = Settings.getConfiguratorUrl()+"/global-variable";
 var applicationVariableHomePageUrl = Settings.getConfiguratorUrl()+"/application-variable";
 
-var importDir = path.join(os.tmpdir(), uuidv4());
+var importDir = global.importDir;
 
 describe('Application Variables: Import Globals: '+importDir, function() {
 
   before(async function() {
-    await fsPromises.mkdir(importDir);
-    driver = await new webdriver.Builder()
-      .withCapabilities(webdriver.Capabilities.chrome())
-      .build();
-
-    driver.manage().window().maximize()
-    var applicationHomeTitle = await commonSteps.login(driver);
-    expect(applicationHomeTitle).to.equal("Applications");
-
-  });
-
-  after(async function() {
-    await driver.quit();
+    driver = global.driver;
   });
 
   it('app:0 , import: 2 unexistent globals-secret - should create 2 globals and add them to the application', async function() {

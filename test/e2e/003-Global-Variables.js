@@ -12,28 +12,13 @@ var Key = webdriver.Key;
 var until = webdriver.until;
 var commonSteps = new CommonSteps();
 
-var service = new chrome.ServiceBuilder(driverPath).build();
-chrome.setDefaultService(service);
 var driver;
 var globalHomePageUrl = Settings.getConfiguratorUrl()+"/global-variable";
 
 describe('Global Variables', function() {
 
   before(async function() {
-    driver = await new webdriver.Builder()
-      .withCapabilities(webdriver.Capabilities.chrome())
-      .build();
-
-    driver.manage().window().maximize()
-
-    await driver.sleep(500)
-    var applicationHomeTitle = await commonSteps.login(driver);
-    expect(applicationHomeTitle).to.equal("Applications");
-
-  });
-
-  after(async function() {
-    await driver.quit();
+    driver = global.driver;
   });
 
   it('global:create - should keep on same page if parameters are empty', async function() {
@@ -288,7 +273,7 @@ describe('Global Variables', function() {
     for (var webElementRow of rowsAfterCollection) {
       var tdElements = await webElementRow.findElements(By.xpath('td'));
       var currentGlobalName = await tdElements[1].getText();
-      if(currentGlobalName==process.env.GLOBAL_NAME+"-edited"){
+      if(currentGlobalName==globalVarName){
         globalWasFound = true;
         break;
       }

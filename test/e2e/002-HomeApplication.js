@@ -12,27 +12,14 @@ var Key = webdriver.Key;
 var until = webdriver.until;
 var commonSteps = new CommonSteps();
 
-var service = new chrome.ServiceBuilder(driverPath).build();
-chrome.setDefaultService(service);
 var driver;
-var isError = false;
 
 describe('Application', function() {
 
   before(async function() {
-    driver = await new webdriver.Builder()
-      .withCapabilities(webdriver.Capabilities.chrome())
-      .build();
-
-    driver.manage().window().maximize()
-    var applicationHomeTitle = await commonSteps.login(driver);
-    expect(applicationHomeTitle).to.equal("Applications");
-
+    driver = global.driver;
   });
 
-  after(async function() {
-    await driver.quit();
-  });
 
   it('app:create - should keep on same page if parameters are empty', async function() {
 

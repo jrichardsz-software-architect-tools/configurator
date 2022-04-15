@@ -3,6 +3,7 @@ function ApplicationRepository() {
   this.findAll = function(callback) {
     databaseConnection.getConnection(function(err, connection) {
       connection.query('select * from application', function(err, rows) {
+        connection.release();
         callback(err, rows);
       });
     });
@@ -12,6 +13,7 @@ function ApplicationRepository() {
     var params = [deleted];
     databaseConnection.getConnection(function(err, connection) {
       connection.query('select * from application where deleted = ? order by name', params, function(err, rows) {
+        connection.release();
         callback(err, rows);
       });
     });
@@ -24,6 +26,7 @@ function ApplicationRepository() {
       return new Promise(function (resolve, reject) {
         databaseConnection.getConnection(function(err, connection) {
           connection.query('select * from application where id = ?', [id], function(err, rows) {
+            connection.release();
             if (err) {
               reject(err);
             }
@@ -40,6 +43,7 @@ function ApplicationRepository() {
     //is a callback
     databaseConnection.getConnection(function(err, connection) {
       connection.query('select * from application where id = ?', [id], function(err, rows) {
+        connection.release();
         if (err) {
           callback(err, rows);
         }
@@ -57,6 +61,7 @@ function ApplicationRepository() {
   this.findByName = function(name, callback) {
     databaseConnection.getConnection(function(err, connection) {
       connection.query('select * from application where name = ?', [name], function(err, rows) {
+        connection.release();
         callback(err, rows);
       });
     });
@@ -88,6 +93,7 @@ function ApplicationRepository() {
         logger.info(sql);
 
         connection.query(sql, params, function(errUpdate, result) {
+          connection.release();
           callback(errUpdate, result);
         });
 
@@ -111,6 +117,7 @@ function ApplicationRepository() {
         sql = sql.replace("@jokers", jokers.toString());
 
         connection.query(sql, values, function(errInsert, result) {
+          connection.release();
           callback(errInsert, result);
         });
       }
@@ -124,6 +131,7 @@ function ApplicationRepository() {
                  SET deleted = 'Y'
                  WHERE id = ?`;
       connection.query(sql, [id], function(errDelete, result) {
+        connection.release();
         callback(errDelete, result);
       });
     });
@@ -137,6 +145,7 @@ function ApplicationRepository() {
 
     databaseConnection.getConnection(function(conecctionErr, connection) {
       connection.query(sql, params, function(deletionErr, deletionResult) {
+        connection.release();
         callback(deletionErr, deletionResult);
       });
     });

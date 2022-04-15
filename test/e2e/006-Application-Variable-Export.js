@@ -1,5 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 var chai = require('chai');
+chai.config.includeStack = true;
 var path = require('path');
 const os = require('os');
 const fs = require('fs');
@@ -16,34 +17,16 @@ var Key = webdriver.Key;
 var until = webdriver.until;
 var commonSteps = new CommonSteps();
 
-var service = new chrome.ServiceBuilder(driverPath).build();
-chrome.setDefaultService(service);
 var driver;
 var globalHomePageUrl = Settings.getConfiguratorUrl()+"/global-variable";
 var applicationVariableHomePageUrl = Settings.getConfiguratorUrl()+"/application-variable";
 
-var downloadDir = path.join(os.tmpdir(), uuidv4());
+var downloadDir = global.downloadDir;
 
 describe('Application Variables: Export:'+downloadDir, function() {
 
   before(async function() {
-
-    await fsPromises.mkdir(downloadDir);
-    driver = new webdriver.Builder()
-    .forBrowser('chrome')
-    .setChromeOptions(new chrome.Options().setUserPreferences(
-        { "download.default_directory": downloadDir }
-    ))
-    .build();
-
-    driver.manage().window().maximize();
-    var applicationHomeTitle = await commonSteps.login(driver);
-    expect(applicationHomeTitle).to.equal("Applications");
-
-  });
-
-  after(async function() {
-    await driver.quit();
+    driver = global.driver;
   });
 
   it('an application without variables should download a json with empty collection', async function() {
@@ -61,8 +44,7 @@ describe('Application Variables: Export:'+downloadDir, function() {
     await selectedApplicationElement[0].click();
 
     await driver.findElement(By.id('exportButton')).click();
-
-    await driver.sleep(3000)
+    await driver.sleep(1000);
 
     var fileAsString = await fs.promises.readFile(path.join(downloadDir,appName+".json"),'utf8')
     var exportedVars = JSON.parse(fileAsString);
@@ -95,8 +77,7 @@ describe('Application Variables: Export:'+downloadDir, function() {
     await selectedApplicationElement[0].click();
 
     await driver.findElement(By.id('exportButton')).click();
-
-    await driver.sleep(3000)
+    await driver.sleep(1000);
 
     var fileAsString = await fs.promises.readFile(path.join(downloadDir,appName+".json"),'utf8')
     var exportedVars = JSON.parse(fileAsString);
@@ -149,8 +130,7 @@ describe('Application Variables: Export:'+downloadDir, function() {
     await selectedApplicationElement[0].click();
 
     await driver.findElement(By.id('exportButton')).click();
-
-    await driver.sleep(3000)
+    await driver.sleep(1000);
 
     var fileAsString = await fs.promises.readFile(path.join(downloadDir,appName+".json"),'utf8')
     var exportedVars = JSON.parse(fileAsString);
@@ -205,8 +185,7 @@ describe('Application Variables: Export:'+downloadDir, function() {
     await selectedApplicationElement[0].click();
 
     await driver.findElement(By.id('exportButton')).click();
-
-    await driver.sleep(3000)
+    await driver.sleep(1000);
 
     var fileAsString = await fs.promises.readFile(path.join(downloadDir,appName+".json"),'utf8')
     var exportedVars = JSON.parse(fileAsString);
@@ -261,8 +240,7 @@ describe('Application Variables: Export:'+downloadDir, function() {
     await selectedApplicationElement[0].click();
 
     await driver.findElement(By.id('exportButton')).click();
-
-    await driver.sleep(3000)
+    await driver.sleep(1000);
 
     var fileAsString = await fs.promises.readFile(path.join(downloadDir,appName+".json"),'utf8')
     var exportedVars = JSON.parse(fileAsString);
@@ -328,8 +306,7 @@ describe('Application Variables: Export:'+downloadDir, function() {
     await selectedApplicationElement[0].click();
 
     await driver.findElement(By.id('exportButton')).click();
-
-    await driver.sleep(3000)
+    await driver.sleep(1000);
 
     var fileAsString = await fs.promises.readFile(path.join(downloadDir,appName+".json"),'utf8')
     var exportedVars = JSON.parse(fileAsString);

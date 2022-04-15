@@ -12,8 +12,6 @@ var Key = webdriver.Key;
 var until = webdriver.until;
 var commonSteps = new CommonSteps();
 
-var service = new chrome.ServiceBuilder(driverPath).build();
-chrome.setDefaultService(service);
 var driver;
 var globalHomePageUrl = Settings.getConfiguratorUrl()+"/global-variable";
 var applicationVariableHomePageUrl = Settings.getConfiguratorUrl()+"/application-variable";
@@ -21,19 +19,7 @@ var applicationVariableHomePageUrl = Settings.getConfiguratorUrl()+"/application
 describe('Application Local Variables', function() {
 
   before(async function() {
-    driver = await new webdriver.Builder()
-      .withCapabilities(webdriver.Capabilities.chrome())
-      .build();
-
-    await driver.sleep(500)
-    driver.manage().window().maximize()
-    var applicationHomeTitle = await commonSteps.login(driver);
-    expect(applicationHomeTitle).to.equal("Applications");
-
-  });
-
-  after(async function() {
-    await driver.quit();
+    driver = global.driver;
   });
 
   it('home page : a created app should appear in the select application-variables home page', async function() {
