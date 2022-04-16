@@ -527,4 +527,72 @@ describe('Application Variables: Import Globals: '+importDir, function() {
 
   });
 
+  it.only('app:1 secret-global , import: 1 non-existent secret-global + 1 existent secret-global - should create 1 global and add 1 var to the application', async function() {
+    var appName = uuidv4();
+    var appDesc = uuidv4();
+    await commonSteps.createApplicationAndValidate(driver, appName, appDesc)
+
+    var var1Name = uuidv4();
+    var var1Value = uuidv4();
+    var var1Desc = uuidv4();
+    await commonSteps.createGlobalVariable(driver, var1Name, var1Value, var1Desc, "S", "Secret")
+    await commonSteps.addGlobalVarToAplicationAndValidate(driver, appName, var1Name);
+
+    await driver.get(applicationVariableHomePageUrl);
+
+    var formTitle = await driver.findElement(By.css(".page-header")).getText();
+    expect(formTitle.trim()).to.equal("Application Variables");
+
+    var selectElements = await driver.findElements(By.css("select[name='applicationId']"))
+    var selectedApplicationElement = await selectElements[0].findElements(By.xpath('option[.="' + appName + '"]'))
+    await selectedApplicationElement[0].click();
+
+    //count vars before the import
+    var rowsBeforeImport = await driver.findElements(By.css("[class='table table-bordered table-hover table-striped'] tbody > tr"));
+    var rowsCountBeforeImport = rowsBeforeImport.length;
+
+    //input file
+    var input = await driver.findElement(By.id('import_file'));
+    var importFile = path.join(importDir, uuidv4()+".json");
+
+    var var2Name = uuidv4();
+    var var2Value = uuidv4();
+    var var2Desc = uuidv4();
+
+    var variablesToImport = [
+        {
+            "name": var1Name,
+            "value": var1Value,
+            "description": var1Desc,
+            "type": "S",
+            "scope": "G"
+        },
+        {
+            "name": var2Name,
+            "value": var2Value,
+            "description": var2Desc,
+            "type": "S",
+            "scope": "G"
+        }
+    ]
+
+    await fsPromises.writeFile(importFile, JSON.stringify(variablesToImport));
+    //perform the import
+    await input.sendKeys(importFile);
+
+    formTitle = await driver.findElement(By.css(".page-header")).getText();
+    expect(formTitle.trim()).to.equal("Application Variables");
+
+    //count rows after the import
+    var rowsAfterImport = await driver.findElements(By.css("[class='table table-bordered table-hover table-striped'] tbody > tr"));
+    var rowsCountAfterImport = rowsAfterImport.length;
+
+    //expected two new variables
+    expect(rowsCountAfterImport).to.equal(rowsCountBeforeImport+1);
+    //globals should exist
+    await commonSteps.validateGlobalVariableExistence(driver, var1Name, var1Desc, var1Value, "S", "Secret")
+    await commonSteps.validateGlobalVariableExistence(driver, var2Name, var2Desc, "changeme", "S", "Secret")
+
+  });
+
 });

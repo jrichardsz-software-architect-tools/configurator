@@ -154,17 +154,22 @@ I will develop clients for every language. At this moment, just the client for b
 
 - https://github.com/software-architect-tools/configurator/wiki/Linux-Client
 
-# e2e Tests
+# Tests
+
+## e2e
+
+Chrome is required.
 
 ```
 export TEST_CONFIGURATOR_URL=http://localhost:8080
 export TEST_CONFIGURATOR_ADMIN=admin
-export TEST_CONFIGURATOR_PASSWORD=9ae244-f446-4050-8873-a5320d
+export TEST_CONFIGURATOR_PASSWORD=****
+npm run test_e2e
 ```
 
 # Success stories
 
-I successful use the configurator for the following technologies based on docker:
+I successful used the configurator for the following technologies based on docker:
 
 - java : spring-boot
 - java : war on tomcats
