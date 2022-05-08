@@ -36,7 +36,9 @@ const SecureExpress = require('./security/SecureExpress.js');
 const port = process.env.PORT || 2708;
 const app = express();
 
-app.use(cookieParser())
+app.disable('x-powered-by');
+
+app.use(cookieParser());
 
 app.use(session({
   secret: uuid.v4(),
@@ -80,8 +82,9 @@ databaseConnection.initializeConnection({
   user: properties.database.user, // your mysql user
   password: properties.database.password, // your mysql password
   port: properties.database.port, //port mysql
-  database: properties.database.name // your database name
-}, 'single');
+  database: properties.database.name, // your database name
+  connectionLimit: 25 // your database name
+});
 
 global.databaseConnection = databaseConnection;
 

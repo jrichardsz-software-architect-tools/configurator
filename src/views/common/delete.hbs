@@ -14,7 +14,7 @@
     <div id="page-wrapper">
       <div class="row">
         <div class="col-lg-12">
-          <h1 class="page-header">Delete</h1>
+          <h1 class="page-header">delete</h1>
         </div>
         <!-- /.col-lg-12 -->
       </div>
@@ -46,14 +46,14 @@
                       <input name="{{this.name}}" type="hidden" value="{{this.value}}" />
                     {{/each}}
                     <div class="form-group">
-                      <p>{{warningMessage}}</p>
+                      <p id="deleteWarningMessage" >{{warningMessage}}</p>
                     </div>
                     {{#stringEquals @root.mode 'cannot-delete'}}
                       <a href="/{{entityType}}" type="button" onclick="window.history.go(-1); return false;" class="btn btn-outline btn-primary">Accept</a>
                     {{/stringEquals}}
                     {{#stringEquals @root.mode 'confirm'}}
                       <button type="submit" class="btn btn-outline btn-primary">Submit</button>
-                      <a href="/{{entityType}}" type="button" onclick="window.history.go(-1); return false;" class="btn btn-outline btn-primary">Cancel</a>
+                      <a href="/{{entityType}}" id="cancelDeletionButton" type="button" onclick="window.history.go(-1); return false;" class="btn btn-outline btn-primary">Cancel</a>
                     {{/stringEquals}}
                   </form>
                 </div>

@@ -3,6 +3,7 @@ function VariableRepository() {
   this.findOneById = function(id, callback) {
     databaseConnection.getConnection(function(err, connection) {
       connection.query('select * from variable where id = ?', [id], function(err, rows) {
+        connection.release();
         if (err) {
           callback(err, rows);
         }
@@ -21,6 +22,7 @@ function VariableRepository() {
     var params = [scope,deleted];
     databaseConnection.getConnection(function(err, connection) {
       connection.query('select * from variable where scope = ? and deleted = ? order by name', params, function(err, rows) {
+        connection.release();
         callback(err, rows);
       });
     });
@@ -32,6 +34,7 @@ function VariableRepository() {
       var params = [name,deleted];
       databaseConnection.getConnection(function(err, connection) {
         connection.query('select * from variable where name = ? and deleted = ?', params, function(err, rows) {
+          connection.release();
           if (err) {
             reject(err);
           }
@@ -47,6 +50,7 @@ function VariableRepository() {
       var params = [name, scope, deleted];
       databaseConnection.getConnection(function(err, connection) {
         connection.query('select * from variable where name = ? and scope = ? and deleted = ?', params, function(err, rows) {
+          connection.release();
           if (err) {
             reject(err);
           }
@@ -82,6 +86,7 @@ function VariableRepository() {
         logger.debug(sql);
 
         connection.query(sql, params, function(errUpdate, result) {
+          connection.release();
           callback(errUpdate, result);
         });
 
@@ -106,6 +111,7 @@ function VariableRepository() {
         sql = sql.replace("@jokers", jokers.toString());
 
         connection.query(sql, values, function(errInsert, result) {
+          connection.release();
           callback(errInsert, result);
         });
       }
@@ -139,6 +145,7 @@ function VariableRepository() {
           logger.debug(sql);
 
           connection.query(sql, params, function(errUpdate, result) {
+            connection.release();
             if(errUpdate){
               reject(errUpdate);
             }else{
@@ -167,6 +174,7 @@ function VariableRepository() {
           sql = sql.replace("@jokers", jokers.toString());
 
           connection.query(sql, values, function(errInsert, result) {
+            connection.release();
             if(errInsert){
               reject(errInsert);
             }else{
@@ -186,6 +194,7 @@ function VariableRepository() {
 
     databaseConnection.getConnection(function(conecctionErr, connection) {
       connection.query(sql, params, function(deletionErr, deletionResult) {
+        connection.release();
         callback(deletionErr, deletionResult);
       });
     });
@@ -211,6 +220,7 @@ function VariableRepository() {
         //https://stackoverflow.com/a/68596834/3957754
         var rows = variables.map(row => [row.name, row.value, row.description, row.type, row.scope]);
         connection.query(sql, [rows], function(err, result) {
+          connection.release();
           if (err) {
             reject(err);
           }
@@ -229,6 +239,7 @@ function VariableRepository() {
         }
         var sql = 'select * from variable where name in (?) and scope = ? ';
         connection.query(sql, [names, scope], function(err, rows) {
+          connection.release();
           if (err) {
             reject(err);
           }

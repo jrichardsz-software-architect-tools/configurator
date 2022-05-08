@@ -4,7 +4,9 @@ var escape = require('escape-html');
 function ApplicationRouter(expressInstance) {
 
   expressInstance.get('/application/view/new', ["admin"], (req, res) => {
-    res.render('application/new.hbs', {});
+    res.render('application/new.hbs', {
+      operation: "new"
+    });
   });
 
   expressInstance.post('/application/action/save', ["admin"], (req, res) => {
@@ -44,7 +46,8 @@ function ApplicationRouter(expressInstance) {
        })
      } else {
        res.render('application/new.hbs', {
-         application:application
+         application:application,
+         operation: "edit"
        });
      }
    });

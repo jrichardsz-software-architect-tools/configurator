@@ -4,6 +4,7 @@ function ApplicationVariableRepository() {
     databaseConnection.getConnection(function(err, connection) {
       connection.query('select * from application_variable where id = ?', [id], function(err, rows) {
         if (err) {
+          connection.release();
           callback(err, rows);
         }
 
@@ -27,12 +28,14 @@ function ApplicationVariableRepository() {
                  order by scope, v.name`;
       try {
         connection.query(sql, [applicationId], function(err, selectResult) {
+          connection.release();
           if (err) {
             callback(err, null);
           }
           callback(null, selectResult);
         });
       } catch (connectionErr) {
+        connection.release();
         callback(connectionErr, null);
       }
     });
@@ -60,12 +63,14 @@ function ApplicationVariableRepository() {
                   order by v.scope, v.name`;
       try {
         connection.query(sql, [applicationName], function(err, selectResult) {
+          connection.release();
           if (err) {
             callback(err, null);
           }
           callback(null, selectResult);
         });
       } catch (connectionErr) {
+        connection.release();
         callback(connectionErr, null);
       }
     });
@@ -95,12 +100,14 @@ function ApplicationVariableRepository() {
                   	and v.scope = ?`;
         try {
           connection.query(sql, [applicationName, variableName, variableScope], function(err, rows) {
+            connection.release();
             if (err) {
               reject(err);
             }
             resolve(rows);
           });
         } catch (connectionErr) {
+          connection.release();
           reject(connectionErr);
         }
       });
@@ -116,12 +123,14 @@ function ApplicationVariableRepository() {
                  v.id = av.variable_id`;
       try {
         connection.query(sql, [id], function(err, rows) {
+          connection.release();
           if (err) {
             callback(err, rows);
           }
           callback(null, rows);
         });
       } catch (connectionErr) {
+        connection.release();
         callback(connectionErr, null);
       }
     });
@@ -133,12 +142,14 @@ function ApplicationVariableRepository() {
                  where av.variable_id = ? && av.application_id = ap.id`;
       try {
         connection.query(sql, [variableId], function(err, rows) {
+          connection.release();
           if (err) {
             callback(err, rows);
           }
           callback(null, rows);
         });
       } catch (connectionErr) {
+        connection.release();
         callback(connectionErr, null);
       }
     });
@@ -170,6 +181,7 @@ function ApplicationVariableRepository() {
         logger.info(sql);
 
         connection.query(sql, params, function(errUpdate, result) {
+          connection.release();
           callback(errUpdate, result);
         });
 
@@ -193,6 +205,7 @@ function ApplicationVariableRepository() {
         sql = sql.replace("@jokers", jokers.toString());
         logger.info(sql);
         connection.query(sql, values, function(errInsert, result) {
+          connection.release();
           callback(errInsert, result);
         });
       }
@@ -220,6 +233,7 @@ function ApplicationVariableRepository() {
       sql = sql.replace("@values", values.toString());
       logger.info(sql);
       connection.query(sql, values, function(errInsert, result) {
+        connection.release();
         callback(errInsert, result);
       });
     });
@@ -233,6 +247,7 @@ function ApplicationVariableRepository() {
 
     databaseConnection.getConnection(function(conecctionErr, connection) {
       connection.query(sql, params, function(deletionErr, deletionResult) {
+        connection.release();
         callback(deletionErr, deletionResult);
       });
     });
@@ -262,6 +277,7 @@ function ApplicationVariableRepository() {
           and v.scope = ?
         `;
         connection.query(sql, [applicationId, variableNames, scope], function(err, rows) {
+          connection.release();
           if (err) {
             reject(err);
           }
@@ -291,6 +307,7 @@ function ApplicationVariableRepository() {
       `;
       try {
         connection.query(sql, [variableNames], function(err, rows) {
+          connection.release();
           if (err) {
             callback(err, rows);
           }
@@ -311,6 +328,7 @@ function ApplicationVariableRepository() {
         var sql = `INSERT into application_variable (@columns) VALUES ?`;
         sql = sql.replace("@columns", columns.toString());
         connection.query(sql,  [variables], function(err, result) {
+          connection.release();
           if (err) {
             reject(err);
           }

@@ -2,10 +2,10 @@ var aes256 = require('aes256');
 const fs = require('fs');
 const Utils = require('../common/Utils.js');
 const ApplicationVariableService = require(appHomePath+'/service/ApplicationVariableService.js');
-var applicationVariableService = new ApplicationVariableService();
+const applicationVariableService = new ApplicationVariableService();
 const util = require('util');
 const readFile = util.promisify(fs.readFile);
-var escape = require('escape-html');
+const escape = require('escape-html');
 
 function ApplicationVariableRouter(expressInstance) {
 
@@ -208,7 +208,7 @@ function ApplicationVariableRouter(expressInstance) {
       logger.error(err);
       return _this.goToHomePage(req, res, {
         redirect: '/application-variable',
-        error_message: err,
+        error_message: "Failed to read the file",
         application_id: applicationId
       })
     }
@@ -221,7 +221,7 @@ function ApplicationVariableRouter(expressInstance) {
       logger.error(err);
       return _this.goToHomePage(req, res, {
         redirect: '/application-variable',
-        error_message:"Not valid json. "+ err,
+        error_message:"Not valid json.",
         application_id: applicationId
       })
     }
@@ -235,25 +235,27 @@ function ApplicationVariableRouter(expressInstance) {
       })
     }
 
+    //TODO: validate the consistence of item on json
+
     var safeReceivedVariables = Utils.obfuscateFieldInArrayOfObjects(incomingVariablesToImport, "value", "****", 10);
     logger.info("received variables to import")
     logger.info(safeReceivedVariables);
 
     //get sub sets of the received variables
     //these subsets are variables that not exist
-    var readyToInsertGlobals = await applicationVariableService.getNewVariablesReadyToInsertByScope(incomingVariablesToImport, "G");
-    logger.info("globals ready to insert");
-    logger.info(Utils.arrayObjecsToArrayValues(readyToInsertGlobals, "name"));
+    var newGlobalsToBeCreated = await applicationVariableService.getNewVariablesReadyToInsertByScope(incomingVariablesToImport, "G");
+    logger.info("new globals to insert");
+    logger.info(Utils.arrayObjecsToArrayValues(newGlobalsToBeCreated, "name"));
 
     //globals
-    //if readyToInsertGlobals length == 0, it means that exist as variables
+    //if newGlobalsToBeCreated length == 0, it means that exist as variables
     //just we need to determine if were added to this application
 
-    //if readyToInsertGlobals length > 0, user wants to import some globals
+    //if newGlobalsToBeCreated length > 0, user wants to import some globals
     //these global variables does not exist in table: variable
     //if it does not exist in its table, it does not exist in application_variable
     logger.info("Importing globals");
-    if(readyToInsertGlobals.length == 0){
+    if(newGlobalsToBeCreated.length == 0){
       logger.info("All the received globals already exist");
       //get the global names of received
       var receivedGlobalNames = Utils.arrayObjecsToArrayValuesFilterByField(incomingVariablesToImport,"name", "scope","G");
@@ -291,22 +293,51 @@ function ApplicationVariableRouter(expressInstance) {
       }
     }else{
       try {
-        //step 1 : insert the global variables
-        var safeGlobalsToInsert = Utils.overrideFieldWithConditionInArrayOfObjects(readyToInsertGlobals, "value", defaultCryptedValueForImport, "type", "S");
+        logger.info("Some globals already exist and other needs to be created");
+        //step 1 : insert the new global variables
+        var safeGlobalsToInsert = Utils.overrideFieldWithConditionInArrayOfObjects(newGlobalsToBeCreated, "value", defaultCryptedValueForImport, "type", "S");
+        logger.info("new globals to create");
         logger.info(safeGlobalsToInsert);
         await variableRepository.bulkInsert("name, value, description, type, scope", safeGlobalsToInsert);
         resultMessages.push({level:"success", message:"Globals were created successfully"})
         logger.info("Globals were created successfully");
         //due to mysql behavior, after bulk insert, we don't have its primary keys.
         //we need to query them
-        var variableNames = Utils.arrayObjecsToArrayValuesWithFilter(readyToInsertGlobals, "name", "scope", "G");
-        var recentlyCreatedVariablesFullData = await variableRepository.findVariablesByNamesAndScope(variableNames, "G");
+        //at this point the new created globals and the pre-existent global are ready to be added to the application
+        //prepare the new globals to be added to the app
+        var globalNamesRecentlyCreated = Utils.arrayObjecsToArrayValuesFilterByField(newGlobalsToBeCreated,"name", "scope","G");
+        var recentlyCreatedVariablesFullData = await variableRepository.findVariablesByNamesAndScope(globalNamesRecentlyCreated, "G");
         //step 2: retrieve the ids of created variables
         // create an array with the new variable ids
         var applicationVariables = [];
         recentlyCreatedVariablesFullData.forEach((variableId, i) => {
           applicationVariables.push([applicationId, variableId.id]);
         });
+
+        logger.info("recently created to be added:"+JSON.stringify(applicationVariables));
+
+        //append the pre-existent but not added yet
+        //get all global names from import file
+        var allGlobalNamesToImport = Utils.arrayObjecsToArrayValuesFilterByField(incomingVariablesToImport,"name", "scope","G");
+        logger.info("allGlobalNamesToImport:"+JSON.stringify(allGlobalNamesToImport));
+        var alreadyGlobalsInApplication = await applicationVariableRepository.
+          findAlreadyExistentVariablesInApplicationByNamesAndScope(applicationId, allGlobalNamesToImport, "G");
+        var alreadyGlobalNamesInApplication = Utils.arrayObjecsToArrayValues(alreadyGlobalsInApplication, "name");
+        //get the difference between the all globals - recently created = already created
+        var globalAlreadyCreatedButNotAddedBeforeImport = Utils.getDifferenceBetweenArrays(allGlobalNamesToImport,alreadyGlobalNamesInApplication);
+        var globalAlreadyCreatedToBeAddedToApp = Utils.getDifferenceBetweenArrays(globalAlreadyCreatedButNotAddedBeforeImport,globalNamesRecentlyCreated);
+        logger.info("globalAlreadyCreatedToBeAddedToApp");
+        logger.info(globalAlreadyCreatedToBeAddedToApp);
+
+        if(globalAlreadyCreatedToBeAddedToApp.length>0){//
+          var alreadyCreatedToBeAddedVariablesFullData = await variableRepository.findVariablesByNamesAndScope(globalAlreadyCreatedToBeAddedToApp, "G");
+          alreadyCreatedToBeAddedVariablesFullData.forEach((variableId, i) => {
+            applicationVariables.push([applicationId, variableId.id]);
+          });
+        }
+
+        logger.info("recently created + (already created but not added):"+JSON.stringify(applicationVariables));
+
         //step 3: add the global variables to the application
         await applicationVariableRepository.bulkInsert("application_id, variable_id", applicationVariables);
         resultMessages.push({level:"success", message:"Globals were added to this application successfully"})

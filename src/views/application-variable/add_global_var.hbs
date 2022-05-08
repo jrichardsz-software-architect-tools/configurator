@@ -54,8 +54,8 @@
                       <div class="form-group">
                         <label for="sel1">Select a global variable:</label>
                         <br><br>
-                        <table class="table table-bordered">
-                          <thead class="thead-dark" >
+                        <table class="table table-bordered table-hover table-striped">
+                          <thead>
                             <tr>
                               <th scope="col">Var Name</th>
                               <th scope="col">Var Description</th>
@@ -64,8 +64,8 @@
                           </thead>
                           <tbody>
                             {{#each variables}}
-                              <tr>
-                                <th scope="row">{{this.name}}</th>
+                              <tr  class="table-row" >
+                                <td>{{this.name}}</td>
                                 <td>{{showValueWithSafeWidth this.description}}</td>
                                 <td>
                                   <input type="checkbox" class="form-check-input" id="{{this.id}}" name="global_var_id_selected_{{this.id}}">
@@ -77,7 +77,7 @@
                       </div>
                       <button type="submit" class="btn btn-outline btn-primary">Submit</button>
           					{{/ne}}
-                    <a href="/application-variable?application_id={{application_id}}" type="button" class="btn btn-outline btn-primary">Cancel</a>
+                    <a id="cancelAddGlobalVarButton" href="/application-variable?application_id={{application_id}}" type="button" class="btn btn-outline btn-primary">Cancel</a>
                   </form>
                 </div>
               </div>
