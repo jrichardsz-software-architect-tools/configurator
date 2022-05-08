@@ -4,19 +4,18 @@ Centralize and Management configurations of all your applications.
 
 ![logo](./src/logo/logo.png)
 
-# Requirements
+## Requirements
 
 - Node.js > 14.*
 - Mysql database. You could use [docker](https://gist.github.com/jrichardsz/73142c5c7eb7136d80b165e75d3a1e22)
-- Create a database and execute this ddl to create the required tables: [./database/ddl.sql](./src/database/dump/ddl.sql)
 
 
-# Settings
+## Settings
 
 
 |key | sample value | description|
 |---|---|---|
-|PORT | 8080 | change the port of server. Default is 2708|
+|PORT | 8080 | port of server. Default is 2708|
 |CONFIGURATOR_DATABASE_HOST | 10.20.30.40 | some ip of your mysql database|
 |CONFIGURATOR_DATABASE_USER | usr_configurator | the mysql user for your my database. Root is not required.|
 |CONFIGURATOR_DATABASE_PASSWORD | ***** |  password related to the mysql user|
@@ -28,8 +27,9 @@ Centralize and Management configurations of all your applications.
 |CONFIGURATOR_DISABLE_CAPTCHA | false | Enable or disable the captcha on login|
 
 
-# For developers
+## For developers
 
+- Create a database and execute this ddl to create the required tables: [./database/ddl.sql](./src/database/dump/ddl.sql)
 - install dependencies
 ```
 npm install
@@ -41,8 +41,9 @@ npm install
 npm run dev
 ```
 
-# For servers without docker
+## For servers without docker
 
+- Create a database and execute this ddl to create the required tables: [./database/ddl.sql](./src/database/dump/ddl.sql)
 - install dependencies
 ```
 npm install
@@ -52,8 +53,15 @@ npm install
 ```
 npm run start
 ```
+## For servers with docker-compose
 
-# For servers with docker
+Just one step :)
+
+```
+docker-compose up -d
+```
+
+## For servers with docker
 
 **Docker build**
 
@@ -64,7 +72,7 @@ docker build -t configurator .
 **Docker run**
 
 ```
-docker run --name configurator -it --rm -p 8080:2708 \
+docker run --name configurator -it --rm -p 2708:2708 \
 -e CONFIGURATOR_DATABASE_HOST=localhost \
 -e CONFIGURATOR_DATABASE_USER=root \
 -e CONFIGURATOR_DATABASE_PASSWORD=secret \
@@ -74,12 +82,6 @@ docker run --name configurator -it --rm -p 8080:2708 \
 -e CONFIGURATOR_CRYPT_KEY=changeme \
 -e CONFIGURATOR_BFA_THRESHOLD=100 \
 -e TZ=America/Lima configurator
-```
-
-# For servers with docker-compose
-
-```
-docker-compose up -d
 ```
 
 # For servers with public docker image
@@ -99,19 +101,23 @@ If no errors, you will see:
 
 ![home](./src/logo/home.png)
 
-# Login
+## Login
 
 By default two user are created:
 
 - admin with admin role
 - guest with reader role
 
-Password are printed in the first log. Take care to delete them of the log!!. If you are using docker, [this](https://stackoverflow.com/a/42510314/3957754) works.
+Id the database don't contain the admin or guest user, they are created and stored in these internal files:
+- `$HOME/configurator-user-admin.txt`
+- `$HOME/configurator-user-guest.txt`
 
-Admin can make anything. Guest user only can enter to few options and can't view secrets values.
+Take care to delete them. If you are using docker, [this](https://stackoverflow.com/a/42510314/3957754) works.
+
+Admin can make anything. Guest user only can view all the variables names, view the plain values and can't edit anything.
 
 
-# Api: /variables
+## Api: /variables
 
 If you have created an app called **helicarrier-api** with at least one variable, this is how you can get its variables:
 
@@ -126,7 +132,7 @@ export ERP_HOST="12.124.1.6"
 export firebase_key="65468748"
 ```
 
-# Clients and How to use it
+## Clients and How to use it
 
 These variables are an option to the following strategies in several languages:
 
@@ -138,9 +144,9 @@ These variables are an option to the following strategies in several languages:
 - AppSettings.json on c#
 - etc
 
-The previous files are inherited from first languages as a way to centralize the **configurations** of the application. Use them today in distributed enterprise environments **is not an option anymore**
+The previous files are inherited from first languages as a way to centralize the **configurations** of the application. Use them today in distributed enterprise environments **is not an option anymore** because it needs a biological entity who using a ssh client, edit the file with hardcoded values **directly in the production server**
 
-The famous [The Twelve Factors](https://12factor.net/) for modern software, mention this on its third statement:
+The famous [The Twelve Factors](https://12factor.net/) for software in modern era , mention this on its third statement:
 
 > III. Config : Store config in the environment
 
@@ -148,26 +154,30 @@ Also several platforms like [heroku](https://devcenter.heroku.com/articles/confi
 
 > An app’s environment-specific configuration should be stored in environment variables (not in the app’s source code)
 
-If this is your case, you just need to call the **/variables** endpoint in the startup of your application and expose that variables to your entire system in transparent way, so that your classes won't know the origin of the variables: development ide, developer shell or testing/prod shell
+If you understand the problem of hardcoded values in plain properties, you could use this tool to call the **/variables** endpoint in the startup of your application and expose that variables to your entire system in transparent way using **ENVIRONMENT VARIABLES** or inject them directly into your application.
 
 I will develop clients for every language. At this moment, just the client for bash or docker based apps are here:
 
 - https://github.com/software-architect-tools/configurator/wiki/Linux-Client
 
-# Tests
+## Tests
 
-## e2e
+### e2e
 
-Chrome is required.
-
+- Chrome is required.
+- Configurator should be started before the e2e tests execution. (Take a look the port)
+- Export the url and credentials
 ```
 export TEST_CONFIGURATOR_URL=http://localhost:8080
 export TEST_CONFIGURATOR_ADMIN=admin
 export TEST_CONFIGURATOR_PASSWORD=****
+```
+- Run tests
+```
 npm run test_e2e
 ```
 
-# Success stories
+## Success stories
 
 I successful used the configurator for the following technologies based on docker:
 
@@ -179,9 +189,10 @@ I successful used the configurator for the following technologies based on docke
 - php : drupal
 - php : wordpress
 - php : moodle
+- python : django
 - c# : netcore
 
-# Alternatives
+## Alternatives
 
 Here some platforms:
 - [zookeeper](https://zookeeper.apache.org)
@@ -197,18 +208,15 @@ Here some platforms:
 - etcd
 
 
-# Roadmap
+## Roadmap
 
-- [ ] highlight variables who exist in another applications
-- [ ] solve/implement [issues](https://github.com/software-architect-tools/configurator/issues)
-- [ ] add changelog column for each app or variable
-- [ ] add dependency injection
-- [ ] improve unit tests tests
-- [ ] unit selenium tests
-- [ ] java and nodejs libraries to be used in application as **configurator client**
+- [ ] fix [issues](https://github.com/jrichardsz-software-architect-tools/configurator/issues)
+- [ ] implement [features](https://github.com/jrichardsz-software-architect-tools/configurator/issues)
+- [ ] improve unit tests and coverage
+- [ ] develop java, nodejs and c# clients to be used direclty on application
 
 
-# Made with
+## Made with
 
 - Node.js
 - Mysql
@@ -218,9 +226,7 @@ Here some platforms:
 - Initial template : https://github.com/jayetan/Nodejs-Admin-Dashboard.git
 
 
-# Contributors
-
-Thanks goes to these wonderful people :
+## Contributors
 
 <table>
   <tbody>

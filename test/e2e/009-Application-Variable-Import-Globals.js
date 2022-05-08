@@ -527,7 +527,7 @@ describe('Application Variables: Import Globals: '+importDir, function() {
 
   });
 
-  it.only('app:1 secret-global , import: 1 non-existent secret-global + 1 existent secret-global - should create 1 global and add 1 var to the application', async function() {
+  it('app:1 secret-global , import: 1 non-existent secret-global + 1 existent secret-global - should create 1 global and add 1 var to the application', async function() {
     var appName = uuidv4();
     var appDesc = uuidv4();
     await commonSteps.createApplicationAndValidate(driver, appName, appDesc)

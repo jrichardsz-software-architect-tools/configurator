@@ -1,5 +1,5 @@
 
-function StatusRouter(expressInstance) {
+function HealthRouter(expressInstance) {
   var _this = this;
 
   expressInstance.get('/health', ["anonymous"], (req, res) => {
@@ -13,4 +13,4 @@ function StatusRouter(expressInstance) {
 
 }
 
-module.exports = StatusRouter;
+module.exports = HealthRouter;
