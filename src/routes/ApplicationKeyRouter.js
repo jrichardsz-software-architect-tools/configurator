@@ -33,7 +33,9 @@ function ApplicationKeyRouter(expressInstance) {
         return;
       }
 
-      let key = entities;
+      let key = [{
+        apikey: global.properties.api.key
+      }]
 
       if (entities.length === 0) {
         bcrypt.hash(global.properties.api.key, 10, function (err, hash) {
@@ -59,7 +61,7 @@ function ApplicationKeyRouter(expressInstance) {
                 error_security_message: req.session.error_security_message || undefined,
                 userRole: req.session.loginInformation.role || undefined
               }
-              logger.info(renderAttributes)
+
               return res.render('application-key/home.hbs', renderAttributes)
             }
           })
