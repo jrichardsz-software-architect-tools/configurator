@@ -4,14 +4,29 @@ const bcrypt = require('bcrypt');
 const osUtil = require('os');
 
 function DefaultUserConfigurator() {
-
+ var _this = this;
   var saltRoundsGenerationNumber = 10;
+
+  this.generatePassword = function (length) {
+
+    const passLength = length || 128;
+
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+    let generate = '';
+
+    for (let i = 0; i < passLength; i++) {
+      generate += characters.charAt(Math.floor(Math.random() * characters.length))
+    }
+
+    return generate
+  }
 
   this.createUserIfNoExist = function(userName, role) {
     authenticationRepository.findOneByUserName(userName, function(err, userInformation) {
       if (err || userInformation.length == 0) {
         logger.info(userName+" was not found in database."+err);
-        var plainPassword = uuid.v4();
+        var plainPassword = _this.generatePassword()
 
         bcrypt.hash(plainPassword, saltRoundsGenerationNumber, function(err, hash) {
 

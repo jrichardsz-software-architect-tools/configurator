@@ -123,13 +123,13 @@ function ApplicationKeyRouter(expressInstance) {
             global.properties.api.key = apikey;
             _this.goToHomePage(req, res, {
               redirect: '/application-key',
-              success_message: `The apikey was reset.`
+              success_message: `apikey was reset.`
             })
           }
 
           if (err) {
             logger.error(err);
-            logger.error(apikey + " The apikey cannot be created.");
+            logger.error(apikey + " apikey cannot be created.");
             return;
           }
 
