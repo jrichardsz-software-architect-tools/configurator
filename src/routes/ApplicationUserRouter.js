@@ -1,11 +1,10 @@
 const Utils = require("../common/Utils");
 const bcrypt = require('bcrypt');
 
-function ApplicationUser(expressInstance) {
+function ApplicationUserRouter(expressInstance) {
   var _this = this;
-  var cryptKey = properties.security.cryptKey;
 
-  expressInstance.get('/application-user', ["admin", "reader"], (req, res) => {
+  expressInstance.get('/application-user', ["admin"], (req, res) => {
     _this.goToHomePage(req, res)
   })
 
@@ -17,7 +16,7 @@ function ApplicationUser(expressInstance) {
 
   expressInstance.get('/application-user/view/edit/:id', ["admin"], (req, res) => {
 
-    applicationUser.findOneById(req.params.id, function (err, user) {
+    applicationUserRepository.findOneById(req.params.id, function (err, user) {
       if (err) {
         logger.info(err)
         this.goToHomePage(req, res, {
@@ -33,7 +32,7 @@ function ApplicationUser(expressInstance) {
   })
 
   expressInstance.get('/application-user/view/delete/:id', ["admin"], (req, res) => {
-    applicationUser.findOneById(req.params.id, function (err, user) {
+    applicationUserRepository.findOneById(req.params.id, function (err, user) {
       if (err) {
         logger.info(err)
         _this.goToHomePage(req, res, {
@@ -52,7 +51,7 @@ function ApplicationUser(expressInstance) {
 
   this.goToHomePage = function (req, res, redirectAttributes) {
 
-    applicationUser.findAll(function (err, entities) {
+    applicationUserRepository.findAll(function (err, entities) {
 
       if (err) {
         logger.info(err);
@@ -97,7 +96,7 @@ function ApplicationUser(expressInstance) {
         ...{ password: hash }
       }
 
-      applicationUser.save(entity, function (err, result) {
+      applicationUserRepository.save(entity, function (err, result) {
         if (err) {
           logger.error(`Error trying to persist a user: ${err.code} ${err.sqlMessage}`)
           if (err.code === 'ER_DUP_ENTRY') {
@@ -112,6 +111,7 @@ function ApplicationUser(expressInstance) {
           }
         } else {
           _this.goToHomePage(req, res, {
+            redirect: '/application-user',
             success_message: "The user was saved successfully."
           })
         }
@@ -127,7 +127,7 @@ function ApplicationUser(expressInstance) {
 
   expressInstance.post('/application-user/action/delete', ["admin"], (req, res) => {
     logger.info("Delete user: ")
-    applicationUser.delete(req.body.id, function (err, result) {
+    applicationUserRepository.delete(req.body.id, function (err, result) {
       if (err) {
         logger.info(err)
         res.render('common/delete.hbs', {
@@ -143,4 +143,4 @@ function ApplicationUser(expressInstance) {
 
 }
 
-module.exports = ApplicationUser;
+module.exports = ApplicationUserRouter;

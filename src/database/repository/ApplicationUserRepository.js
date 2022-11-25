@@ -1,4 +1,4 @@
-function ApplicationUser() {
+function ApplicationUserRepository() {
 
   this.findAll = function (callback) {
     databaseConnection.getConnection(function (err, connection) {
@@ -86,7 +86,7 @@ function ApplicationUser() {
             jokers.push("?");
           }
         }
-        logger.info(jokers)
+        
         var sql = `INSERT INTO authentication
                    (@columns)
                    VALUES(@jokers)`;
@@ -116,4 +116,4 @@ function ApplicationUser() {
 
 }
 
-module.exports = ApplicationUser;
+module.exports = ApplicationUserRepository;
