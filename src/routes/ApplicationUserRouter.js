@@ -110,9 +110,14 @@ function ApplicationUserRouter(expressInstance) {
             });
           }
         } else {
+          let success_message =
+            entity.id
+              ? `The user was update successfully: ${entity.username}`
+              : `The user was saved successfully: ${entity.username}`;
+              
           _this.goToHomePage(req, res, {
             redirect: '/application-user',
-            success_message: "The user was saved successfully."
+            success_message
           })
         }
 

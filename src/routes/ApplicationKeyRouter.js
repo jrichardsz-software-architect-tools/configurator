@@ -100,7 +100,8 @@ function ApplicationKeyRouter(expressInstance) {
         return;
       }
 
-      let apikey = uuid.v4();
+      // A Key value must be between 30 and 128 characters.
+      let apikey = _this.generatePassword();
 
       bcrypt.hash(apikey, 10, function (err, hash) {
         let apikeyHash = {
@@ -139,6 +140,21 @@ function ApplicationKeyRouter(expressInstance) {
       })
 
     })
+  }
+
+  this.generatePassword = function (length) {
+
+    const passLength = length || 128;
+
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+    let generate = '';
+
+    for (let i = 0; i < passLength; i++) {
+      generate += characters.charAt(Math.floor(Math.random() * characters.length))
+    }
+
+    return generate
   }
 }
 
