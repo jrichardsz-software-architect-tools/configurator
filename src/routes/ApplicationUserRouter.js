@@ -82,7 +82,7 @@ function ApplicationUserRouter(expressInstance) {
 
     logger.info("Save user: ");
     var userParameters = Utils.sanitizeObject(req.body);
-    logger.info(userParameters);
+    logger.info(userParameters.username);
 
     var saltRoundsGenerationNumber = 10;
     bcrypt.hash(userParameters.password, saltRoundsGenerationNumber, function (err, hash) {

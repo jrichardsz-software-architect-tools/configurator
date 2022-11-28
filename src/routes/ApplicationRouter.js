@@ -41,7 +41,6 @@ function ApplicationRouter(expressInstance) {
     }
 
     homeRouter.goToHomePage(req, res, renderAttributes)
-    // res.render('./', renderAttributes)
   })
 
   expressInstance.post('/application/action/save', ["admin"], (req, res) => {

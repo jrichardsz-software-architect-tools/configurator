@@ -66,7 +66,7 @@ function ApplicationRepository() {
       });
     });
   }
-  // select * from application where name like "%test%" and deleted = "N";
+
   this.findByNameAndDeleted = function (name, deleted) {
     return new Promise(function (resolve, reject) {
       var params = [`%${name}%`, deleted];
