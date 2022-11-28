@@ -45,7 +45,6 @@ function VariableRepository() {
   }
 
   this.findByNameAndScopeAndDeleted = function (name, scope, deleted) {
-
     return new Promise(function (resolve, reject) {
       var params = [name, scope, deleted];
       databaseConnection.getConnection(function(err, connection) {

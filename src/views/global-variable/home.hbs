@@ -40,10 +40,22 @@
 						</div>
 					{{/if}}
 
-					<div>
-						{{#stringEquals userRole 'admin'}}
-	              <a href="/global-variable/view/new" type="button" class="btn btn-outline btn-primary">New Global Var</a>
-						{{/stringEquals}}
+					<div style="display: flex;">
+						<div>
+							{{#stringEquals userRole 'admin'}}
+									<a href="/global-variable/view/new" type="button" class="btn btn-outline btn-primary">New Global Var</a>
+							{{/stringEquals}}
+						</div>
+						<div style="margin-left: 1rem;">
+							<form action="/global-valiable/action/search" method="get" role="form">
+								<div class="input-group">
+									<input type="text" name="var" class="form-control" required="true" placeholder="Enter name of global variable" onchange="this.value = $(this).val().trim()">
+									<span class="input-group-btn">
+										<button type="submit" class="btn btn-outline btn-primary">Search</button>
+									</span>
+								</div>
+							</form>
+						</div>
 						<br><br>
 					</div>
 
