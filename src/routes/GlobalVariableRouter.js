@@ -46,7 +46,7 @@ function GlobalVariableRouter(expressInstance) {
     let globalVar = req.query.var;
     logger.info(globalVar);
 
-    let rows = await variableRepository.findByNameAndScopeAndDeleted(globalVar, 'G', 'N');
+    let rows = await variableRepository.findLikeByNameAndScopeAndDeleted(globalVar, 'G', 'N');
 
     let renderAttributes = {
       redirect: 'global-variable/home.hbs',

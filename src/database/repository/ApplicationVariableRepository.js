@@ -76,6 +76,31 @@ function ApplicationVariableRepository() {
     });
   }
 
+  this.findApplicationByGlobalVariableName = function (globalVarName, callback) {
+    databaseConnection.getConnection(function (err, connection) {
+      let sql = `select app.name, app.description, app.type
+                   from application app, variable var,
+                        application_variable app_var
+                  where app.id = app_var.application_id
+                    and var.id = app_var.variable_id
+                    and var.name = ?
+                  order by app.type, app.name`;
+
+      try {
+        connection.query(sql, [globalVarName], function (err, result) {
+          connection.release();
+          if (err) {
+            callback(err, null)
+          }
+          callback(null, result)
+        })
+      } catch (err) {
+        connection.release();
+        callback(err, null);
+      }
+    })
+  }
+
   this.findVariableInApplication = function (applicationName, variableName, variableScope) {
     return new Promise(function (resolve, reject) {
       databaseConnection.getConnection(function (err, connection) {

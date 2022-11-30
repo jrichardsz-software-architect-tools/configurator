@@ -3,6 +3,8 @@ const uuid = require('uuid');
 
 function ApplicationKeyRouter(expressInstance) {
   var _this = this;
+  var javascriptModule = 'application-key';
+
   expressInstance.get('/application-key', ["admin"], (req, res) => {
     _this.goToHomePage(req, res)
   })
@@ -13,6 +15,7 @@ function ApplicationKeyRouter(expressInstance) {
 
   expressInstance.get('/application-key/action/copy', ["admin"], (req, res) => {
     _this.goToHomePage(req, res, {
+      javascriptModule,
       redirect: '/application-key',
       success_message: `The apikey has been copied successfully.`
     })
@@ -24,6 +27,7 @@ function ApplicationKeyRouter(expressInstance) {
       if (err) {
         logger.info(err)
         var renderAttributes = {
+          javascriptModule,
           error_message: "An error occurred when trying to list apikey.",
           error_security_message: req.session.error_security_message || undefined
         }
@@ -47,16 +51,19 @@ function ApplicationKeyRouter(expressInstance) {
               logger.error(`Error trying to persist an apikey: ${err.code} ${err.sqlMessage}`);
               if (err.code === 'ER_DUP_ENTRY') {
                 return res.render('application-key/home.hbs', {
+                  javascriptModule,
                   error_message: "A apikey already exists: " + key.apikey
                 });
               } else {
                 logger.error(err);
                 return res.render('application-key/home.hbs', {
+                  javascriptModule,
                   error_message: "An error occurred while trying to save the apikey."
                 });
               }
             } else {
               var renderAttributes = {
+                javascriptModule,
                 applicationKey: key,
                 error_security_message: req.session.error_security_message || undefined,
                 userRole: req.session.loginInformation.role || undefined
@@ -72,6 +79,7 @@ function ApplicationKeyRouter(expressInstance) {
         }]
 
         var renderAttributes = {
+          javascriptModule,
           applicationKey: key,
           error_security_message: req.session.error_security_message || undefined,
           userRole: req.session.loginInformation.role || undefined
@@ -91,6 +99,7 @@ function ApplicationKeyRouter(expressInstance) {
       if (err) {
         logger.info(err)
         var renderAttributes = {
+          javascriptModule,
           error_message: "An error occurred when trying to delete apikey.",
           error_security_message: req.session.error_security_message || undefined
         }
@@ -114,17 +123,20 @@ function ApplicationKeyRouter(expressInstance) {
             logger.error(`Error trying to persist an apikey: ${err.code} ${err.sqlMessage}`)
             if (err.code === 'ER_DUP_ENTRY') {
               return res.render('application-key/home.hbs', {
+                javascriptModule,
                 error_message: "A apikey already exists: " + entities.key
               });
             } else {
               logger.error(err);
               return res.render('application-key/home.hbs', {
+                javascriptModule,
                 error_message: "An error occurred while trying to save the apikey."
               });
             }
           } else {
             global.properties.api.key = apikey;
             _this.goToHomePage(req, res, {
+              javascriptModule,
               redirect: '/application-key',
               success_message: `apikey was reset.`
             })

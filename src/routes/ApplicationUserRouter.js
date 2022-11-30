@@ -50,9 +50,7 @@ function ApplicationUserRouter(expressInstance) {
   })
 
   this.goToHomePage = function (req, res, redirectAttributes) {
-
     applicationUserRepository.findAll(function (err, entities) {
-
       if (err) {
         logger.info(err);
         var renderAttributes = {
