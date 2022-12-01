@@ -76,6 +76,32 @@ function ApplicationVariableRepository() {
     });
   }
 
+  this.findVariablesLikeVariableName = function (variableName) {
+    return new Promise(function (resolve, reject) {
+      databaseConnection.getConnection(function (err, connection) {
+        let sql = `
+          select var.name
+            from variable var
+           where var.name like ?
+        `;
+        let variable_name = `%${variableName}%`;
+
+        try {
+          connection.query(sql, [variable_name], function (err, results) {
+            connection.release();
+            if (err) {
+              reject(err)
+            }
+            resolve(results)
+          })
+        } catch (err) {
+          connection.release();
+          reject(err);
+        }
+      })
+    })
+  }
+
   this.findApplicationByGlobalVariableName = function (globalVarName, callback) {
     databaseConnection.getConnection(function (err, connection) {
       let sql = `select app.name, app.description, app.type
@@ -396,6 +422,5 @@ function ApplicationVariableRepository() {
   }
 
 }
-
 
 module.exports = ApplicationVariableRepository;

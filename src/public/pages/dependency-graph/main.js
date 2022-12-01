@@ -11,4 +11,10 @@ $(document).ready(function ($) {
   buttonGenGraph.addEventListener('click', () => {
     document.location.href = `/dependency-graph/view/graph?global_var_name=${globalVarName.value}`;
   })
+
+  globalVarName.addEventListener('keyup', (e) => {
+    if (e.code === 'Enter') {
+      document.location.href = `/dependency-graph/view/graph?global_var_name=${globalVarName.value}`;
+    }
+  })
 });

@@ -24,13 +24,31 @@ function DependencyGraphRouter(expressInstance) {
       graph: false
     }
 
-    applicationVariableRepository.findApplicationByGlobalVariableName(globalVarName, (err, applications) => {
+    applicationVariableRepository.findApplicationByGlobalVariableName(globalVarName, async (err, applications) => {
+
       if (err) {
         redirectAttributes.error_message = `An error occurred while trying to find the global variable: ${globalVarName}`;
       }
 
       if (applications.length === 0) {
-        redirectAttributes.error_message = `There are no applications registered for the global variable: ${globalVarName}`;
+        redirectAttributes.success_message = `There are no search results for: ${globalVarName}`;
+
+        let searchMatches = await applicationVariableRepository.findVariablesLikeVariableName(globalVarName)
+
+        if (searchMatches.length > 0) {
+          redirectAttributes.success_message += ', maybe you wanted to search: ';
+
+          let count = 0;
+          for (const searchMatche of searchMatches) {
+            redirectAttributes.success_message +=
+              `${count === 0
+                ? ' '
+                : count + 1 === searchMatches.length
+                  ? ' o '
+                  : ', '}'${searchMatche.name}'`
+            count++;
+          }
+        }
       }
 
       if (applications.length > 0) {
@@ -38,8 +56,7 @@ function DependencyGraphRouter(expressInstance) {
 
         let dot = 'digraph {';
         let count = 1;
-        let nodeApp = `var [label="${globalVarName}"];`
-        let nodeIdentifiers = `${nodeApp}`;
+        let nodeIdentifiers = `var [label="${globalVarName}"];`;
         let nodeRelations = '';
 
         for (const application of applications) {

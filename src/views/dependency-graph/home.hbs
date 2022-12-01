@@ -24,6 +24,11 @@
 							{{success_message}}
 						</div>
 					{{/if}}
+					{{#if search_matches}}
+						<div class="alert alert-success">
+							{{search_matches}}
+						</div>
+					{{/if}}
 					{{#if warning_message}}
 						<div class="alert alert-warning">
 							{{warning_message}}
@@ -41,7 +46,7 @@
 					{{/if}}
 
 					<div class="input-group">
-						<input type="text" id="global_var_name" name="global_var_name" class="form-control" value="{{globalVarName}}" placeholder="Enter name of application" onchange="this.value = $(this).val().trim()">
+						<input type="text" id="global_var_name" name="global_var_name" class="form-control" value="{{globalVarName}}" placeholder="Enter name of variable" onchange="this.value = $(this).val().trim()">
 						<span class="input-group-btn">
 							<button id="button-gen-graph" class="btn btn-outline btn-primary">Search</button>
 						</span>

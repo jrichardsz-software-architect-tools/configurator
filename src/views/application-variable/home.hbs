@@ -65,7 +65,7 @@
 								{{#if selectedApplicationId }}
 										<form method="get" action="/application-variable/action/{{selectedApplicationId}}/search" class="form-group">
 											<div class="input-group">
-												<input type="text" name="variable" class="form-control" required="true" placeholder="Enter name of variable" onchange="this.value = $(this).val().trim()">
+												<input type="text" name="variable" class="form-control" required minlength="3" placeholder="Enter name of variable">
 												<span class="input-group-btn">
 													<button type="submit" class="btn btn-outline btn-primary">Search</button>
 												</span>
