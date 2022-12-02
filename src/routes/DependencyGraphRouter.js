@@ -19,7 +19,7 @@ function DependencyGraphRouter(expressInstance) {
   expressInstance.get('/dependency-graph/view/graph', ["admin", "reader"], async (req, res) => {
     let globalVarName = req.query.global_var_name;
 
-    let redirectAttributes = {
+    let renderAttributes = {
       globalVarName,
       graph: false
     }
@@ -27,20 +27,20 @@ function DependencyGraphRouter(expressInstance) {
     applicationVariableRepository.findApplicationByGlobalVariableName(globalVarName, async (err, applications) => {
 
       if (err) {
-        redirectAttributes.error_message = `An error occurred while trying to find the global variable: ${globalVarName}`;
+        renderAttributes.error_message = `An error occurred while trying to find the global variable: ${globalVarName}`;
       }
 
       if (applications.length === 0) {
-        redirectAttributes.success_message = `There are no search results for: ${globalVarName}`;
+        renderAttributes.success_message = `There are no search results for '${globalVarName}'`;
 
         let searchMatches = await applicationVariableRepository.findVariablesLikeVariableName(globalVarName)
 
         if (searchMatches.length > 0) {
-          redirectAttributes.success_message += ', maybe you wanted to search: ';
+          renderAttributes.success_message += ', maybe you wanted to search:';
 
           let count = 0;
           for (const searchMatche of searchMatches) {
-            redirectAttributes.success_message +=
+            renderAttributes.success_message +=
               `${count === 0
                 ? ' '
                 : count + 1 === searchMatches.length
@@ -52,7 +52,7 @@ function DependencyGraphRouter(expressInstance) {
       }
 
       if (applications.length > 0) {
-        redirectAttributes.graph = true;
+        renderAttributes.graph = true;
 
         let dot = 'digraph {';
         let count = 1;
@@ -70,10 +70,10 @@ function DependencyGraphRouter(expressInstance) {
 
         dot += '}';
 
-        redirectAttributes.dot = dot;
+        renderAttributes.dot = dot;
       }
 
-      _this.goToHomePage(req, res, redirectAttributes)
+      _this.goToHomePage(req, res, renderAttributes)
     })
 
   })

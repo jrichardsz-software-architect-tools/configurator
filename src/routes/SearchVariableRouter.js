@@ -23,13 +23,21 @@ function SearchVariableRouter(expressInstance) {
       }
     }
 
-    let variableName = req.query.value_search;
+    let variableName = req.query.value_search.trim();
     logger.info(`Search variable: ${variableName}`);
     try {
       let result = await searchVariableRepository.findVariablesLikeName(variableName);
       logger.info(variableName)
-      renderAttributes.resultVariable = result;
-      renderAttributes.success_message = `Results for: ${variableName}`;
+      
+      renderAttributes = {
+        ...renderAttributes,
+        ...{
+          resultVariable: result,
+          success_message: `Results for: ${variableName}`,
+          variableName
+        }
+      }
+      
       res.render('search-variable/home.hbs', renderAttributes)
     } catch (err) {
       logger.info(err)

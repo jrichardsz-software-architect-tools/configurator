@@ -13,7 +13,7 @@ $(document).ready(function ($) {
   })
 
   globalVarName.addEventListener('keyup', (e) => {
-    if (e.code === 'Enter') {
+    if (e.code === 'Enter' || e.code === 'NumpadEnter') {
       document.location.href = `/dependency-graph/view/graph?global_var_name=${globalVarName.value}`;
     }
   })

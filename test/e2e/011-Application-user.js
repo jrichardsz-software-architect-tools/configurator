@@ -23,7 +23,7 @@ describe('Application user', function () {
     driver = global.driver;
   })
 
-  it('user:create Should create an Administrator user', async function () {
+  it('user:create - Should create an Administrator user', async function () {
     let unValue = uuidv4()
     let pwValue = uuidv4()
 
@@ -43,7 +43,8 @@ describe('Application user', function () {
     btnSubmit.click();
 
     await driver.wait(
-      until.elementsLocated(By.css(".page-header"))
+      until.elementsLocated(By.css(".page-header")),
+      5 * 1000
     )
 
     let title = await driver.findElement(By.css(".page-header")).getText();
@@ -53,7 +54,7 @@ describe('Application user', function () {
     expect(success_message.trim()).to.equal(`The user was saved successfully: ${unValue}`)
   })
 
-  it('user:create Should create an Guest user', async function () {
+  it('user:create - Should create an Guest user', async function () {
     let unValue = uuidv4()
     let pwValue = uuidv4()
 
@@ -73,7 +74,8 @@ describe('Application user', function () {
     btnSubmit.click();
 
     await driver.wait(
-      until.elementsLocated(By.css(".page-header"))
+      until.elementsLocated(By.css(".page-header")),
+      5 * 1000
     )
 
     let title = await driver.findElement(By.css(".page-header")).getText();
@@ -83,7 +85,7 @@ describe('Application user', function () {
     expect(success_message.trim()).to.equal(`The user was saved successfully: ${unValue}`)
   })
 
-  it('user:edit Should modify the user', async function () {
+  it('user:edit - Should modify the user', async function () {
     let pwValue = uuidv4()
 
     await driver.get(globalHomePageUrl)
@@ -106,7 +108,8 @@ describe('Application user', function () {
     btnSubmit.click();
 
     await driver.wait(
-      until.elementsLocated(By.css(".page-header"))
+      until.elementsLocated(By.css(".page-header")),
+      5 * 1000
     )
 
     let title = await driver.findElement(By.css(".page-header")).getText();
@@ -128,7 +131,8 @@ describe('Application user', function () {
     await row.findElement(By.css('td > a[class="btn btn-outline btn-primary fa fa-times"]')).click();
     
     await driver.wait(
-      until.elementsLocated(By.css(".page-header"))
+      until.elementsLocated(By.css(".page-header")),
+      5 * 1000
     )
 
     let title = await driver.findElement(By.css(".page-header")).getText();
@@ -138,7 +142,8 @@ describe('Application user', function () {
     btnSubmit.click();
 
     await driver.wait(
-      until.elementsLocated(By.css(".page-header"))
+      until.elementsLocated(By.css(".page-header")),
+      5 * 1000
     )
 
     title = await driver.findElement(By.css(".page-header")).getText();

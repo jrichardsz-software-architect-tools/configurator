@@ -40,18 +40,20 @@ function GlobalVariableRouter(expressInstance) {
     });
   }
 
-  expressInstance.get('/global-valiable/action/search', ["admin", "reader"], async (req, res) => {
+  expressInstance.get('/global-variable/action/search', ["admin", "reader"], async (req, res) => {
 
     logger.info("Search global variable:");
-    let globalVar = req.query.var;
+    let globalVar = req.query.var.trim();
     logger.info(globalVar);
 
     let rows = await variableRepository.findLikeByNameAndScopeAndDeleted(globalVar, 'G', 'N');
 
     let renderAttributes = {
-      redirect: 'global-variable/home.hbs',
+      redirect: '../',
       globalVariables: rows,
+      globalVar
     };
+
     if (rows.length === 0) {
       renderAttributes = {
         ...renderAttributes,
@@ -71,7 +73,6 @@ function GlobalVariableRouter(expressInstance) {
       }
     }
 
-    req.session.error_security_message = undefined;
     _this.goToHomePage(req, res,
       renderAttributes
     )

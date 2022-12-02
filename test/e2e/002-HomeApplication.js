@@ -32,7 +32,7 @@ describe('Application', function() {
     //set app name
     var appNameBox = await driver.findElement(By.name('name'));
     await appNameBox.sendKeys("app-" + (Math.floor((Math.random() * 999) + 100)));
-    var buttonCreateApp = await driver.findElements(By.css("button[type='submit']"));
+    var buttonCreateApp = await driver.findElements(By.css("button#submit-form-application[type='submit']"));
     await buttonCreateApp[0].click();
 
     formTitle = await driver.findElement(By.css(".page-header")).getText();
@@ -100,7 +100,7 @@ describe('Application', function() {
 
     await driver.findElement(By.css("select[name='type'] > option[value=WEB]")).click();
 
-    var buttonCreateApp = await driver.findElements(By.css("button[type='submit']"));
+    var buttonCreateApp = await driver.findElements(By.css("button#submit-form-application[type='submit']"));
     await buttonCreateApp[0].click();
 
     var rowsAfterCollection = await driver.findElements(By.css("[class='table table-bordered table-hover table-striped'] tbody > tr"));

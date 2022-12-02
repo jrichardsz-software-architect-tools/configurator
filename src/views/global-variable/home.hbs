@@ -47,9 +47,9 @@
 							{{/stringEquals}}
 						</div>
 						<div style="margin-left: 1rem;">
-							<form action="/global-valiable/action/search" method="get" class="form-group">
+							<form action="/global-variable/action/search" method="get" class="form-group">
 								<div class="input-group">
-									<input type="text" name="var" class="form-control" required minlength="3" placeholder="Enter name of global variable">
+									<input type="text" name="var" class="form-control" required minlength="3" value="{{globalVar}}" placeholder="Enter name of global variable">
 									<span class="input-group-btn">
 										<button type="submit" class="btn btn-outline btn-primary">Search</button>
 									</span>
