@@ -20,7 +20,7 @@
     "cookie-parser": "1.4.4",
     "cryptr": "^6.0.2",
     "escape-html": "^1.0.3",
-    "express": "4.17.1",
+    "express": "4.17.3",
     "express-fileupload": "^1.2.1",
     "express-session": "1.16.2",
     "hbs": "4.2.0",
