@@ -1,7 +1,7 @@
 {
   "name": "configurator",
   "version": "1.0.6",
-  "description": "Centralize and Management configurations of all your applications.",
+  "description": "Centralizations of all your applications variables",
   "main": "app.js",
   "scripts": {
     "start": "node src/Index.js",

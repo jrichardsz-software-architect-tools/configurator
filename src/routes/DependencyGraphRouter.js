@@ -1,7 +1,7 @@
 function DependencyGraphRouter(expressInstance) {
   var _this = this;
 
-  expressInstance.get('/dependency-graph', ["admin", "reader"], (req, res) => {
+  expressInstance.get('/insights/dependency-graph', ["admin", "reader"], (req, res) => {
     _this.goToHomePage(req, res)
   })
 
@@ -10,13 +10,14 @@ function DependencyGraphRouter(expressInstance) {
       ...redirectAttributes,
       ...{
         javascriptModule: 'dependency-graph'
-      }
+      },
+      userRole: req.session.loginInformation.role || undefined
     }
 
     res.render('dependency-graph/home.hbs', renderAttributes)
   }
 
-  expressInstance.get('/dependency-graph/view/graph', ["admin", "reader"], async (req, res) => {
+  expressInstance.get('/insights/dependency-graph/view/graph', ["admin", "reader"], async (req, res) => {
     let globalVarName = req.query.global_var_name;
 
     let renderAttributes = {

@@ -9,12 +9,12 @@ $(document).ready(function ($) {
   }
 
   buttonGenGraph.addEventListener('click', () => {
-    document.location.href = `/dependency-graph/view/graph?global_var_name=${globalVarName.value}`;
+    document.location.href = `/insights/dependency-graph/view/graph?global_var_name=${globalVarName.value}`;
   })
 
   globalVarName.addEventListener('keyup', (e) => {
     if (e.code === 'Enter' || e.code === 'NumpadEnter') {
-      document.location.href = `/dependency-graph/view/graph?global_var_name=${globalVarName.value}`;
+      document.location.href = `/insights/dependency-graph/view/graph?global_var_name=${globalVarName.value}`;
     }
   })
 });

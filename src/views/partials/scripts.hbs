@@ -32,11 +32,11 @@
   <script src="/vendor/datatables-responsive/dataTables.responsive.js"></script>
 {{/if}}
 
-{{#if graph}}
+{{!-- {{#if graph}} --}}
   <script src="//d3js.org/d3.v5.min.js"></script>
   <script src="https://unpkg.com/@hpcc-js/wasm@0.3.11/dist/index.min.js"></script>
   <script src="https://unpkg.com/d3-graphviz@3.0.5/build/d3-graphviz.js"></script>
-{{/if}}
+{{!-- {{/if}} --}}
 
 
 
@@ -45,9 +45,9 @@
 
 <script type="text/javascript">
   $(document).ready(function($) {
-  {{#if redirect}}
-    window.history.pushState("", "", '{{redirect}}');
-  {{/if}}
+    {{#if redirect}}
+      window.history.pushState("", "", '{{redirect}}');
+    {{/if}}
   });
 </script>
 
