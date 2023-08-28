@@ -59,8 +59,8 @@
 										<tr>
 											<th>#</th>
 											<th>Name</th>
-											<th>Type</th>
 											<th>Value</th>
+											<th>Type</th>
 											<th>Scope</th>
 											<th>Application</th>
 										</tr>
@@ -72,16 +72,16 @@
 												<td>{{incremented @index}}</td>
 												<td>{{this.name}}</td>
 												{{#eq this.type 'P'}}
-												<td>Plain</td>
-												{{/eq}}
-												{{#eq this.type 'S'}}
-												<td>Secret</td>
-												{{/eq}}
-												{{#eq this.type 'P'}}
 												<td>{{showValueWithSafeWidth this.value}}</td>
 												{{else}}
 												<td>****</td>
 												{{/eq}}
+												{{#eq this.type 'P'}}
+												<td>Plain</td>
+												{{/eq}}
+												{{#eq this.type 'S'}}
+												<td>Secret</td>
+												{{/eq}}												
 												{{#eq this.scope 'G'}}
 												<td>Global</td>
 												{{/eq}}
@@ -89,8 +89,7 @@
 												<td>Local</td>
 												{{/eq}}
 												<td>
-
-												</td>
+												<td>{{this.app_name}}</td>
 											</tr>
 										{{/each}}
 									</tbody>

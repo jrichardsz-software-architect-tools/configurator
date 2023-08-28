@@ -42,47 +42,29 @@
 
 					<div>
 						{{#stringEquals userRole 'admin'}}
-	              <a href="/application-key/action/reset" type="button" class="btn btn-outline btn-primary">Reset apikey</a>
+	              			<a href="/application-key/action/reset" type="button" class="btn btn-outline btn-primary">Reset apikey</a>
 						{{/stringEquals}}
 						<br><br>
 					</div>
-
-					<div class="panel panel-default">
-						<div class="panel-body">
-							<div class="table-responsive">
-								<table class="table table-bordered table-hover table-striped">
-									<thead>
-										<tr>
-											<th>#</th>
-											<th>Apikey</th>
-										</tr>
-									</thead>
-									<tbody>
-										{{#each applicationKey}}
-											<tr class="table-row">
-												<td>{{incremented @index}}</td>
-												<td class="btn-group btn-group-sm">
-													<div class="input-group">
-														<input type="password" id="inpApikey" class="form-control" value="{{this.apikey}}" readonly>
-														<span class="input-group-btn">
-															<a class="btn btn-default" href="/application-key/action/copy" aria-label="Left Align" title="Copy" id="copy">
-																<span class="glyphicon glyphicon-copy" aria-hidden="true"></span> 
-																Copy
-															</a>
-															<button type="button" class="btn btn-default" aria-label="Left Align" id="reveal">
-																<span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> 
-																Reveal
-															</button>
-														</span>
-													</div>
-												</td>
-											</tr>
-										{{/each}}
-									</tbody>
-								</table>
+					{{#if apikey}}
+						<div class="panel panel-default">
+							<div class="panel-body">
+								<div class="input-group">
+									<input type="password" id="inpApikey" class="form-control" value="{{apikey}}" readonly>
+									<span class="input-group-btn">
+										<a class="btn btn-default" href="/application-key/action/copy" aria-label="Left Align" title="Copy" id="copy">
+											<span class="glyphicon glyphicon-copy" aria-hidden="true"></span> 
+											Copy
+										</a>
+										<button type="button" class="btn btn-default" aria-label="Left Align" id="reveal">
+											<span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> 
+											Reveal
+										</button>
+									</span>
+								</div>
 							</div>
 						</div>
-					</div>
+					{{/if}}
 					<br>
 					<br>
 				</div>

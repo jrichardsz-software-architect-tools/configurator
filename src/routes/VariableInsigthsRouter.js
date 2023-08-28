@@ -34,7 +34,6 @@ function VariableInsigthsRouter(expressInstance) {
           ...renderAttributes,
           ...{
             resultVariable: result,
-            success_message: `Results for: ${variableName}`,
             variableName
           }
         }
@@ -43,7 +42,7 @@ function VariableInsigthsRouter(expressInstance) {
       } catch (err) {
         logger.info(err)
         _this.goToHomePage(req, res, {
-          error_message: `An error occurred while searching for results for the variable: ${variableName}`
+          error_message: `An error occurred while searching the variable: ${variableName}`
         })
       }
     }else{
